@@ -42,7 +42,7 @@ enum DebugSnapshot {
     }
 
     static func writePet(to path: String, awake: Bool) async -> Bool {
-        let view = SunPetView(isAwake: awake, stage: .flare, remainingText: nil, animates: false, onClick: {})
+        let view = SunPetView(isAwake: awake, stage: .flare, animates: false)
             .padding(PetWindowController.padding)
             .background(Color(nsColor: Palette.panelFill))
         return await render(view: view, size: PetWindowController.contentSize, to: path, transparent: false)
@@ -90,8 +90,7 @@ enum DebugSnapshot {
                     )
                     fill.setFill()
                     NSRect(origin: origin, size: cell).fill()
-                    // The menu bar's own appearance decides the label color, exactly as in the real button.
-                    let icon = MenuBarIcon.image(state, appearance: NSAppearance(named: appearanceName))
+                    let icon = MenuBarIcon.image(state)
                     drawAsMenuBar(icon, in: NSRect(
                         x: origin.x + (cell.width - icon.size.width) / 2,
                         y: origin.y + (cell.height - icon.size.height) / 2,

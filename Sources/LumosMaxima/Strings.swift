@@ -12,6 +12,9 @@ enum Strings {
     static let keepingAwake = String(localized: "Keeping awake")
     static let stop = String(localized: "Let It Sleep")
     static let untilStopped = String(localized: "Until I stop it")
+    static let close = String(localized: "Close")
+    static let off = String(localized: "Off")
+    static let noTimer = String(localized: "No timer")
     static let cannotStart = String(localized: "Could not keep this Mac awake")
 
     static func inTime(_ text: String) -> String { String(localized: "\(text) left") }

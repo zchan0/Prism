@@ -10,6 +10,7 @@ final class StatusItemController: NSObject {
     private let model: AppModel
     private let statusItem: NSStatusItem
     private let panel: PanelController
+    private let quickPanel: QuickPanelController
     private let pet: PetWindowController
     private let settings: SettingsWindowController
     /// The image only changes when the state does, so the menu bar is not redrawn every second.
@@ -34,6 +35,7 @@ final class StatusItemController: NSObject {
         )
         settings = SettingsWindowController.shared(for: model)
         panel = PanelController(model: model, actions: actions)
+        quickPanel = QuickPanelController(model: model)
         pet = PetWindowController(model: model)
         super.init()
 
@@ -48,8 +50,9 @@ final class StatusItemController: NSObject {
             if visible { self?.model.uiTick() }
         }
         pet.onClick = { [weak self] frame, screen in
-            self?.togglePanelFromPet(above: frame, on: screen)
+            self?.quickPanel.toggle(above: frame, on: screen)
         }
+        pet.onDoubleClick = { SettingsWindowController.shared(for: model).show() }
         observeModel()
         model.petVisible = false
         if model.preferences.showsPet {
@@ -69,17 +72,14 @@ final class StatusItemController: NSObject {
     func clickPetForDebug() {
         pet.clickForDebug()
     }
-    #endif
 
-    /// A click on the pet opens the same panel as the menu bar item, lifted above the sun so it does not cover it.
-    private func togglePanelFromPet(above frame: NSRect, on screen: NSScreen) {
-        if panel.isShown {
-            panel.hide()
-        } else {
-            // The panel can be open from the menu bar elsewhere on screen; showing it again moves it here.
-            panel.show(above: frame, on: screen)
-        }
+    var quickPanelWindowForDebug: NSWindow? { quickPanel.windowForDebug }
+
+    /// Drags the pet window the way a person's mouse would, and reports where it ended up.
+    func dragPetForDebug() -> String {
+        pet.dragForDebug()
     }
+    #endif
 
     /// Called every second while a session runs; cheap when nothing needs to change.
     func tick() {
@@ -165,7 +165,7 @@ final class StatusItemController: NSObject {
         let state = model.menuBarState
         guard state != shownState || button.image == nil else { return }
         shownState = state
-        button.image = MenuBarIcon.image(state, appearance: button.effectiveAppearance)
+        button.image = MenuBarIcon.image(state)
         button.setAccessibilityLabel(state.accessibilityText)
     }
 

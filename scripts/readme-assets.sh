@@ -28,6 +28,9 @@ cp $work/panel-dark.png $out/panel-dark.png
 LUMOS_PANEL_STATE=asleep LUMOS_SNAPSHOT=$out/panel-asleep.png $bin
 LUMOS_SNAPSHOT=$out/panel-zh.png $bin -AppleLanguages "(zh-Hans)" 
 
+LUMOS_PET_CLICK=1 LUMOS_PANEL_CAPTURE=$work/quick.png $bin || true
+if [[ -f $work/quick.png ]]; then cp $work/quick.png $out/quick-panel.png; fi
+
 LUMOS_PET_SNAPSHOT=$out/pet-awake.png $bin
 LUMOS_PET_STATE=asleep LUMOS_PET_SNAPSHOT=$out/pet-asleep.png $bin
 

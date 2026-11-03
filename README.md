@@ -22,13 +22,13 @@ English · [简体中文](README.zh-CN.md)
 
 **One click, no sleep.** Pick 30 minutes, 1 hour, 2 hours, or until you stop it — the default, and the one pick that starts the session even from asleep, so it is always one click. A kernel power assertion holds the Mac awake; it disappears on its own if the app crashes, so nothing can leave it stuck on.
 
-**Choose what stays on.** Keep the screen on too, or let it turn off while the Mac keeps working. The menu bar sun is solid when the screen stays on and hollow when only the Mac does.
+**Choose what stays on.** Keep the screen on too, or let it turn off while the Mac keeps working.
 
 **The lid, without the guesswork.** Turn on *Keep running with the lid closed* and LumosMaxima installs a tiny root helper once, with a single administrator prompt. After that the switch is instant and password-free, and quitting the app puts your normal sleep setting back.
 
 **Battery guard.** On battery at the percentage you choose — 20% by default — the session ends itself and tells you why.
 
-**A pet worth keeping awake for.** The sun naps with floating Zs when the Mac may sleep, and wakes up, breathes, spins its rays and blinks when it may not. It grows from a spark to an ember, a flare, a sun and finally a supernova as it logs hours, all tracked per calendar day. Drag it anywhere; click it to open the controls, the very same panel the menu bar item opens, lifted above the sun so it never covers it.
+**A pet worth keeping awake for.** The sun naps with floating Zs when the Mac may sleep, and wakes up, breathes, spins its rays and blinks when it may not. It grows from a spark to an ember, a flare, a sun and finally a supernova as it logs hours, all tracked per calendar day. Drag it anywhere. A single click opens a small strip with the four lengths and a close button; a double click opens Settings.
 
 **Notification when time is up**, and open at login.
 
@@ -57,7 +57,7 @@ Awake time is counted per calendar day: the pet starts each day at whatever stag
 
 <img src="docs/images/status.png" width="540" alt="Menu bar states from left to right: asleep, awake with a timer, awake with no timer, counting down">
 
-The sun is gray with five rays when the Mac may sleep, and amber with eight when it may not. With *Show the time left in the menu bar* on, the countdown sits next to it. A hollow center means the screen can still turn off.
+The icon is an SF Symbol, so the menu bar tints it exactly like the system's own: `sun.min` while the Mac may sleep, `sun.max` while it is kept awake but the screen may turn off, and `sun.max.fill` while the screen stays on too. With *Show the time left in the menu bar* on, the countdown sits next to it.
 
 The left click opens the panel; a right click opens a menu with the same switches. <kbd>⌃</kbd><kbd>⌥</kbd><kbd>⌘</kbd><kbd>L</kbd> starts or stops from anywhere.
 

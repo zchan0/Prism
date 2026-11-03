@@ -79,8 +79,18 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 try? await Task.sleep(for: .seconds(1.5))
                 controller.clickPetForDebug()
                 try? await Task.sleep(for: .seconds(1.2))
-                let ok = await DebugSnapshot.capture(window: controller.panelWindowForDebug, to: ProcessInfo.processInfo.environment["LUMOS_PET_CLICK"] == "1" && ProcessInfo.processInfo.environment["LUMOS_PANEL_CAPTURE"] != nil ? ProcessInfo.processInfo.environment["LUMOS_PANEL_CAPTURE"]! : "/tmp/pet-panel.png")
+                let ok = await DebugSnapshot.capture(
+                    window: controller.quickPanelWindowForDebug,
+                    to: ProcessInfo.processInfo.environment["LUMOS_PANEL_CAPTURE"] ?? "/tmp/pet-panel.png"
+                )
                 exit(ok ? 0 : 1)
+            }
+        }
+        if ProcessInfo.processInfo.environment["LUMOS_PET_DRAG"] == "1" {
+            Task {
+                try? await Task.sleep(for: .seconds(1.5))
+                print(controller.dragPetForDebug())
+                exit(0)
             }
         }
         if ProcessInfo.processInfo.environment["LUMOS_DUMP"] == "1" {

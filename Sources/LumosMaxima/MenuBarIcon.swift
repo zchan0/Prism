@@ -34,88 +34,67 @@ struct MenuBarState: Equatable, Sendable {
 @MainActor
 enum MenuBarIcon {
     static let height: CGFloat = 22
-    // The disc lines up with menu bar text; rays fill the rest of the height.
-    private static let discCenterX: CGFloat = 9.5
-    private static let discRadius: CGFloat = 4.5
-    private static let rayInner: CGFloat = 6.3
-    private static let rayOuter: CGFloat = 9.0
-    private static let rayWidth: CGFloat = 1.5
-    private static let haloRadius: CGFloat = 2.0
-    private static let digitsGap: CGFloat = 4.5
-    private static let digitsFont = NSFont.monospacedDigitSystemFont(ofSize: 12.5, weight: .semibold)
+    private static let digitsGap: CGFloat = 4
+    private static let digitsFont = NSFont.monospacedDigitSystemFont(ofSize: 12.5, weight: .medium)
+    private static let symbolPointSize: CGFloat = 15.5
 
-    /// `appearance` is the status button's: the menu bar can be light or dark, and its label color has to resolve
-    /// against that appearance rather than against the app's own.
-    static func image(_ state: MenuBarState, appearance: NSAppearance? = nil) -> NSImage {
+    /// A template image from an SF Symbol, so the menu bar tints it exactly like the icons Apple puts there, on a
+    /// light, a dark or a wallpaper-tinted menu bar. The state is carried by shape:
+    ///
+    /// - `sun.min` while the Mac may sleep,
+    /// - `sun.max` while it is kept awake but the screen may turn off,
+    /// - `sun.max.fill` while the screen stays on too.
+    ///
+    /// Colour would read faster, but a coloured icon next to the system's monochrome ones looks pasted on.
+    static func image(_ state: MenuBarState) -> NSImage {
         let text = state.timeText
         let textWidth = text.map { ($0 as NSString).size(withAttributes: [.font: digitsFont]).width.rounded(.up) } ?? 0
-        let width = textWidth > 0 ? discCenterX + rayOuter + digitsGap + textWidth : discCenterX + rayOuter + 1
-        let warm = state.mode.isAwake
-        let draw: () -> Void = {
-            // The sleeping sun is a template; the awake one keeps its amber so the state reads without counting pixels.
-            // Template images are tinted by the menu bar, so the ink here is only a placeholder.
-            let ink = warm ? Palette.sun : NSColor.labelColor
-            drawSun(ink: ink, warm: warm, holdsDisplay: state.holdsDisplay)
+        let symbol = symbol(for: state)
+        let symbolWidth = symbol.size.width.rounded(.up)
+        let width = textWidth > 0 ? symbolWidth + digitsGap + textWidth : symbolWidth
+        let image = NSImage(size: NSSize(width: width, height: height), flipped: false) { _ in
+            let symbolHeight = symbol.size.height
+            symbol.draw(in: NSRect(
+                x: 0,
+                y: (height - symbolHeight) / 2,
+                width: symbolWidth,
+                height: symbolHeight
+            ))
             if let text {
-                let attributes: [NSAttributedString.Key: Any] = [.font: digitsFont, .foregroundColor: NSColor.labelColor]
+                let attributes: [NSAttributedString.Key: Any] = [.font: digitsFont, .foregroundColor: NSColor.black]
                 let size = (text as NSString).size(withAttributes: attributes)
                 (text as NSString).draw(
-                    at: NSPoint(x: discCenterX + rayOuter + digitsGap, y: (height - size.height) / 2 + 0.5),
+                    at: NSPoint(x: symbolWidth + digitsGap, y: (height - size.height) / 2 + 0.5),
                     withAttributes: attributes
                 )
             }
+            return true
         }
-        let image: NSImage
-        if warm {
-            // Only the awake sun carries its own color, so only it needs the menu bar's appearance.
-            image = NSImage(size: NSSize(width: width, height: height), flipped: false) { _ in
-                if let appearance {
-                    appearance.performAsCurrentDrawingAppearance(draw)
-                } else {
-                    draw()
-                }
-                return true
-            }
-            image.isTemplate = false
-        } else {
-            image = NSImage(size: NSSize(width: width, height: height), flipped: false) { _ in
-                draw()
-                return true
-            }
-            image.isTemplate = true
-        }
+        image.isTemplate = true
         image.accessibilityDescription = Strings.appName + ": " + state.accessibilityText
         return image
     }
 
-    private static func drawSun(ink: NSColor, warm: Bool, holdsDisplay: Bool) {
-        let center = NSPoint(x: discCenterX, y: height / 2)
-        ink.setStroke()
-        ink.setFill()
-        // A sleeping sun loses rays so it reads differently at a glance, not only by color.
-        let rayCount = warm ? 8 : 5
-        for index in 0..<rayCount {
-            let angle = .pi * 2 * Double(index) / Double(rayCount) + (warm ? 0 : -.pi / 2)
-            let start = NSPoint(x: center.x + cos(angle) * rayInner, y: center.y + sin(angle) * rayInner)
-            let end = NSPoint(x: center.x + cos(angle) * rayOuter, y: center.y + sin(angle) * rayOuter)
-            let path = NSBezierPath()
-            path.move(to: start)
-            path.line(to: end)
-            path.lineWidth = rayWidth
-            path.lineCapStyle = .round
-            path.stroke()
+    private static func symbol(for state: MenuBarState) -> NSImage {
+        let name: String
+        switch state.mode {
+        case .asleep: name = "sun.min"
+        case .forever, .counting: name = state.holdsDisplay ? "sun.max.fill" : "sun.max"
         }
-        NSBezierPath(ovalIn: NSRect(
-            x: center.x - discRadius, y: center.y - discRadius,
-            width: discRadius * 2, height: discRadius * 2
-        )).fill()
-        // A hollow core when the screen may still turn off; a solid disc when the screen stays on too.
-        if !holdsDisplay {
-            NSColor.clear.setFill()
-            NSBezierPath(ovalIn: NSRect(
-                x: center.x - haloRadius, y: center.y - haloRadius,
-                width: haloRadius * 2, height: haloRadius * 2
-            )).fill()
+        let configuration = NSImage.SymbolConfiguration(pointSize: symbolPointSize, weight: .regular)
+            .applying(NSImage.SymbolConfiguration(paletteColors: [.black]))
+        guard let symbol = NSImage(systemSymbolName: name, accessibilityDescription: nil)?
+            .withSymbolConfiguration(configuration) else {
+            // No SF Symbols would mean no macOS, but an empty image would leave a hole in the menu bar.
+            return NSImage(size: NSSize(width: symbolPointSize, height: symbolPointSize), flipped: false) { rect in
+                NSColor.black.setFill()
+                NSBezierPath(ovalIn: rect.insetBy(dx: 3, dy: 3)).fill()
+                return true
+            }
         }
+        // A template drawn into a symbol already has the right alpha; this only makes sure the source is a template
+        // too, so drawing it into another image keeps its shape instead of its colors.
+        symbol.isTemplate = true
+        return symbol
     }
 }

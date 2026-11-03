@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.1.2] - 2026-11-03
+
+- Clicking the pet opens a small strip with just the four lengths and a close button; a double click opens Settings.
+- Dragging the pet follows the pointer exactly. The old SwiftUI `DragGesture` measured its translation in global
+  coordinates, which the window moved as it was being dragged, so the pet lagged and often refused to move at all.
+  AppKit mouse events with a remembered grab point replace it, with unit tests.
+- The length row sits properly below the header instead of being pinned against the divider.
+- The menu bar icon is an SF Symbol template, `sun.min` / `sun.max` / `sun.max.fill`, so the system tints it like
+  its neighbors on a light, a dark or a tinted menu bar.
+
 ## [0.1.1] - 2026-11-03
 
 - "Until I stop it" is now the default length, and it comes first in the panel and in Settings.

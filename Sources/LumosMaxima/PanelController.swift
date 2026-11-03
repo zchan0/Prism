@@ -143,7 +143,13 @@ final class PanelController {
     }
 
     /// The panel hangs off one edge of its anchor, aligns with the anchor's left edge, and stays inside the screen.
-    static func frame(height: CGFloat, from anchor: NSRect, placement: Placement, in visibleFrame: NSRect) -> NSRect {
+    static func frame(
+        height: CGFloat,
+        from anchor: NSRect,
+        placement: Placement,
+        in visibleFrame: NSRect,
+        width: CGFloat = width
+    ) -> NSRect {
         let x = max(visibleFrame.minX + screenMargin, min(anchor.minX, visibleFrame.maxX - screenMargin - width))
         let bottomLimit = visibleFrame.minY + screenMargin
         switch placement {
@@ -159,7 +165,7 @@ final class PanelController {
         }
     }
 
-    static func makePanel(rootView: some View) -> NSPanel {
+    static func makePanel(rootView: some View, width: CGFloat = width, cornerRadius: CGFloat = cornerRadius) -> NSPanel {
         let panel = NSPanel(
             contentRect: NSRect(x: 0, y: 0, width: width, height: 420),
             styleMask: [.borderless, .nonactivatingPanel],
@@ -196,7 +202,8 @@ final class PanelController {
         return panel
     }
 
-    static func hostView(of panel: NSPanel) -> NSView? {
+    static func hostView(of panel: NSPanel?) -> NSView? {
+        guard let panel else { return nil }
         if #available(macOS 26, *), let glass = panel.contentView as? NSGlassEffectView {
             return glass.contentView
         }

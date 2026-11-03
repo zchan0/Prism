@@ -276,7 +276,17 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "点击打开控制面板，拖动可以换位置"
+            "value": "单击打开快捷面板，双击打开设置，拖动换位置"
+          }
+        }
+      }
+    },
+    "Close": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "关闭"
           }
         }
       }
@@ -447,6 +457,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "没有电池"
+          }
+        }
+      }
+    },
+    "No timer": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "没有定时"
           }
         }
       }

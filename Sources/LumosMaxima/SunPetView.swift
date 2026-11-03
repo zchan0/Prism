@@ -12,72 +12,32 @@ struct SunPetView: View {
 
     let isAwake: Bool
     let stage: SunStage
-    let remainingText: String?
     let animates: Bool
-    /// A click opens the controls; dragging still just moves the pet.
-    let onClick: () -> Void
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @State private var hovering = false
-    @State private var didDrag = false
 
     private var isAnimating: Bool { animates && !reduceMotion }
-
-    private var stringsForAccessibility: String {
-        (isAwake ? Strings.awake : Strings.sleeping) + ", " + Strings.petHint
-    }
 
     /// Only the drifting Zs move while the sun naps, so a slow frame rate is enough and costs far less.
     private var frameInterval: TimeInterval { isAwake ? 1.0 / 6.0 : 1.0 / 3.0 }
 
     var body: some View {
+        sun
+            .background(SunGlow(isAwake: isAwake))
+            .frame(width: Self.size, height: Self.size)
+            .opacity(isAwake ? 1 : 0.9)
+            .help(Strings.petHint)
+            .accessibilityAddTraits([.isButton])
+            .accessibilityLabel(Strings.yourSun)
+            .accessibilityValue((isAwake ? Strings.awake : Strings.sleeping) + ", " + Strings.petHint)
+    }
+
+    private var sun: some View {
         TimelineView(.animation(minimumInterval: frameInterval, paused: !isAnimating)) { context in
             Canvas { canvas, size in
                 draw(in: &canvas, size: size, time: context.date.timeIntervalSinceReferenceDate)
             }
         }
-        .background(SunGlow(isAwake: isAwake))
-        .frame(width: Self.size, height: Self.size)
-        .opacity(isAwake ? 1 : 0.9)
-        .gesture(clickOrDrag)
-        .onHover { hovering = $0 }
-        .overlay(alignment: .top) {
-            if hovering, let remainingText {
-                Text(remainingText)
-                    .font(.system(size: 11, weight: .semibold, design: .rounded))
-                    .foregroundStyle(.white)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 4)
-                    .background(Capsule().fill(Color(nsColor: Palette.onWarm).opacity(0.82)))
-                    .padding(.top, 2)
-                    .allowsHitTesting(false)
-            }
-        }
-        .help(Strings.petHint)
-        .accessibilityAddTraits([.isButton])
-        .accessibilityLabel(Strings.yourSun)
-        .accessibilityValue(stringsForAccessibility)
-    }
-
-    /// One gesture for both, so a click is never mistaken for the start of a drag.
-    private var clickOrDrag: some Gesture {
-        DragGesture(minimumDistance: 0, coordinateSpace: .global)
-            .onChanged { value in
-                let moved = hypot(value.translation.width, value.translation.height)
-                guard moved > 4 else { return }
-                guard let window = PetDragging.window, let origin = PetDragging.origin else { return }
-                didDrag = true
-                window.setFrameOrigin(NSPoint(x: origin.x + value.translation.width, y: origin.y - value.translation.height))
-            }
-            .onEnded { value in
-                let moved = hypot(value.translation.width, value.translation.height)
-                if didDrag {
-                    PetDragging.finish()
-                    didDrag = false
-                } else if moved <= 4 {
-                    onClick()
-                }
-            }
     }
 
     private func draw(in canvas: inout GraphicsContext, size: CGSize, time: TimeInterval) {

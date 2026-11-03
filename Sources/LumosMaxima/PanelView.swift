@@ -116,9 +116,7 @@ struct PanelView: View {
                 SunPetView(
                     isAwake: content.isAwake,
                     stage: SunStage.stage(for: content.sunHours),
-                    remainingText: nil,
-                    animates: animates,
-                    onClick: actions.toggle
+                    animates: animates
                 )
                 .scaledToFit()
                 .scaleEffect(0.64)
@@ -140,8 +138,8 @@ struct PanelView: View {
             }
         }
         .frame(maxWidth: .infinity)
-        .padding(.top, 16)
-        .padding(.bottom, 14)
+        .padding(.top, 14)
+        .padding(.bottom, 10)
     }
 
     private var statusDetail: String {
@@ -179,7 +177,10 @@ struct PanelView: View {
             .accessibilityLabel(content.isAwake ? Strings.stop : Strings.keepAwake)
         }
         .padding(.horizontal, 12)
-        .padding(.bottom, 12)
+        // The length row needs air under the divider it sits beneath; flush against it looked like a tab bar glued
+        // to the header.
+        .padding(.top, 12)
+        .padding(.bottom, 14)
     }
 
     private var details: some View {

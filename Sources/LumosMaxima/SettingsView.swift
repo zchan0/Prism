@@ -110,9 +110,7 @@ struct PetSettingsView: View {
                     SunPetView(
                         isAwake: model.isAwake,
                         stage: SunStage.stage(for: model.sunHours),
-                        remainingText: nil,
-                        animates: true,
-                        onClick: {}
+                            animates: true
                     )
                     .frame(width: SunPetView.size, height: SunPetView.size)
                     .allowsHitTesting(false)
