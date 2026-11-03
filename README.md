@@ -51,6 +51,11 @@ English · [简体中文](README.zh-CN.md)
 | Sol | 6 h | Deep orange, at its widest. |
 | Nova | 10 h | Brightest, with the longest rays. |
 
+A single click on the sun opens a strip with only the state, the four lengths and a close button; a double click
+opens Settings.
+
+<p align="center"><img src="docs/images/quick-panel.png" width="268" alt="The strip a click on the pet opens: state on the left, countdown on the right, the four lengths and a close button below"></p>
+
 Awake time is counted per calendar day: the pet starts each day at whatever stage that day's hours have earned. Settings → Your sun shows the stage list and can start the pet over.
 
 ## The menu bar

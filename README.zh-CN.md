@@ -43,6 +43,10 @@
   <img src="docs/images/pet-asleep.png" width="150" alt="睡着的宠物：暗淡的太阳，闭着眼，飘着 z，光芒也少了">
 </p>
 
+单击宠物弹出来的小条：只有状态、四个时长和关闭。双击打开完整设置。
+
+<p align="center"><img src="docs/images/quick-panel.png" width="268" alt="宠物旁的小条：左侧是太阳和状态，右侧是倒计时，下面一排是四个时长和关闭按钮"></p>
+
 | 阶段 | 需要醒着 | 样子 |
 | --- | --- | --- |
 | 火苗 | 0 小时 | 很小，光芒短短的。 |
