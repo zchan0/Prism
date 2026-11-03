@@ -117,7 +117,7 @@ struct PetSettingsView: View {
                         Text(Strings.petAwakeToday(TimeText.remaining(model.sunHours * 3600)))
                             .font(.caption)
                             .foregroundStyle(.secondary)
-                        Text(Strings.petEarned(model.awakeLog.petCount))
+                        Text(Strings.petSessions(model.awakeLog.petCount))
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }

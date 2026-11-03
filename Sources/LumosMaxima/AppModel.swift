@@ -162,8 +162,12 @@ final class AppModel {
         case .started:
             lastStop = nil
             lastError = nil
-        case .stopped(let reason, _):
+        case .stopped(let reason, let duration):
             lastStop = reason
+            // The last partial minute before the stop still counts toward the pet's day.
+            if duration > flushed {
+                awakeLog.add(duration - flushed)
+            }
             // The session is over, so the lid override is over too; the switch would otherwise claim a state
             // that nothing is enforcing.
             preferences.keepsAwakeWithLidClosed = false

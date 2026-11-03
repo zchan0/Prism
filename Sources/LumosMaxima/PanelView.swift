@@ -7,6 +7,7 @@ struct PanelActions {
     var setLength: @MainActor (SessionLength) -> Void
     var setKeepsDisplayAwake: @MainActor (Bool) -> Void
     var setKeepsAwakeWithLidClosed: @MainActor (Bool) -> Void
+    var confirmLidChange: @MainActor () -> Void
     var showSettings: @MainActor () -> Void
     var quit: @MainActor () -> Void
 }
@@ -43,7 +44,6 @@ struct PanelView: View {
     let actions: PanelActions
     let onHeightChange: @MainActor (CGFloat) -> Void
     @State private var height: CGFloat = 0
-    @State private var confirmingLid = false
 
     init(content: PanelContent, actions: PanelActions, onHeightChange: @escaping @MainActor (CGFloat) -> Void = { _ in }) {
         self.content = content
@@ -157,6 +157,7 @@ struct PanelView: View {
                 ) {
                     actions.setLength(length)
                 }
+                .help(Strings.lengthName(length))
             }
             Button(action: actions.toggle) {
                 Image(systemName: content.isAwake ? "moon.zzz.fill" : "sun.max.fill")
@@ -202,7 +203,7 @@ struct PanelView: View {
                     get: { content.keepsAwakeWithLidClosed },
                     set: { newValue in
                         if newValue {
-                            confirmingLid = true
+                            actions.confirmLidChange()
                         } else {
                             actions.setKeepsAwakeWithLidClosed(false)
                         }
@@ -227,18 +228,12 @@ struct PanelView: View {
                 title: Strings.petAwakeToday(TimeText.remaining(content.sunHours * 3600)),
                 note: countText
             ) {
-                Text("x\(max(1, content.petCount))")
+                Text(verbatim: "\(content.petCount)")
                     .font(.system(size: 11, weight: .medium, design: .monospaced))
                     .foregroundStyle(Color(nsColor: Palette.ink3))
             }
         }
         .padding(.horizontal, 12)
-        .alert(Strings.lidClosed, isPresented: $confirmingLid) {
-            Button(Strings.cancel, role: .cancel) {}
-            Button(Strings.continueButton) { actions.setKeepsAwakeWithLidClosed(true) }
-        } message: {
-            Text(Strings.lidClosedNote)
-        }
     }
 
     private var batteryTitle: String {
@@ -258,7 +253,7 @@ struct PanelView: View {
 
     private var countText: String {
         if content.sunHours < 0.02 { return Strings.petAsleepHint }
-        return Strings.petEarned(content.petCount)
+        return Strings.petSessions(content.petCount)
     }
 
     private func banner(_ message: String) -> some View {

@@ -45,7 +45,7 @@ enum PetDragging {
 
 @MainActor
 final class PetWindowController {
-    static let padding: CGFloat = 10
+    static let padding: CGFloat = 2
     static let contentSize = NSSize(width: SunPetView.size + padding * 2, height: SunPetView.size + padding * 2)
 
     private let model: AppModel

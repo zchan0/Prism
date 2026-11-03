@@ -197,8 +197,10 @@ struct LidControlTests {
         #expect(script.contains("/Library/PrivilegedHelperTools/LumosMaximaLid.sh"))
         #expect(script.contains(LidControl.daemonPath))
         #expect(script.contains("launchctl bootstrap system"))
-        #expect(script.contains("pmset -a disablesleep 1"))
+        #expect(script.contains("pmset -a disablesleep $want"))
         #expect(script.contains("pgrep -x LumosMaxima"))
         #expect(script.contains("<key>WatchPaths</key>"))
+        #expect(LidControl.daemonPlist.contains("<string>\(LidControl.flagDirectory)</string>"))
+        #expect(LidControl.helperScript.contains("pmset -g"))
     }
 }

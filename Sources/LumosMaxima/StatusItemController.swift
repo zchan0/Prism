@@ -20,9 +20,10 @@ final class StatusItemController: NSObject {
             toggle: { model.toggle() },
             setLength: { model.setLength($0) },
             setKeepsDisplayAwake: { model.setKeepsDisplayAwake($0) },
-            setKeepsAwakeWithLidClosed: { length in
-                Task { await model.setKeepsAwakeWithLidClosed(length) }
+            setKeepsAwakeWithLidClosed: { enabled in
+                Task { await model.setKeepsAwakeWithLidClosed(enabled) }
             },
+            confirmLidChange: { LidPrompter.presentLidPrompt(model: model) },
             showSettings: { SettingsWindowController.shared(for: model).show() },
             quit: {
                 model.stop()
@@ -38,9 +39,7 @@ final class StatusItemController: NSObject {
             button.imagePosition = .imageOnly
             button.target = self
             button.action = #selector(togglePanel)
-            // A right click opens the menu at the same moment as the left click that opens the panel, so only the
-            // left button is wired here; the menu is reached from the panel and from the shortcut.
-            button.sendAction(on: [.leftMouseUp])
+            button.sendAction(on: [.leftMouseUp, .rightMouseUp])
         }
         panel.onVisibilityChange = { [weak self] visible in
             self?.statusItem.button?.highlight(visible)
@@ -72,11 +71,16 @@ final class StatusItemController: NSObject {
 
     @objc private func togglePanel() {
         guard let button = statusItem.button else { return }
+        // A right click, or a control click, opens the menu instead of the panel.
+        if NSApp.currentEvent?.type == .rightMouseUp || NSApp.currentEvent?.modifierFlags.contains(.control) == true {
+            showMenu(from: button)
+            return
+        }
         panel.toggle(below: button)
     }
 
     /// Right click menu, also reachable from a control click on the status item.
-    func showMenu(from button: NSStatusBarButton) {
+    private func showMenu(from button: NSStatusBarButton) {
         let menu = NSMenu()
         menu.autoenablesItems = false
         let toggle = NSMenuItem(

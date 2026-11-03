@@ -26,6 +26,7 @@ cp $work/panel-light.png $out/panel-light.png
 LUMOS_APPEARANCE=dark LUMOS_SNAPSHOT=$work/panel-dark.png $bin
 cp $work/panel-dark.png $out/panel-dark.png
 LUMOS_PANEL_STATE=asleep LUMOS_SNAPSHOT=$out/panel-asleep.png $bin
+LUMOS_SNAPSHOT=$out/panel-zh.png $bin -AppleLanguages "(zh-Hans)" 
 
 LUMOS_PET_SNAPSHOT=$out/pet-awake.png $bin
 LUMOS_PET_STATE=asleep LUMOS_PET_SNAPSHOT=$out/pet-asleep.png $bin

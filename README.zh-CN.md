@@ -14,7 +14,7 @@
 
 <br>
 
-<img src="docs/images/panel-light.png" width="330" alt="面板：一颗笑脸太阳、四个时长，以及屏幕、合盖、电池和宠物的开关">
+<img src="docs/images/panel-zh.png" width="330" alt="面板：一颗笑脸太阳、四个时长，以及屏幕、合盖、电池和宠物的开关">
 
 </div>
 

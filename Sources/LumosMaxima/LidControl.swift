@@ -1,3 +1,4 @@
+import AppKit
 import Foundation
 import Observation
 
@@ -176,11 +177,19 @@ final class LidControl {
     /// Runs as root, flips pmset to match the flag file, and puts sleep back when the app is not running.
     static let helperScript = """
     #!/bin/zsh
+    # Runs as root from the LaunchDaemon. Sets lid sleep to match the flag, and never leaves it off after the
+    # app is gone, so a crash cannot keep a Mac awake for good.
     flag=/var/tmp/LumosMaxima/lid
+    want=0
     if [[ -e "$flag" ]] && /usr/bin/pgrep -x LumosMaxima > /dev/null; then
-      /usr/bin/pmset -a disablesleep 1
-    else
-      /usr/bin/pmset -a disablesleep 0
+      want=1
+    fi
+    # pmset leaves the line out when the setting is off, so an empty answer means 0.
+    have=$(/usr/bin/pmset -g | /usr/bin/awk '/SleepDisabled/ { print $2 }')
+    have=${have:-0}
+    # pmset writes a system setting, so it is only called when the value actually has to change.
+    if [[ "$have" != "$want" ]]; then
+      /usr/bin/pmset -a disablesleep $want
     fi
     """
 
@@ -221,6 +230,21 @@ final class LidControl {
         /bin/launchctl bootstrap system \(daemonPath)
         /bin/launchctl kickstart -k system/\(helperLabel) > /dev/null 2>&1 || true
         """
+    }
+}
+
+/// The panel closes when it loses focus, so the lid confirmation is an app-modal alert rather than a sheet.
+@MainActor
+enum LidPrompter {
+    static func presentLidPrompt(model: AppModel) {
+        let alert = NSAlert()
+        alert.messageText = Strings.lidClosed
+        alert.informativeText = Strings.lidClosedNote
+        alert.addButton(withTitle: Strings.continueButton)
+        alert.addButton(withTitle: Strings.cancel)
+        NSApp.activate()
+        guard alert.runModal() == .alertFirstButtonReturn else { return }
+        Task { await model.setKeepsAwakeWithLidClosed(true) }
     }
 }
 

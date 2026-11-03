@@ -167,6 +167,7 @@ enum DebugSnapshot {
             setLength: { _ in },
             setKeepsDisplayAwake: { _ in },
             setKeepsAwakeWithLidClosed: { _ in },
+            confirmLidChange: {},
             showSettings: {},
             quit: {}
         )

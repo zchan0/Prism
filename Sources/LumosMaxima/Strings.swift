@@ -16,7 +16,6 @@ enum Strings {
 
     static func inTime(_ text: String) -> String { String(localized: "\(text) left") }
     static func awakeFor(_ text: String) -> String { String(localized: "Awake for \(text)") }
-    static let lowBattery = String(localized: "Low battery")
     static let lessThanAMinute = String(localized: "less than a minute")
     static func minutesOnly(_ minutes: Int) -> String { String(localized: "\(minutes) min") }
     static func hoursOnly(_ hours: Int) -> String { String(localized: "\(hours) hr") }
@@ -82,13 +81,6 @@ enum Strings {
     static let petNote = String(localized: "Drag it anywhere; it naps while the Mac may sleep.")
     static let loginItem = String(localized: "Open at login")
     static let loginItemNeedsApproval = String(localized: "Allow it in System Settings → General → Login Items")
-    static let diagnostics = String(localized: "Diagnostics")
-    static let wakeAssertion = String(localized: "Power assertion")
-    static let lidSetting = String(localized: "Lid sleep disabled")
-    static let statusHeld = String(localized: "Held")
-    static let statusNone = String(localized: "None")
-    static let statusOn = String(localized: "Yes")
-    static let statusOff = String(localized: "No")
 
     static let notificationTimerTitle = String(localized: "Awake time is up")
     static let notificationTimerBody = String(localized: "LumosMaxima let your Mac sleep again.")
@@ -100,7 +92,6 @@ enum Strings {
     static func lidCommandFailed(_ detail: String) -> String {
         String(localized: "pmset refused the change: \(detail)")
     }
-    static let unknownError = String(localized: "Something went wrong.")
     static let lidHelperUnavailable = String(localized: "The lid helper could not be installed.")
     static let lidChangeTimedOut = String(localized: "The lid setting did not change. Try again, or turn it off in System Settings → Battery.")
 
@@ -109,8 +100,8 @@ enum Strings {
     static let asleepHint = String(localized: "Your Mac may sleep. Tap a length to wake the sun.")
     static let petAwakeHint = String(localized: "Tap to let it nap")
     static func petAwakeToday(_ text: String) -> String { String(localized: "\(text) awake today") }
-    static func petEarned(_ count: Int) -> String {
-        count == 1 ? String(localized: "It grew once") : String(localized: "It grew \(count) times")
+    static func petSessions(_ count: Int) -> String {
+        count == 1 ? String(localized: "1 session together") : String(localized: "\(count) sessions together")
     }
     static func petStageNote(_ stage: SunStage) -> String {
         switch stage {
@@ -122,8 +113,6 @@ enum Strings {
         }
     }
     static let resetPet = String(localized: "Start the pet over")
-    static let resetPetConfirm = String(localized: "Start the pet over?")
-    static let reset = String(localized: "Start Over")
     static let petStagesFooter = String(localized: "It grows every hour it keeps your Mac awake, and naps on days it does not.")
     static let aboutTagline = String(localized: "A sun that keeps your Mac awake, and gets brighter the longer you work.")
     static func version(_ version: String) -> String { String(localized: "Version \(version)") }

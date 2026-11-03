@@ -3,7 +3,7 @@ import SwiftUI
 /// The pet: a small sun that burns bright while the Mac is kept awake and dozes off with floating Zs when it may sleep.
 /// Everything is drawn from the current time, so the view keeps no animation state that could drift.
 struct SunPetView: View {
-    static let size: CGFloat = 156
+    static let size: CGFloat = 140
 
     let isAwake: Bool
     let stage: SunStage
