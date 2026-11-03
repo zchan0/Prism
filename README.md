@@ -32,6 +32,8 @@ English · [简体中文](README.zh-CN.md)
 
 **Notification when time is up**, and open at login.
 
+**Cheap when idle.** The pet is a single `Canvas` drawing at 6 frames per second while awake and 3 while it naps; with the pet hidden the app costs about 0.1% of a CPU core.
+
 **English and Chinese.** The app follows the system language. To pick another language for LumosMaxima only, use System Settings → General → Language & Region → Applications.
 
 ## The pet

@@ -10,3 +10,4 @@ First version.
 - Stop on low battery at a chosen percentage, with a notification.
 - A sun pet that naps when the Mac may sleep, wakes and animates when it may not, and grows with the hours it logs.
 - Open at login, a global shortcut, English and Chinese.
+- The pet draws in one canvas: 6 fps awake, 3 fps asleep, and no work at all when hidden.

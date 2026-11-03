@@ -22,8 +22,11 @@ struct SunPetView: View {
 
     private var isAnimating: Bool { animates && !reduceMotion }
 
+    /// Only the drifting Zs move while the sun naps, so a slow frame rate is enough and costs far less.
+    private var frameInterval: TimeInterval { isAwake ? 1.0 / 6.0 : 1.0 / 3.0 }
+
     var body: some View {
-        TimelineView(.animation(minimumInterval: 1.0 / 10.0, paused: !isAnimating)) { context in
+        TimelineView(.animation(minimumInterval: frameInterval, paused: !isAnimating)) { context in
             Canvas { canvas, size in
                 draw(in: &canvas, size: size, time: context.date.timeIntervalSinceReferenceDate)
             }
@@ -193,27 +196,25 @@ struct SunPetView: View {
     }
 }
 
-/// The halo behind the sun. It breathes on its own timeline, so the canvas below only redraws the parts that
-/// actually move.
+/// The halo behind the sun. It depends only on whether the sun is awake, so SwiftUI draws it once instead of once
+/// per frame; the breathing motion lives in the rays inside the canvas.
 private struct SunGlow: View {
     let isAwake: Bool
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
-        TimelineView(.animation(minimumInterval: 1.0 / 4.0, paused: !isAwake || reduceMotion)) { context in
-            let breathe = 0.5 + 0.5 * sin(context.date.timeIntervalSinceReferenceDate * 1.4)
-            RadialGradient(
-                colors: [
-                    Color(nsColor: Palette.sun).opacity(isAwake ? 0.40 + 0.12 * breathe : 0.16),
-                    Color(nsColor: Palette.sun).opacity(0),
-                ],
-                center: .center,
-                startRadius: 2,
-                endRadius: SunPetView.size * 0.48
+        Circle()
+            .fill(
+                RadialGradient(
+                    colors: [
+                        Color(nsColor: Palette.sun).opacity(isAwake ? 0.44 : 0.16),
+                        Color(nsColor: Palette.sun).opacity(0),
+                    ],
+                    center: .center,
+                    startRadius: 2,
+                    endRadius: SunPetView.size * 0.48
+                )
             )
-        }
-        .frame(width: SunPetView.size, height: SunPetView.size)
-        .blur(radius: 1)
-        .allowsHitTesting(false)
+            .frame(width: SunPetView.size, height: SunPetView.size)
+            .allowsHitTesting(false)
     }
 }
