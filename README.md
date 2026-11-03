@@ -20,7 +20,7 @@ English · [简体中文](README.zh-CN.md)
 
 ## Features
 
-**One click, no sleep.** Pick 30 minutes, 1 hour, 2 hours, or nothing at all. A kernel power assertion holds the Mac awake; it disappears on its own if the app crashes, so nothing can leave it stuck on.
+**One click, no sleep.** Pick 30 minutes, 1 hour, 2 hours, or nothing at all — a pick starts the session even from asleep, so it is one click either way. A kernel power assertion holds the Mac awake; it disappears on its own if the app crashes, so nothing can leave it stuck on.
 
 **Choose what stays on.** Keep the screen on too, or let it turn off while the Mac keeps working. The menu bar sun is solid when the screen stays on and hollow when only the Mac does.
 
