@@ -131,7 +131,7 @@ struct PetRootView: View {
             isAwake: model.isAwake,
             stage: SunStage.stage(for: model.sunHours),
             remainingText: model.remaining.map { TimeText.remaining($0) },
-            animates: model.petVisible,
+            animates: model.petVisible && !ProcessInfo.processInfo.environment.keys.contains("LUMOS_PET_STILL"),
             onToggle: { model.toggle() }
         )
         .padding(PetWindowController.padding)

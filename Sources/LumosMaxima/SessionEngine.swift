@@ -101,6 +101,14 @@ final class SessionEngine {
         return true
     }
 
+    #if DEBUG
+    /// A short countdown for exercising the timer path; release builds only ever use SessionLength.
+    func startForDebug(seconds: TimeInterval, keepsDisplayAwake: Bool) {
+        start(length: .forever, keepsDisplayAwake: keepsDisplayAwake)
+        endsAt = now.addingTimeInterval(seconds)
+    }
+    #endif
+
     func stop(_ reason: StopReason) {
         guard isAwake else { return }
         let duration = now.timeIntervalSince(startedAt ?? now)
@@ -125,6 +133,7 @@ final class SessionEngine {
             stop(.timerFinished)
         }
     }
+
 
     /// The pet only needs the clock while the panel or a countdown is visible.
     func refreshNow() {

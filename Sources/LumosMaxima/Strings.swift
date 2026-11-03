@@ -96,6 +96,7 @@ enum Strings {
     static let lidChangeTimedOut = String(localized: "The lid setting did not change. Try again, or turn it off in System Settings → Battery.")
 
     static let yourPet = String(localized: "Your sun")
+    static let yourSun = String(localized: "Your sun")
     static let petAsleepHint = String(localized: "Tap to wake it up")
     static let asleepHint = String(localized: "Your Mac may sleep. Tap a length to wake the sun.")
     static let petAwakeHint = String(localized: "Tap to let it nap")

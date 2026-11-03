@@ -1,9 +1,14 @@
 import SwiftUI
 
 /// The pet: a small sun that burns bright while the Mac is kept awake and dozes off with floating Zs when it may sleep.
-/// Everything is drawn from the current time, so the view keeps no animation state that could drift.
+///
+/// Everything is drawn in one `Canvas` pass from the current time. Building the rays, disc and face out of dozens
+/// of SwiftUI views meant laying the whole tree out on every animation frame; a canvas only redraws, which is cheap
+/// enough to leave running while the Mac sits idle.
 struct SunPetView: View {
     static let size: CGFloat = 140
+    /// The numbers below are designed against a 70-point radius and scaled from there.
+    private static let designRadius: CGFloat = 70
 
     let isAwake: Bool
     let stage: SunStage
@@ -15,21 +20,17 @@ struct SunPetView: View {
     @State private var hovering = false
     @State private var didDrag = false
 
+    private var isAnimating: Bool { animates && !reduceMotion }
+
     var body: some View {
-        TimelineView(.animation(minimumInterval: 1.0 / 20.0, paused: !animates || reduceMotion)) { context in
-            let time = context.date.timeIntervalSinceReferenceDate
-            ZStack {
-                SunGlow(isAwake: isAwake, breathe: breathe(at: time))
-                SunRays(isAwake: isAwake, scale: stage.scale, time: time)
-                SunDisc(isAwake: isAwake, scale: stage.scale, bob: bob(at: time))
-                SunFace(isAwake: isAwake, scale: stage.scale, bob: bob(at: time), blink: blink(at: time))
-                if !isAwake {
-                    SunSleepingZs(time: time)
-                }
+        TimelineView(.animation(minimumInterval: 1.0 / 10.0, paused: !isAnimating)) { context in
+            Canvas { canvas, size in
+                draw(in: &canvas, size: size, time: context.date.timeIntervalSinceReferenceDate)
             }
-            .frame(width: Self.size, height: Self.size)
         }
-        .opacity(isAwake ? 1 : 0.88)
+        .background(SunGlow(isAwake: isAwake))
+        .frame(width: Self.size, height: Self.size)
+        .opacity(isAwake ? 1 : 0.9)
         .gesture(clickOrDrag)
         .onHover { hovering = $0 }
         .overlay(alignment: .top) {
@@ -46,7 +47,7 @@ struct SunPetView: View {
         }
         .help(isAwake ? Strings.petAwakeHint : Strings.petAsleepHint)
         .accessibilityAddTraits([.isButton])
-        .accessibilityLabel(Strings.yourPet)
+        .accessibilityLabel(Strings.yourSun)
         .accessibilityValue(isAwake ? Strings.petAwakeHint : Strings.petAsleepHint)
     }
 
@@ -71,194 +72,148 @@ struct SunPetView: View {
             }
     }
 
-    private func breathe(at time: TimeInterval) -> Double {
-        guard isAwake, !reduceMotion else { return 0.5 }
-        return 0.5 + 0.5 * sin(time * 1.4)
+    private func draw(in canvas: inout GraphicsContext, size: CGSize, time: TimeInterval) {
+        let scale = size.width / (Self.designRadius * 2) * stage.scale
+        let center = CGPoint(x: size.width / 2, y: size.height / 2)
+        let bob = isAwake && isAnimating ? CGFloat(sin(time * 1.4)) * 1.2 : 0
+        let body = CGPoint(x: center.x, y: center.y + bob)
+
+        drawRays(in: &canvas, center: center, scale: scale, time: time)
+        drawDisc(in: &canvas, center: body, scale: scale)
+        drawFace(in: &canvas, center: body, scale: scale, time: time)
+        if !isAwake {
+            drawZs(in: &canvas, center: center, time: time)
+        }
     }
 
-    private func bob(at time: TimeInterval) -> CGFloat {
-        guard isAwake, !reduceMotion else { return 0 }
-        return CGFloat(sin(time * 1.4)) * 1.4
+    private func drawRays(in canvas: inout GraphicsContext, center: CGPoint, scale: CGFloat, time: TimeInterval) {
+        let count = isAwake ? 12 : 8
+        let breath = isAwake && isAnimating ? 1 + 0.045 * sin(time * 1.4) : 1
+        let inner = 44 * scale * breath
+        let length = (isAwake ? 16 : 8) * scale * breath
+        let width = isAwake ? 4.2 : 3.4
+        let spin = isAwake && isAnimating ? time.truncatingRemainder(dividingBy: 90) * 4 : 0
+        for index in 0..<count {
+            let angle = Double(index) / Double(count) * .pi * 2 + spin * .pi / 180
+            let direction = CGPoint(x: cos(angle), y: sin(angle))
+            let start = CGPoint(x: center.x + direction.x * inner, y: center.y + direction.y * inner)
+            let end = CGPoint(x: center.x + direction.x * (inner + length), y: center.y + direction.y * (inner + length))
+            var path = Path()
+            path.move(to: start)
+            path.addLine(to: end)
+            let gradient = Gradient(colors: [
+                Color(nsColor: Palette.sun).opacity(isAwake ? 0.95 : 0.5),
+                Color(nsColor: Palette.sunPale).opacity(isAwake ? 0.72 : 0.3),
+            ])
+            canvas.stroke(
+                path,
+                with: .linearGradient(gradient, startPoint: start, endPoint: end),
+                style: StrokeStyle(lineWidth: width, lineCap: .round)
+            )
+        }
+    }
+
+    private func drawDisc(in canvas: inout GraphicsContext, center: CGPoint, scale: CGFloat) {
+        let radius = 41 * scale
+        let rect = CGRect(x: center.x - radius, y: center.y - radius, width: radius * 2, height: radius * 2)
+        let colors = isAwake
+            ? [Color(nsColor: Palette.sunPale), Color(nsColor: Palette.sun), Color(nsColor: Palette.sunDeep)]
+            : [Color(nsColor: Palette.sunPale).opacity(0.85), Color(nsColor: Palette.sun).opacity(0.6)]
+        canvas.fill(
+            Path(ellipseIn: rect),
+            with: .linearGradient(
+                Gradient(colors: colors),
+                startPoint: CGPoint(x: rect.minX, y: rect.minY),
+                endPoint: CGPoint(x: rect.maxX, y: rect.maxY)
+            )
+        )
+        canvas.stroke(
+            Path(ellipseIn: rect.insetBy(dx: 0.5, dy: 0.5)),
+            with: .color(.white.opacity(isAwake ? 0.5 : 0.28)),
+            lineWidth: 1
+        )
+    }
+
+    private func drawFace(in canvas: inout GraphicsContext, center: CGPoint, scale: CGFloat, time: TimeInterval) {
+        let eyeGap = 20 * scale
+        let eyeWidth: CGFloat = 8
+        let blink = isAwake && isAnimating ? blinkAmount(at: time) : 0
+        let eyeHeight = isAwake ? max(2, 13 * (1 - blink)) : 0
+        let eyeInk = Color(nsColor: Palette.onWarm).opacity(0.8)
+
+        for side in [-1.0, 1.0] {
+            let x = center.x + side * eyeGap
+            if isAwake {
+                let eye = CGRect(x: x - eyeWidth / 2, y: center.y - 8 - eyeHeight / 2, width: eyeWidth, height: eyeHeight)
+                canvas.fill(Path(roundedRect: eye, cornerRadius: eyeWidth / 2), with: .color(eyeInk))
+                // A highlight keeps the eye from looking printed.
+                let glint = CGRect(x: eye.maxX - 3.4, y: eye.minY + 2.2, width: 2.2, height: 2.2)
+                canvas.fill(Path(ellipseIn: glint), with: .color(.white.opacity(0.75)))
+            } else {
+                // A curved lid, so the sleeping sun looks peaceful rather than switched off.
+                var lid = Path()
+                lid.move(to: CGPoint(x: x - 5, y: center.y - 6))
+                lid.addQuadCurve(to: CGPoint(x: x + 5, y: center.y - 6), control: CGPoint(x: x, y: center.y - 1.5))
+                canvas.stroke(lid, with: .color(eyeInk), style: StrokeStyle(lineWidth: 2, lineCap: .round))
+            }
+        }
+
+        let mouthY = center.y + 7
+        if isAwake {
+            var smile = Path()
+            smile.move(to: CGPoint(x: center.x - 7.5 * scale, y: mouthY - 2))
+            smile.addQuadCurve(
+                to: CGPoint(x: center.x + 7.5 * scale, y: mouthY - 2),
+                control: CGPoint(x: center.x, y: mouthY + 7)
+            )
+            canvas.stroke(smile, with: .color(eyeInk.opacity(0.85)), style: StrokeStyle(lineWidth: 2, lineCap: .round))
+        } else {
+            let mouth = CGRect(x: center.x - 4, y: mouthY - 1, width: 8, height: 2.6)
+            canvas.fill(Path(roundedRect: mouth, cornerRadius: 1.3), with: .color(eyeInk.opacity(0.7)))
+        }
+    }
+
+    private func drawZs(in canvas: inout GraphicsContext, center: CGPoint, time: TimeInterval) {
+        let cycle = time.truncatingRemainder(dividingBy: 3.6) / 3.6
+        for index in 0..<3 {
+            let phase = (cycle + Double(index) / 3).truncatingRemainder(dividingBy: 1)
+            let text = Text(verbatim: "z")
+                .font(.system(size: 12 + phase * 9, weight: .bold, design: .rounded))
+                .foregroundStyle(Color(nsColor: Palette.moon).opacity((1 - phase) * 0.9))
+            let position = CGPoint(x: center.x + 36 + phase * 20, y: center.y - 20 - phase * 32)
+            canvas.draw(text, at: position, anchor: .top)
+        }
     }
 
     /// Blinks once every few seconds, for a fifth of a second.
-    private func blink(at time: TimeInterval) -> Double {
-        guard isAwake, !reduceMotion else { return 0 }
+    private func blinkAmount(at time: TimeInterval) -> Double {
         let cycle = time.truncatingRemainder(dividingBy: 4.6)
         guard cycle > 4.35 else { return 0 }
         return sin((cycle - 4.35) / 0.25 * .pi)
     }
 }
 
+/// The halo behind the sun. It breathes on its own timeline, so the canvas below only redraws the parts that
+/// actually move.
 private struct SunGlow: View {
     let isAwake: Bool
-    let breathe: Double
-
-    var body: some View {
-        RadialGradient(
-            colors: [
-                Color(nsColor: Palette.sun).opacity(isAwake ? 0.42 + 0.12 * breathe : 0.14),
-                Color(nsColor: Palette.sun).opacity(0),
-            ],
-            center: .center,
-            startRadius: 4,
-            endRadius: SunPetView.size * 0.48
-        )
-        .frame(width: SunPetView.size, height: SunPetView.size)
-        .blur(radius: 2)
-    }
-}
-
-private struct SunRays: View {
-    let isAwake: Bool
-    let scale: Double
-    let time: TimeInterval
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
-        let count = isAwake ? 12 : 8
-        let inner = 44 * scale * breath
-        let length = (isAwake ? 16 : 8) * scale * breath
-        ZStack {
-            ForEach(0..<count, id: \.self) { index in
-                Capsule()
-                    .fill(rayInk)
-                    .frame(width: isAwake ? 4.2 : 3.4, height: length)
-                    .offset(y: -(inner + length / 2))
-                    .rotationEffect(.degrees(Double(index) / Double(count) * 360))
-            }
+        TimelineView(.animation(minimumInterval: 1.0 / 4.0, paused: !isAwake || reduceMotion)) { context in
+            let breathe = 0.5 + 0.5 * sin(context.date.timeIntervalSinceReferenceDate * 1.4)
+            RadialGradient(
+                colors: [
+                    Color(nsColor: Palette.sun).opacity(isAwake ? 0.40 + 0.12 * breathe : 0.16),
+                    Color(nsColor: Palette.sun).opacity(0),
+                ],
+                center: .center,
+                startRadius: 2,
+                endRadius: SunPetView.size * 0.48
+            )
         }
-        .rotationEffect(.degrees(spin))
-    }
-
-    private var breath: Double {
-        guard isAwake, !reduceMotion else { return 1 }
-        return 1 + 0.045 * sin(time * 1.4)
-    }
-
-    private var spin: Double {
-        guard isAwake, !reduceMotion else { return 0 }
-        return time.truncatingRemainder(dividingBy: 90) * 4
-    }
-
-    private var rayInk: LinearGradient {
-        LinearGradient(
-            colors: [
-                Color(nsColor: Palette.sun).opacity(isAwake ? 0.95 : 0.55),
-                Color(nsColor: Palette.sunDeep).opacity(isAwake ? 0.0 : 0.45),
-                Color(nsColor: Palette.sunPale).opacity(isAwake ? 0.72 : 0.35),
-            ],
-            startPoint: .bottom,
-            endPoint: .top
-        )
-    }
-}
-
-private struct SunDisc: View {
-    let isAwake: Bool
-    let scale: Double
-    let bob: CGFloat
-
-    var body: some View {
-        Circle()
-            .fill(fill)
-            .frame(width: diameter, height: diameter)
-            .overlay(Circle().strokeBorder(.white.opacity(isAwake ? 0.5 : 0.34), lineWidth: 1))
-            .shadow(color: Color(nsColor: Palette.sunDeep).opacity(isAwake ? 0.35 : 0.12), radius: 8, y: 3)
-            .offset(y: bob)
-    }
-
-    private var diameter: CGFloat { 82 * scale }
-
-    private var fill: LinearGradient {
-        LinearGradient(
-            colors: isAwake
-                ? [Color(nsColor: Palette.sunPale), Color(nsColor: Palette.sun), Color(nsColor: Palette.sunDeep)]
-                : [Color(nsColor: Palette.sunPale).opacity(0.85), Color(nsColor: Palette.sunDeep).opacity(0.55)],
-            startPoint: .topLeading,
-            endPoint: .bottomTrailing
-        )
-    }
-}
-
-private struct SunFace: View {
-    let isAwake: Bool
-    let scale: Double
-    let bob: CGFloat
-    let blink: Double
-
-    var body: some View {
-        VStack(spacing: 6) {
-            HStack(spacing: 20 * scale) {
-                eye
-                eye
-            }
-            mouth
-        }
-        .offset(y: -3 + bob)
-    }
-
-    private var eye: some View {
-        Group {
-            if isAwake {
-                Capsule()
-                    .fill(Color(nsColor: Palette.onWarm).opacity(0.8))
-                    .frame(width: 8, height: max(2, 13 * (1 - blink)))
-                    .overlay(alignment: .topTrailing) {
-                        Circle()
-                            .fill(.white.opacity(0.75))
-                            .frame(width: 2.2, height: 2.2)
-                            .offset(x: -2, y: 2.5)
-                    }
-            } else {
-                // A closed eyelid curves, so the sleeping sun looks peaceful rather than switched off.
-                Capsule()
-                    .strokeBorder(Color(nsColor: Palette.onWarm).opacity(0.85), lineWidth: 2)
-                    .frame(width: 10, height: 5)
-            }
-        }
-        .frame(width: 10, height: 15)
-    }
-
-    @ViewBuilder private var mouth: some View {
-        if isAwake {
-            SmileShape()
-                .stroke(Color(nsColor: Palette.onWarm).opacity(0.7), style: StrokeStyle(lineWidth: 2, lineCap: .round))
-                .frame(width: 15 * scale, height: 6)
-        } else {
-            Capsule()
-                .fill(Color(nsColor: Palette.onWarm).opacity(0.65))
-                .frame(width: 7, height: 3)
-        }
-    }
-}
-
-private struct SunSleepingZs: View {
-    let time: TimeInterval
-
-    var body: some View {
-        let cycle = time.truncatingRemainder(dividingBy: 3.6) / 3.6
-        ZStack {
-            ForEach(0..<3, id: \.self) { index in
-                let phase = (cycle + Double(index) / 3).truncatingRemainder(dividingBy: 1)
-                Text(verbatim: "z")
-                    .font(.system(size: 12 + phase * 9, weight: .bold, design: .rounded))
-                    .foregroundStyle(Color(nsColor: Palette.moon).opacity((1 - phase) * 0.9))
-                    .offset(x: 36 + phase * 20, y: -20 - phase * 32)
-            }
-        }
+        .frame(width: SunPetView.size, height: SunPetView.size)
+        .blur(radius: 1)
         .allowsHitTesting(false)
-    }
-}
-
-private struct SmileShape: Shape {
-    func path(in rect: CGRect) -> Path {
-        var path = Path()
-        path.move(to: CGPoint(x: rect.minX, y: rect.minY + rect.height * 0.2))
-        path.addQuadCurve(
-            to: CGPoint(x: rect.maxX, y: rect.minY + rect.height * 0.2),
-            control: CGPoint(x: rect.midX, y: rect.maxY + rect.height * 0.7)
-        )
-        return path
     }
 }

@@ -44,14 +44,17 @@ enum MenuBarIcon {
     private static let digitsGap: CGFloat = 4.5
     private static let digitsFont = NSFont.monospacedDigitSystemFont(ofSize: 12.5, weight: .semibold)
 
-    static func image(_ state: MenuBarState) -> NSImage {
+    /// `appearance` is the status button's: the menu bar can be light or dark, and its label color has to resolve
+    /// against that appearance rather than against the app's own.
+    static func image(_ state: MenuBarState, appearance: NSAppearance? = nil) -> NSImage {
         let text = state.timeText
         let textWidth = text.map { ($0 as NSString).size(withAttributes: [.font: digitsFont]).width.rounded(.up) } ?? 0
         let width = textWidth > 0 ? discCenterX + rayOuter + digitsGap + textWidth : discCenterX + rayOuter + 1
         let warm = state.mode.isAwake
-        let image = NSImage(size: NSSize(width: width, height: height), flipped: false) { _ in
-            // The sun turns orange while it keeps the Mac awake, so the state reads without counting pixels.
-            let ink = warm ? Palette.sun : NSColor.labelColor.withAlphaComponent(0.4)
+        let draw: () -> Void = {
+            // The sleeping sun is a template; the awake one keeps its amber so the state reads without counting pixels.
+            // Template images are tinted by the menu bar, so the ink here is only a placeholder.
+            let ink = warm ? Palette.sun : NSColor.labelColor
             drawSun(ink: ink, warm: warm, holdsDisplay: state.holdsDisplay)
             if let text {
                 let attributes: [NSAttributedString.Key: Any] = [.font: digitsFont, .foregroundColor: NSColor.labelColor]
@@ -61,10 +64,26 @@ enum MenuBarIcon {
                     withAttributes: attributes
                 )
             }
-            return true
         }
-        // A sleeping sun is a plain template so the menu bar tints it like its neighbors.
-        image.isTemplate = false
+        let image: NSImage
+        if warm {
+            // Only the awake sun carries its own color, so only it needs the menu bar's appearance.
+            image = NSImage(size: NSSize(width: width, height: height), flipped: false) { _ in
+                if let appearance {
+                    appearance.performAsCurrentDrawingAppearance(draw)
+                } else {
+                    draw()
+                }
+                return true
+            }
+            image.isTemplate = false
+        } else {
+            image = NSImage(size: NSSize(width: width, height: height), flipped: false) { _ in
+                draw()
+                return true
+            }
+            image.isTemplate = true
+        }
         image.accessibilityDescription = Strings.appName + ": " + state.accessibilityText
         return image
     }

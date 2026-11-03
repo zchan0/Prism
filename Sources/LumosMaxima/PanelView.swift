@@ -41,17 +41,21 @@ struct PanelContent: Equatable {
 
 struct PanelView: View {
     let content: PanelContent
+    /// The panel stays alive while hidden, and a running timeline would keep SwiftUI redrawing the sun behind it.
+    let animates: Bool
     let actions: PanelActions
     let onHeightChange: @MainActor (CGFloat) -> Void
     @State private var height: CGFloat = 0
 
-    init(content: PanelContent, actions: PanelActions, onHeightChange: @escaping @MainActor (CGFloat) -> Void = { _ in }) {
+    init(content: PanelContent, animates: Bool = true, actions: PanelActions, onHeightChange: @escaping @MainActor (CGFloat) -> Void = { _ in }) {
         self.content = content
+        self.animates = animates
         self.actions = actions
         self.onHeightChange = onHeightChange
     }
 
     init(model: AppModel, layout: PanelLayout, actions: PanelActions, onHeightChange: @escaping @MainActor (CGFloat) -> Void) {
+        animates = layout.isShown
         content = PanelContent(
             isAwake: model.isAwake,
             remaining: model.remaining,
@@ -113,7 +117,7 @@ struct PanelView: View {
                     isAwake: content.isAwake,
                     stage: SunStage.stage(for: content.sunHours),
                     remainingText: nil,
-                    animates: true,
+                    animates: animates,
                     onToggle: actions.toggle
                 )
                 .scaledToFit()

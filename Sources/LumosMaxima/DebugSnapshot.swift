@@ -90,7 +90,8 @@ enum DebugSnapshot {
                     )
                     fill.setFill()
                     NSRect(origin: origin, size: cell).fill()
-                    let icon = MenuBarIcon.image(state)
+                    // The menu bar's own appearance decides the label color, exactly as in the real button.
+                    let icon = MenuBarIcon.image(state, appearance: NSAppearance(named: appearanceName))
                     drawAsMenuBar(icon, in: NSRect(
                         x: origin.x + (cell.width - icon.size.width) / 2,
                         y: origin.y + (cell.height - icon.size.height) / 2,
@@ -171,7 +172,7 @@ enum DebugSnapshot {
             showSettings: {},
             quit: {}
         )
-        let view = PanelView(content: content, actions: actions, onHeightChange: { _ in })
+        let view = PanelView(content: content, animates: false, actions: actions, onHeightChange: { _ in })
         return await render(view: view, size: NSSize(width: PanelController.width, height: 420), to: path, transparent: false)
     }
 

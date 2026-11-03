@@ -70,6 +70,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         if let seconds = ProcessInfo.processInfo.environment["LUMOS_AUTO_START"].flatMap(Double.init) {
             model.start(length: SessionLength(rawValue: Int(seconds / 60)) ?? .forever)
         }
+        if let seconds = ProcessInfo.processInfo.environment["LUMOS_TIMER_SECONDS"].flatMap(Double.init) {
+            model.start(length: .forever)
+            model.engine.startForDebug(seconds: seconds, keepsDisplayAwake: model.preferences.keepsDisplayAwake)
+        }
         if ProcessInfo.processInfo.environment["LUMOS_DUMP"] == "1" {
             Task {
                 try? await Task.sleep(for: .seconds(2))

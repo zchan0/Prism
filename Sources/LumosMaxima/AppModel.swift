@@ -43,7 +43,7 @@ final class AppModel {
 
     var isAwake: Bool { engine.isAwake }
     var remaining: TimeInterval? { engine.remaining() }
-    var sunHours: Double { awakeLog.todayIncluding(engine.elapsed - flushed) / 3600 }
+    var sunHours: Double { awakeLog.todayIncluding(max(0, engine.elapsed - flushed)) / 3600 }
 
     var menuBarState: MenuBarState {
         let mode: MenuBarState.Mode

@@ -12,6 +12,8 @@ final class StatusItemController: NSObject {
     private let panel: PanelController
     private let pet: PetWindowController
     private let settings: SettingsWindowController
+    /// The image only changes when the state does, so the menu bar is not redrawn every second.
+    private var shownState: MenuBarState?
 
     init(model: AppModel) {
         self.model = model
@@ -142,8 +144,11 @@ final class StatusItemController: NSObject {
 
     private func updateStatusItem() {
         guard let button = statusItem.button else { return }
-        button.image = MenuBarIcon.image(model.menuBarState)
-        button.setAccessibilityLabel(model.menuBarState.accessibilityText)
+        let state = model.menuBarState
+        guard state != shownState || button.image == nil else { return }
+        shownState = state
+        button.image = MenuBarIcon.image(state, appearance: button.effectiveAppearance)
+        button.setAccessibilityLabel(state.accessibilityText)
     }
 
     private func syncPet() {

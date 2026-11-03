@@ -45,6 +45,11 @@ final class AwakeLog {
         return totalToday + max(0, running)
     }
 
+    /// The pet's stage today, including the session still running.
+    func stage(running: TimeInterval) -> SunStage {
+        SunStage.stage(for: todayIncluding(running) / 3600)
+    }
+
     private func loadToday() {
         rollOverIfNeeded()
         totalToday = defaults.double(forKey: Self.secondsKey)
