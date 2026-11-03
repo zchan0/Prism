@@ -1,0 +1,386 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "%lld hr" : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "%lld 小时" } }
+      }
+    },
+    "%lld hr %lld min" : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "%lld 小时 %lld 分钟" } }
+      }
+    },
+    "%lld min" : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "%lld 分钟" } }
+      }
+    },
+    "%lld minutes" : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "%lld 分钟" } }
+      }
+    },
+    "%lld hours" : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "%lld 小时" } }
+      }
+    },
+    "%lld%%" : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "%lld%%" } }
+      }
+    },
+    "%@" : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "%@" } }
+      }
+    },
+    "%@ awake today" : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "今天醒着 %@" } }
+      }
+    },
+    "%@ left" : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "还剩 %@" } }
+      }
+    },
+    "Allow lid sleep to change, or System Settings → Energy may be affected." : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "允许修改合盖睡眠，否则会影响“系统设置 → 电池”。" } }
+      }
+    },
+    "An administrator password is needed to change lid sleep." : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "修改合盖睡眠需要管理员密码。" } }
+      }
+    },
+    "Allow it in System Settings → General → Login Items" : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "请在“系统设置 → 通用 → 登录项”中允许" } }
+      }
+    },
+    "Asks for your password once, then disables lid sleep until the session ends." : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "会要求输入一次密码，随后关闭合盖睡眠，直到本次会话结束。" } }
+      }
+    },
+    "At %lld%%, LumosMaxima stopped keeping your Mac awake." : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "电量降到 %lld%%，LumosMaxima 已停止让 Mac 保持唤醒。" } }
+      }
+    },
+    "A sun that keeps your Mac awake, and gets brighter the longer you work." : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "一颗让 Mac 醒着的小太阳，工作越久它越亮。" } }
+      }
+    },
+    "A spark that sleeps all day" : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "一睡就是一整天的小火苗" } }
+      }
+    },
+    "Awake" : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "醒着" } }
+      }
+    },
+    "Awake for %@" : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "已经醒着 %@" } }
+      }
+    },
+    "Awake time is up" : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "唤醒时间到了" } }
+      }
+    },
+    "Battery" : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "电池" } }
+      }
+    },
+    "Battery is low" : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "电量偏低" } }
+      }
+    },
+    "Blazes after six hours" : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "醒着六小时后熊熊燃烧" } }
+      }
+    },
+    "Cancel" : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "取消" } }
+      }
+    },
+    "Changing…" : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "正在切换…" } }
+      }
+    },
+    "Continue" : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "继续" } }
+      }
+    },
+    "Could not keep this Mac awake" : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "无法让这台 Mac 保持唤醒" } }
+      }
+    },
+    "Default length" : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "默认时长" } }
+      }
+    },
+    "Drag it anywhere; it naps while the Mac may sleep." : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "可以拖到任何地方；Mac 能睡时它会打盹。" } }
+      }
+    },
+    "General" : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "通用" } }
+      }
+    },
+    "Goes supernova after ten hours" : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "醒着十小时后成为超新星" } }
+      }
+    },
+    "Docs" : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "文档" } }
+      }
+    },
+    "Keep Awake" : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "保持唤醒" } }
+      }
+    },
+    "Keeping awake" : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "保持唤醒中" } }
+      }
+    },
+    "Keep running with the lid closed" : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "合上盖子也继续运行" } }
+      }
+    },
+    "Keep the screen on too" : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "同时保持屏幕常亮" } }
+      }
+    },
+    "Let It Sleep" : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "让它睡吧" } }
+      }
+    },
+    "Lid sleep disabled" : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "合盖睡眠已关闭" } }
+      }
+    },
+    "Low battery" : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "电量偏低" } }
+      }
+    },
+    "LumosMaxima let your Mac sleep again." : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "LumosMaxima 已让你的 Mac 重新可以睡眠。" } }
+      }
+    },
+    "Never" : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "从不" } }
+      }
+    },
+    "No battery" : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "没有电池" } }
+      }
+    },
+    "None" : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "无" } }
+      }
+    },
+    "Notifications" : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "通知" } }
+      }
+    },
+    "Off" : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "关" } }
+      }
+    },
+    "Off: the Mac stays awake while its screen can turn off." : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "关闭时：Mac 保持唤醒，但屏幕可以熄灭。" } }
+      }
+    },
+    "On" : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "开" } }
+      }
+    },
+    "On battery" : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "使用电池" } }
+      }
+    },
+    "Open at login" : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "登录时打开" } }
+      }
+    },
+    "Plugged in" : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "已接通电源" } }
+      }
+    },
+    "Power assertion" : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "电源断言" } }
+      }
+    },
+    "Quit LumosMaxima" : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "退出 LumosMaxima" } }
+      }
+    },
+    "Settings…" : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "设置…" } }
+      }
+    },
+    "Show the pet on screen" : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "在屏幕上显示宠物" } }
+      }
+    },
+    "Show the time left in the menu bar" : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "在菜单栏显示剩余时间" } }
+      }
+    },
+    "Sleeping" : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "睡着了" } }
+      }
+    },
+    "Something went wrong." : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "出了点问题。" } }
+      }
+    },
+    "Start Over" : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "重新开始" } }
+      }
+    },
+    "Start or stop keeping awake" : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "开始或停止保持唤醒" } }
+      }
+    },
+    "Start the pet over" : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "重新养一只" } }
+      }
+    },
+    "Start the pet over?" : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "要重新养一只吗？" } }
+      }
+    },
+    "Stops keeping awake at %lld%% to save the battery" : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "电量降到 %lld%% 时停止保持唤醒" } }
+      }
+    },
+    "Stop keeping awake when the battery falls to" : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "电量降到以下时停止保持唤醒" } }
+      }
+    },
+    "Tap to let it nap" : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "点一下让它打盹" } }
+      }
+    },
+    "Tap to wake it up" : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "点一下叫醒它" } }
+      }
+    },
+    "Tell me when the battery stops the session" : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "电量让会话结束时通知我" } }
+      }
+    },
+    "Tell me when the session ends" : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "会话结束时通知我" } }
+      }
+    },
+    "The Mac stays awake while its screen can turn off." : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "Mac 保持唤醒，屏幕可以熄灭。" } }
+      }
+    },
+    "Until I stop it" : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "直到我手动停止" } }
+      }
+    },
+    "Version %@" : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "版本 %@" } }
+      }
+    },
+    "Warms up after an hour awake" : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "醒着一小时后开始发光" } }
+      }
+    },
+    "Your sun" : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "你的太阳" } }
+      }
+    },
+    "It grew once" : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "它长大过一次" } }
+      }
+    },
+    "It grew %lld times" : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "它长大了 %lld 次" } }
+      }
+    },
+    "It grows every hour it keeps your Mac awake, and naps on days it does not." : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "它每让你的 Mac 醒着一小时就会长大一点，闲着的时候打盹。" } }
+      }
+    },
+    "less than a minute" : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "不到一分钟" } }
+      }
+    },
+    "pmset refused the change: %@" : {
+      "localizations" : {
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "pmset 拒绝了这次修改：%@" } }
+      }
+    }
+  },
+  "version" : "1.0"
+}
