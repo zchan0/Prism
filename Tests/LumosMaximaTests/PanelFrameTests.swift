@@ -21,6 +21,26 @@ struct PanelFrameTests {
         #expect(PanelController.frame(height: 400, below: anchor, in: visible).minX == 8)
     }
 
+    @Test func liftsAboveThePetWhenAsked() {
+        let pet = NSRect(x: 1700, y: 300, width: 144, height: 144)
+        let anchor = NSRect(x: pet.midX - PanelController.width / 2, y: pet.maxY, width: PanelController.width, height: 0)
+        let frame = PanelController.frame(height: 400, from: anchor, placement: .above, in: visible)
+        #expect(frame.minY == pet.maxY + PanelController.menuBarGap)
+        #expect(frame.maxX <= 1912)
+    }
+
+    @Test func anAbovePanelNearTheTopStillFits() {
+        let anchor = NSRect(x: 600, y: 1000, width: PanelController.width, height: 0)
+        let frame = PanelController.frame(height: 400, from: anchor, placement: .above, in: visible)
+        #expect(frame.maxY <= 1048)
+        #expect(frame.height < 400)
+    }
+
+    @Test func anAbovePanelNearTheLeftEdgeStaysOnScreen() {
+        let anchor = NSRect(x: -40, y: 400, width: PanelController.width, height: 0)
+        #expect(PanelController.frame(height: 300, from: anchor, placement: .above, in: visible).minX == 8)
+    }
+
     @Test func shrinksRatherThanRunOffTheBottom() {
         let anchor = NSRect(x: 600, y: 1056, width: 60, height: 24)
         let frame = PanelController.frame(height: 2000, below: anchor, in: visible)

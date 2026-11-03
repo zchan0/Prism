@@ -10,6 +10,7 @@ final class Preferences {
         static let keepsDisplayAwake = "keepsDisplayAwake"
         static let keepsAwakeWithLidClosed = "keepsAwakeWithLidClosed"
         static let lastLength = "lastLength"
+        static let lengthDefaultMigrated = "lengthDefaultMigrated"
         static let lowBatteryThreshold = "lowBatteryThreshold"
         static let notifiesWhenTimerEnds = "notifiesWhenTimerEnds"
         static let notifiesWhenBatteryLow = "notifiesWhenBatteryLow"
@@ -45,7 +46,16 @@ final class Preferences {
         showsTimeInMenuBar = defaults.object(forKey: Key.showsTimeInMenuBar) as? Bool ?? true
         keepsDisplayAwake = defaults.object(forKey: Key.keepsDisplayAwake) as? Bool ?? true
         keepsAwakeWithLidClosed = defaults.object(forKey: Key.keepsAwakeWithLidClosed) as? Bool ?? false
-        lastLength = defaults.object(forKey: Key.lastLength).flatMap { $0 as? Int }.flatMap(SessionLength.init(rawValue:)) ?? .forever
+        // Until stopped is the default. Builds before 0.1.1 stored a fixed 30 minutes as their default, which nobody
+        // picked, so an existing install is moved over once; a length picked after that is kept.
+        let storedLength = defaults.object(forKey: Key.lastLength).flatMap { $0 as? Int }.flatMap(SessionLength.init(rawValue:))
+        if defaults.bool(forKey: Key.lengthDefaultMigrated) {
+            lastLength = storedLength ?? .forever
+        } else {
+            lastLength = .forever
+            defaults.set(true, forKey: Key.lengthDefaultMigrated)
+            defaults.set(SessionLength.forever.rawValue, forKey: Key.lastLength)
+        }
         lowBatteryThreshold = defaults.object(forKey: Key.lowBatteryThreshold).flatMap { $0 as? Int }.flatMap(LowBatteryThreshold.init(rawValue:)) ?? .twenty
         notifiesWhenTimerEnds = defaults.object(forKey: Key.notifiesWhenTimerEnds) as? Bool ?? true
         notifiesWhenBatteryLow = defaults.object(forKey: Key.notifiesWhenBatteryLow) as? Bool ?? true

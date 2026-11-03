@@ -14,13 +14,18 @@ struct SunPetView: View {
     let stage: SunStage
     let remainingText: String?
     let animates: Bool
-    let onToggle: () -> Void
+    /// A click opens the controls; dragging still just moves the pet.
+    let onClick: () -> Void
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var hovering = false
     @State private var didDrag = false
 
     private var isAnimating: Bool { animates && !reduceMotion }
+
+    private var stringsForAccessibility: String {
+        (isAwake ? Strings.awake : Strings.sleeping) + ", " + Strings.petHint
+    }
 
     /// Only the drifting Zs move while the sun naps, so a slow frame rate is enough and costs far less.
     private var frameInterval: TimeInterval { isAwake ? 1.0 / 6.0 : 1.0 / 3.0 }
@@ -48,10 +53,10 @@ struct SunPetView: View {
                     .allowsHitTesting(false)
             }
         }
-        .help(isAwake ? Strings.petAwakeHint : Strings.petAsleepHint)
+        .help(Strings.petHint)
         .accessibilityAddTraits([.isButton])
         .accessibilityLabel(Strings.yourSun)
-        .accessibilityValue(isAwake ? Strings.petAwakeHint : Strings.petAsleepHint)
+        .accessibilityValue(stringsForAccessibility)
     }
 
     /// One gesture for both, so a click is never mistaken for the start of a drag.
@@ -70,7 +75,7 @@ struct SunPetView: View {
                     PetDragging.finish()
                     didDrag = false
                 } else if moved <= 4 {
-                    onToggle()
+                    onClick()
                 }
             }
     }

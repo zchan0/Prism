@@ -271,6 +271,16 @@
         }
       }
     },
+    "Click to open the controls, drag to move": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "点击打开控制面板，拖动可以换位置"
+          }
+        }
+      }
+    },
     "Continue": {
       "localizations": {
         "zh-Hans": {
@@ -337,6 +347,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "它每让你的 Mac 醒着一小时就会长大一点，闲着的时候打盹。"
+          }
+        }
+      }
+    },
+    "It hasn’t woken up today": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "今天还没醒过"
           }
         }
       }
@@ -617,26 +637,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "电量降到 %lld% 时停止保持唤醒"
-          }
-        }
-      }
-    },
-    "Tap to let it nap": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "点一下让它打盹"
-          }
-        }
-      }
-    },
-    "Tap to wake it up": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "点一下叫醒它"
           }
         }
       }

@@ -42,7 +42,7 @@ enum DebugSnapshot {
     }
 
     static func writePet(to path: String, awake: Bool) async -> Bool {
-        let view = SunPetView(isAwake: awake, stage: .flare, remainingText: nil, animates: false, onToggle: {})
+        let view = SunPetView(isAwake: awake, stage: .flare, remainingText: nil, animates: false, onClick: {})
             .padding(PetWindowController.padding)
             .background(Color(nsColor: Palette.panelFill))
         return await render(view: view, size: PetWindowController.contentSize, to: path, transparent: false)

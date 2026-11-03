@@ -118,7 +118,7 @@ struct PanelView: View {
                     stage: SunStage.stage(for: content.sunHours),
                     remainingText: nil,
                     animates: animates,
-                    onToggle: actions.toggle
+                    onClick: actions.toggle
                 )
                 .scaledToFit()
                 .scaleEffect(0.64)
@@ -154,7 +154,7 @@ struct PanelView: View {
 
     private var durations: some View {
         HStack(spacing: 6) {
-            ForEach(SessionLength.allCases) { length in
+            ForEach(SessionLength.displayOrder) { length in
                 DurationButton(
                     title: Strings.lengthCompact(length),
                     isSelected: content.length == length && content.isAwake
@@ -256,7 +256,7 @@ struct PanelView: View {
     }
 
     private var countText: String {
-        if content.sunHours < 0.02 { return Strings.petAsleepHint }
+        if content.sunHours < 0.02 { return Strings.petIdle }
         return Strings.petSessions(content.petCount)
     }
 

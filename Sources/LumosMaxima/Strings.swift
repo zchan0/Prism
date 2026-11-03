@@ -97,9 +97,10 @@ enum Strings {
 
     static let yourPet = String(localized: "Your sun")
     static let yourSun = String(localized: "Your sun")
-    static let petAsleepHint = String(localized: "Tap to wake it up")
+    static let petIdle = String(localized: "It hasn’t woken up today")
+    static let petHint = String(localized: "Click to open the controls, drag to move")
     static let asleepHint = String(localized: "Your Mac may sleep. Tap a length to wake the sun.")
-    static let petAwakeHint = String(localized: "Tap to let it nap")
+
     static func petAwakeToday(_ text: String) -> String { String(localized: "\(text) awake today") }
     static func petSessions(_ count: Int) -> String {
         count == 1 ? String(localized: "1 session together") : String(localized: "\(count) sessions together")

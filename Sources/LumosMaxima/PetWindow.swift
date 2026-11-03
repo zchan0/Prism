@@ -50,10 +50,23 @@ final class PetWindowController {
 
     private let model: AppModel
     private var window: FloatingPanel?
+    /// Clicking the sun opens the panel it shares with the menu bar item; the pet is a short cut to that, not a
+    /// second set of controls.
+    var onClick: (@MainActor (NSRect, NSScreen) -> Void)?
 
     init(model: AppModel) {
         self.model = model
     }
+
+    var screen: NSScreen? { window?.screen ?? NSScreen.main }
+
+    #if DEBUG
+    func clickForDebug() {
+        guard let frame, let screen else { return }
+        onClick?(frame, screen)
+    }
+    #endif
+    var frame: NSRect? { window?.frame }
 
     var isVisible: Bool { window?.isVisible ?? false }
 
@@ -76,7 +89,10 @@ final class PetWindowController {
 
     private func makeWindow() -> FloatingPanel {
         let window = FloatingPanel(size: Self.contentSize, level: .floating)
-        let host = PetHostingView(rootView: PetRootView(model: model))
+        let host = PetHostingView(rootView: PetRootView(model: model) { [weak self] in
+            guard let self, let frame = self.frame, let screen = self.screen else { return }
+            self.onClick?(frame, screen)
+        })
         host.frame = NSRect(origin: .zero, size: Self.contentSize)
         host.autoresizingMask = [.width, .height]
         window.contentView = host
@@ -125,6 +141,7 @@ private struct WindowGrabber: NSViewRepresentable {
 /// The SwiftUI side of the pet window.
 struct PetRootView: View {
     let model: AppModel
+    let onClick: () -> Void
 
     var body: some View {
         SunPetView(
@@ -132,7 +149,7 @@ struct PetRootView: View {
             stage: SunStage.stage(for: model.sunHours),
             remainingText: model.remaining.map { TimeText.remaining($0) },
             animates: model.petVisible && !ProcessInfo.processInfo.environment.keys.contains("LUMOS_PET_STILL"),
-            onToggle: { model.toggle() }
+            onClick: onClick
         )
         .padding(PetWindowController.padding)
         // The hosting view's window is the pet window, and it is the one a drag moves.

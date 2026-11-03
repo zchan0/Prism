@@ -8,6 +8,9 @@ enum SessionLength: Int, CaseIterable, Identifiable, Sendable {
 
     var id: Int { rawValue }
 
+    /// Until stopped comes first: it is both the default and the one pick that never surprises anybody.
+    static var displayOrder: [SessionLength] { [.forever, .thirtyMinutes, .oneHour, .twoHours] }
+
     var duration: TimeInterval? {
         self == .forever ? nil : TimeInterval(rawValue * 60)
     }

@@ -47,6 +47,9 @@ final class StatusItemController: NSObject {
             self?.statusItem.button?.highlight(visible)
             if visible { self?.model.uiTick() }
         }
+        pet.onClick = { [weak self] frame, screen in
+            self?.togglePanelFromPet(above: frame, on: screen)
+        }
         observeModel()
         model.petVisible = false
         if model.preferences.showsPet {
@@ -61,7 +64,22 @@ final class StatusItemController: NSObject {
     }
 
     var panelWindowForDebug: NSWindow? { panel.windowForDebug }
+
+    /// Acts like a click on the sun, so the one live check that matters can run in a script.
+    func clickPetForDebug() {
+        pet.clickForDebug()
+    }
     #endif
+
+    /// A click on the pet opens the same panel as the menu bar item, lifted above the sun so it does not cover it.
+    private func togglePanelFromPet(above frame: NSRect, on screen: NSScreen) {
+        if panel.isShown {
+            panel.hide()
+        } else {
+            // The panel can be open from the menu bar elsewhere on screen; showing it again moves it here.
+            panel.show(above: frame, on: screen)
+        }
+    }
 
     /// Called every second while a session runs; cheap when nothing needs to change.
     func tick() {

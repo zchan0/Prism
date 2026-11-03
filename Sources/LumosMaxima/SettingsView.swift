@@ -36,7 +36,7 @@ struct GeneralSettingsView: View {
 
             Section {
                 Picker(selection: $preferences.lastLength) {
-                    ForEach(SessionLength.allCases) { length in
+                    ForEach(SessionLength.displayOrder) { length in
                         Text(Strings.lengthName(length)).tag(length)
                     }
                 } label: {
@@ -112,7 +112,7 @@ struct PetSettingsView: View {
                         stage: SunStage.stage(for: model.sunHours),
                         remainingText: nil,
                         animates: true,
-                        onToggle: {}
+                        onClick: {}
                     )
                     .frame(width: SunPetView.size, height: SunPetView.size)
                     .allowsHitTesting(false)

@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.1.1] - 2026-11-03
+
+- "Until I stop it" is now the default length, and it comes first in the panel and in Settings.
+- Clicking the pet opens the control panel instead of starting or stopping the session: the same panel the menu
+  bar item opens, lifted above the sun, or dropped below it when the pet sits near the top of the screen.
+
 ## [0.1.0] - 2026-11-03
 
 First version.
@@ -11,3 +17,4 @@ First version.
 - A sun pet that naps when the Mac may sleep, wakes and animates when it may not, and grows with the hours it logs.
 - Open at login, a global shortcut, English and Chinese.
 - The pet draws in one canvas: 6 fps awake, 3 fps asleep, and no work at all when hidden.
+

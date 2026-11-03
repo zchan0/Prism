@@ -20,7 +20,7 @@ English · [简体中文](README.zh-CN.md)
 
 ## Features
 
-**One click, no sleep.** Pick 30 minutes, 1 hour, 2 hours, or nothing at all — a pick starts the session even from asleep, so it is one click either way. A kernel power assertion holds the Mac awake; it disappears on its own if the app crashes, so nothing can leave it stuck on.
+**One click, no sleep.** Pick 30 minutes, 1 hour, 2 hours, or until you stop it — the default, and the one pick that starts the session even from asleep, so it is always one click. A kernel power assertion holds the Mac awake; it disappears on its own if the app crashes, so nothing can leave it stuck on.
 
 **Choose what stays on.** Keep the screen on too, or let it turn off while the Mac keeps working. The menu bar sun is solid when the screen stays on and hollow when only the Mac does.
 
@@ -28,7 +28,7 @@ English · [简体中文](README.zh-CN.md)
 
 **Battery guard.** On battery at the percentage you choose — 20% by default — the session ends itself and tells you why.
 
-**A pet worth keeping awake for.** The sun naps with floating Zs when the Mac may sleep, and wakes up, breathes, spins its rays and blinks when it may not. It grows from a spark to an ember, a flare, a sun and finally a supernova as it logs hours, all tracked per calendar day. Drag it anywhere; tap it to start or stop.
+**A pet worth keeping awake for.** The sun naps with floating Zs when the Mac may sleep, and wakes up, breathes, spins its rays and blinks when it may not. It grows from a spark to an ember, a flare, a sun and finally a supernova as it logs hours, all tracked per calendar day. Drag it anywhere; click it to open the controls, the very same panel the menu bar item opens, lifted above the sun so it never covers it.
 
 **Notification when time is up**, and open at login.
 

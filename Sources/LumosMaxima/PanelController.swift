@@ -14,11 +14,21 @@ final class PanelController {
     static let cornerRadius: CGFloat = 16
     static let menuBarGap: CGFloat = 6
     static let screenMargin: CGFloat = 8
+    /// Below this the panel would be more clipped window than content; another side is tried instead.
+    static let minimumUsefulHeight: CGFloat = 260
+
+    /// Which side of its anchor the panel grows from. The menu bar item hangs it below; the pet, which sits near the
+    /// bottom of the screen, lifts it above.
+    enum Placement: Equatable {
+        case below
+        case above
+    }
 
     var onVisibilityChange: ((Bool) -> Void)?
     private let model: AppModel
     private var panel: NSPanel?
     private var anchor: NSRect?
+    private var placement = Placement.below
     private var visibleFrame: NSRect?
     private var contentHeight: CGFloat = 0
     private var outsideClickMonitor: Any?
@@ -50,8 +60,36 @@ final class PanelController {
     }
 
     func show(below button: NSStatusBarButton) {
-        guard let panel, let window = button.window, let screen = window.screen ?? NSScreen.main else { return }
-        anchor = window.convertToScreen(button.convert(button.bounds, to: nil))
+        guard let window = button.window, let screen = window.screen ?? NSScreen.main else { return }
+        show(anchoredAt: window.convertToScreen(button.convert(button.bounds, to: nil)), on: screen)
+    }
+
+    /// The pet opens the same panel, lifted above itself, so there is one control surface rather than two.
+    /// A pet dragged near the top of the screen has no room above it, so the panel drops below instead.
+    func show(above petFrame: NSRect, on screen: NSScreen) {
+        let visible = screen.visibleFrame
+        let roomAbove = visible.maxY - Self.screenMargin - petFrame.maxY
+        let roomBelow = petFrame.minY - visible.minY - Self.screenMargin
+        let x = petFrame.midX - Self.width / 2
+        if roomAbove < Self.minimumUsefulHeight, roomBelow > roomAbove {
+            show(
+                anchoredAt: NSRect(x: x, y: petFrame.minY, width: Self.width, height: 0),
+                placement: .below,
+                on: screen
+            )
+        } else {
+            show(
+                anchoredAt: NSRect(x: x, y: petFrame.maxY, width: Self.width, height: 0),
+                placement: .above,
+                on: screen
+            )
+        }
+    }
+
+    private func show(anchoredAt rect: NSRect, placement: Placement = .below, on screen: NSScreen) {
+        guard let panel else { return }
+        anchor = rect
+        self.placement = placement
         visibleFrame = screen.visibleFrame
         panel.contentView?.layoutSubtreeIfNeeded()
         // Never made key: with Liquid Glass a key borderless panel draws a dark rectangle around its rounded
@@ -83,7 +121,7 @@ final class PanelController {
     // follows the content while the panel is on screen.
     private func reposition() {
         guard let panel, panel.isVisible, let anchor, let visibleFrame, contentHeight > 0 else { return }
-        panel.setFrame(Self.frame(height: contentHeight, below: anchor, in: visibleFrame), display: true)
+        panel.setFrame(Self.frame(height: contentHeight, from: anchor, placement: placement, in: visibleFrame), display: true)
     }
 
     private func watchOutsideClicks() {
@@ -100,12 +138,25 @@ final class PanelController {
         outsideClickMonitor = nil
     }
 
-    /// The panel hangs below the item's left edge and stays inside the screen.
     static func frame(height: CGFloat, below anchor: NSRect, in visibleFrame: NSRect) -> NSRect {
+        frame(height: height, from: anchor, placement: .below, in: visibleFrame)
+    }
+
+    /// The panel hangs off one edge of its anchor, aligns with the anchor's left edge, and stays inside the screen.
+    static func frame(height: CGFloat, from anchor: NSRect, placement: Placement, in visibleFrame: NSRect) -> NSRect {
         let x = max(visibleFrame.minX + screenMargin, min(anchor.minX, visibleFrame.maxX - screenMargin - width))
-        let top = min(anchor.minY, visibleFrame.maxY) - menuBarGap
-        let clamped = min(height, top - visibleFrame.minY - screenMargin)
-        return NSRect(x: x, y: top - clamped, width: width, height: clamped)
+        let bottomLimit = visibleFrame.minY + screenMargin
+        switch placement {
+        case .below:
+            // A menu bar item sits at the very top edge, so its own edge is the ceiling, not the visible frame's.
+            let top = min(anchor.minY, visibleFrame.maxY) - menuBarGap
+            let clamped = min(height, max(0, top - bottomLimit))
+            return NSRect(x: x, y: top - clamped, width: width, height: clamped)
+        case .above:
+            let bottom = anchor.maxY + menuBarGap
+            let clamped = min(height, max(0, visibleFrame.maxY - screenMargin - bottom))
+            return NSRect(x: x, y: bottom, width: width, height: clamped)
+        }
     }
 
     static func makePanel(rootView: some View) -> NSPanel {
