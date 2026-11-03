@@ -60,6 +60,8 @@ final class AppModel {
     func launch() {
         battery.start()
         notifier.requestAuthorization()
+        // A session never survives a relaunch, so a lid override left over from the last run has nothing to cover.
+        preferences.keepsAwakeWithLidClosed = false
         Task {
             await lid.refresh()
             lid.adoptSystemState()

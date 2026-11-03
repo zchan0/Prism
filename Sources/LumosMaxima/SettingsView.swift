@@ -23,7 +23,12 @@ struct GeneralSettingsView: View {
                 .disabled(!model.loginItem.isAvailable)
                 Toggle(Strings.menuBarTime, isOn: $preferences.showsTimeInMenuBar)
                 Toggle(Strings.petLabel, isOn: $preferences.showsPet)
-                Toggle(isOn: $preferences.keepsDisplayAwake) {
+                // Going through the model, not straight to the preference, so a running session re-acquires its
+                // assertion instead of keeping the old screen setting until the next start.
+                Toggle(isOn: Binding(
+                    get: { model.preferences.keepsDisplayAwake },
+                    set: { model.setKeepsDisplayAwake($0) }
+                )) {
                     Text(Strings.keepsDisplayAwake)
                     Text(Strings.keepsDisplayAwakeNote)
                 }
