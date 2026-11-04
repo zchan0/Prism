@@ -201,6 +201,16 @@
         }
       }
     },
+    "Available includes space macOS can reclaim, which is the number Finder shows.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "「可用」包含 macOS 可回收的空间，也就是「访达」显示的数字。"
+          }
+        }
+      }
+    },
     "Awake": {
       "localizations": {
         "zh-Hans": {
@@ -301,6 +311,16 @@
         }
       }
     },
+    "charging": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "充电中"
+          }
+        }
+      }
+    },
     "Click to open the controls, drag to move": {
       "localizations": {
         "zh-Hans": {
@@ -351,6 +371,26 @@
         }
       }
     },
+    "Disk": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "磁盘"
+          }
+        }
+      }
+    },
+    "Disk and memory refresh every 20 seconds, and whenever the panel opens.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "磁盘和内存每 20 秒刷新一次，打开面板时也会刷新。"
+          }
+        }
+      }
+    },
     "Done": {
       "localizations": {
         "zh-Hans": {
@@ -377,6 +417,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "可用"
+          }
+        }
+      }
+    },
+    "free of %@": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "可用，共 %@"
           }
         }
       }
@@ -501,6 +551,16 @@
         }
       }
     },
+    "Memory": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "内存"
+          }
+        }
+      }
+    },
     "Menu bar": {
       "localizations": {
         "zh-Hans": {
@@ -527,6 +587,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "没有电池"
+          }
+        }
+      }
+    },
+    "No reading": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "没有读数"
           }
         }
       }
@@ -571,6 +641,16 @@
         }
       }
     },
+    "of %@": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "共 %@"
+          }
+        }
+      }
+    },
     "Off": {
       "localizations": {
         "zh-Hans": {
@@ -611,6 +691,16 @@
         }
       }
     },
+    "on battery": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "使用电池"
+          }
+        }
+      }
+    },
     "One menu bar app, a handful of small tools.": {
       "localizations": {
         "zh-Hans": {
@@ -627,6 +717,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "只在面板里"
+          }
+        }
+      }
+    },
+    "Open %@": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "打开 %@"
           }
         }
       }
@@ -651,7 +751,27 @@
         }
       }
     },
+    "Open Prism": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "打开 Prism"
+          }
+        }
+      }
+    },
     "Plugged in": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已接通电源"
+          }
+        }
+      }
+    },
+    "plugged in": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
@@ -751,6 +871,16 @@
         }
       }
     },
+    "Show the number next to the icon": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在图标旁显示数字"
+          }
+        }
+      }
+    },
     "Show the pet on screen": {
       "localizations": {
         "zh-Hans": {
@@ -777,6 +907,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "在菜单栏显示剩余时间"
+          }
+        }
+      }
+    },
+    "Shows in the menu bar": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在菜单栏显示"
           }
         }
       }
@@ -876,7 +1016,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "即使隐藏图标，面板仍可用快捷键打开。"
+            "value": "即使没有独立图标，面板仍可用快捷键打开。"
           }
         }
       }

@@ -58,24 +58,22 @@ final class ToolboxApp {
     }
 
     /// The shared shortcut: opens the hub, which is the one surface that shows every tool.
+    /// The shared shortcut opens the hub under the pointer: with no icon of its own, the hub has no anchor to hang
+    /// from, and the pointer is where the person is looking.
     func toggleHub() {
-        guard let button = statusItems.hubButton() else {
-            // With the hub icon hidden, the panel has no anchor; it opens under the pointer instead.
-            NotificationCenter.default.post(name: PrismNotifications.openSettings, object: nil)
-            return
+        if hub.isShown {
+            hub.hide()
+        } else {
+            hub.show(at: NSEvent.mouseLocation)
         }
-        hub.toggle(below: button)
     }
 
-    func setHubPlacement(_ placement: MenuBarPlacement) {
-        shell.hubPlacement = placement
-        statusItems.sync(with: registrations)
-    }
+    #if DEBUG
+    func settingsWindow() -> NSWindow { settings.makeWindow() }
+    #endif
+
 
     private func configure() {
-        statusItems.onHubClick = { [weak self] button in
-            self?.hub.toggle(below: button)
-        }
         statusItems.onToolClick = { [weak self] id, button in
             guard let self, let registration = registrations.first(where: { $0.id == id }) else { return }
             // A tool that has its own panel opens it; otherwise the hub is its panel.
@@ -85,8 +83,11 @@ final class ToolboxApp {
                 hub.toggle(below: button)
             }
         }
-        statusItems.onToolMenu = { [weak self] _, button in
-            self?.showToolMenu(below: button)
+        statusItems.onFallbackClick = { [weak self] button in
+            self?.hub.toggle(below: button)
+        }
+        statusItems.onToolMenu = { [weak self] id, button in
+            self?.showToolMenu(for: id, below: button)
         }
         hub.onOpenSettings = { [weak self] in self?.settings.show() }
     }
@@ -108,17 +109,58 @@ final class ToolboxApp {
         }
     }
 
-    private func showToolMenu(below button: NSStatusBarButton) {
+    /// Every tool's icon carries the way back to Prism: the hub, the settings, and quitting. Without a Prism icon of
+    /// its own, this menu is what keeps the app as a whole reachable from any of its tools.
+    private func showToolMenu(for id: ToolID, below button: NSStatusBarButton) {
         let menu = NSMenu()
         menu.autoenablesItems = false
-        let settingsItem = NSMenuItem(title: Strings.openSettings, action: nil, keyEquivalent: "")
+
+        if let tool = registrations.first(where: { $0.id == id })?.tool {
+            let open = NSMenuItem(title: Strings.openTool(tool.title), action: #selector(openToolPanel(_:)), keyEquivalent: "")
+            open.target = self
+            open.representedObject = id.rawValue
+            menu.addItem(open)
+        }
+
+        let hubItem = NSMenuItem(title: Strings.openHub, action: #selector(openHub), keyEquivalent: "")
+        hubItem.target = self
+        menu.addItem(hubItem)
+
+        let settingsItem = NSMenuItem(title: Strings.openSettings, action: #selector(openSettings), keyEquivalent: ",")
         settingsItem.target = self
         menu.addItem(settingsItem)
         menu.addItem(.separator())
-        let quit = NSMenuItem(title: Strings.quit, action: nil, keyEquivalent: "")
+        let quit = NSMenuItem(title: Strings.quit, action: #selector(quitApp), keyEquivalent: "q")
         quit.target = self
         menu.addItem(quit)
+
         menu.popUp(positioning: nil, at: NSPoint(x: 0, y: button.bounds.height + 4), in: button)
+    }
+
+    @objc private func openSettings() {
+        settings.show()
+    }
+
+    @objc private func quitApp() {
+        NSApp.terminate(nil)
+    }
+
+    @objc private func openHub() {
+        if let button = statusItems.button(of: registrations.first(where: { shell.isEnabled($0.id) })?.id) {
+            hub.toggle(below: button)
+        } else {
+            hub.show(at: NSEvent.mouseLocation)
+        }
+    }
+
+    @objc private func openToolPanel(_ sender: NSMenuItem) {
+        guard let raw = sender.representedObject as? String, let button = statusItems.button(of: ToolID(raw)) else { return }
+        guard let registration = registrations.first(where: { $0.id == ToolID(raw) }) else { return }
+        if let presenter = registration.tool as? MenuBarPresenter {
+            presenter.showPanel(below: button)
+        } else {
+            hub.toggle(below: button)
+        }
     }
 
     func terminate() {

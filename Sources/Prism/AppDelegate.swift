@@ -1,6 +1,6 @@
 import AppKit
 import AwakeTool
-import DiskTool
+import VitalsTool
 import PrismKit
 
 @MainActor
@@ -33,6 +33,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
            let awake = registrations.first(where: { $0.id.rawValue == "awake" })?.tool as? AwakeTool {
             awake.startForDebug()
         }
+        if let path = ProcessInfo.processInfo.environment["PRISM_SETTINGS_CAPTURE"] {
+            Task {
+                try? await Task.sleep(for: .seconds(1.5))
+                let ok = await DebugCapture.window(toolbox.settingsWindow(), to: path)
+                exit(ok ? 0 : 1)
+            }
+        }
         if ProcessInfo.processInfo.environment["PRISM_DUMP"] == "1" {
             Task {
                 try? await Task.sleep(for: .seconds(2))
@@ -55,7 +62,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private static func registrations() -> [ToolRegistration] {
         [
             ToolRegistration(AwakeTool(), defaultPlacement: .ownIcon),
-            ToolRegistration(DiskTool(), defaultPlacement: .ownIcon),
+            ToolRegistration(VitalsTool(), defaultPlacement: .ownIcon),
         ]
     }
 }

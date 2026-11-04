@@ -93,6 +93,11 @@ public final class AwakeTool: Tool, MenuBarPresenter {
         AnyView(AwakeSettingsView(model: model))
     }
 
+    /// The pet's own page, reachable from the panel's footer rather than from the app's settings list.
+    public var petSettingsView: AnyView {
+        AnyView(PetSettingsView(model: model))
+    }
+
     /// The panel and the hub both need the same closures; one builder keeps them from drifting apart.
     private func makeActions() -> PanelActions {
         PanelActions(

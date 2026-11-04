@@ -19,6 +19,8 @@ public enum Strings {
     public static let hubMenuBar = String(localized: "Show the Prism icon in the menu bar")
     public static let hubMenuBarNote = String(localized: "The panel is always reachable with the shortcut, even with the icon hidden.")
     public static let openSettings = String(localized: "Settings…")
+    public static let openHub = String(localized: "Open Prism")
+    public static func openTool(_ title: String) -> String { String(localized: "Open \(title)") }
     public static let turnOn = String(localized: "On")
     public static let turnOff = String(localized: "Off")
     public static let toolsSection = String(localized: "Tools")

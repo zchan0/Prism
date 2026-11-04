@@ -77,26 +77,33 @@ public final class ToolSettings {
 public final class ShellSettings {
     private enum Key {
         static let enabled = "shell.enabledTools"
+        static let disabledTools = "shell.disabledTools"
         static let placements = "shell.placements"
-        static let hubPlacement = "shell.hubPlacement"
     }
 
     /// Turning a tool off stops it and hides it; its settings are kept for when it comes back.
     public private(set) var enabled: Set<ToolID>
     /// Every tool's placement, whether or not it is enabled, so turning it back on restores the choice.
     public private(set) var placements: [ToolID: MenuBarPlacement]
-    public var hubPlacement: MenuBarPlacement {
-        didSet { defaults.set(hubPlacement.rawValue, forKey: Key.hubPlacement) }
-    }
 
     @ObservationIgnored private let defaults: UserDefaults
 
     public init(registrations: [ToolRegistration], defaults: UserDefaults = .standard) {
         self.defaults = defaults
         let storedEnabled = defaults.stringArray(forKey: Key.enabled).map { $0.map(ToolID.init(rawValue:)) }
-        // A tool that has never been seen before starts on, which is what makes adding a tool to a release feel like
-        // the app grew rather than like something broke.
-        enabled = storedEnabled.map(Set.init) ?? Set(registrations.map(\.id))
+        let initialEnabled: Set<ToolID>
+        if let storedEnabled {
+            // A tool added in a later version is not in the saved set, and defaulting it to off would hide every new
+            // tool from everybody who had ever toggled one. It starts on unless the person turned it off explicitly,
+            // which is recorded separately.
+            let disabled = Set(defaults.stringArray(forKey: Key.disabledTools).map { $0.map(ToolID.init(rawValue:)) } ?? [])
+            var result = Set(registrations.map(\.id)).subtracting(disabled)
+            for id in storedEnabled { result.insert(id) }
+            initialEnabled = result
+        } else {
+            initialEnabled = Set(registrations.map(\.id))
+        }
+        enabled = initialEnabled
         var storedPlacements = (defaults.dictionary(forKey: Key.placements) as? [String: String]) ?? [:]
         for registration in registrations where storedPlacements[registration.id.rawValue] == nil {
             storedPlacements[registration.id.rawValue] = registration.defaultPlacement.rawValue
@@ -105,8 +112,6 @@ public final class ShellSettings {
             guard let placement = MenuBarPlacement(rawValue: pair.value) else { return }
             result[ToolID(rawValue: pair.key)] = placement
         }
-        hubPlacement = defaults.string(forKey: Key.hubPlacement)
-            .flatMap(MenuBarPlacement.init(rawValue:)) ?? .ownIcon
     }
 
     public func isEnabled(_ id: ToolID) -> Bool { enabled.contains(id) }
@@ -122,6 +127,14 @@ public final class ShellSettings {
             enabled.remove(id)
         }
         defaults.set(enabled.map(\.rawValue).sorted(), forKey: Key.enabled)
+        // The explicit "off" list is what lets a new tool default to on without resurrecting one that was turned off.
+        var disabled = Set(defaults.stringArray(forKey: Key.disabledTools) ?? [])
+        if isOn {
+            disabled.remove(id.rawValue)
+        } else {
+            disabled.insert(id.rawValue)
+        }
+        defaults.set(disabled.sorted(), forKey: Key.disabledTools)
     }
 
     public func setPlacement(_ placement: MenuBarPlacement, for id: ToolID) {

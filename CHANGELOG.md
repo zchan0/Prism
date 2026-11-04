@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.2.1] - 2026-11-04
+
+- The disk tool is now **Vitals**: one tool for system readings — disk, memory and battery — instead of a tool per
+  number. It shows one reading in the menu bar and all of them in the panel.
+- No more Prism icon in the menu bar. Each tool's icon carries an "Open Prism" menu item instead, so the hub is
+  reachable from any tool. A small Prism icon appears only when every tool is set to panel-only, since otherwise
+  there would be no way into the panel at all.
+- Fixed the settings window: a tool's page was a nested `Form`, whose preferred size stretched the window to
+  1279 points tall, and the segmented controls were squeezed into unusable widths. Tool pages are now plain content
+  inside the shell's one form, sidebar-style menus replace the segments, and the window is 600 × 640.
+- A tool added in a later version now starts turned on. Previously, anybody who had ever toggled a tool had a saved
+  enabled set that silently excluded every tool added after that.
+
 ## [0.2.0] - 2026-11-04
 
 Prism: LumosMaxima becomes a small toolbox.

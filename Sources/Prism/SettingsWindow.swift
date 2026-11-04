@@ -28,20 +28,29 @@ final class SettingsWindowController {
             registrations: registrations,
             loginItem: loginItem
         ))
-        hosting.sizingOptions = .preferredContentSize
+        // A fixed height keeps the window from measuring its content: a grouped form with a tool section inside can
+        // report an enormous preferred height and stretch the window into a column.
+        hosting.sizingOptions = []
         let window = SettingsWindow(contentViewController: hosting)
-        window.styleMask = [.titled, .closable]
+        window.styleMask = [.titled, .closable, .resizable]
         window.isReleasedWhenClosed = false
         window.title = Strings.appName
+        window.contentMinSize = NSSize(width: SettingsRootView.width, height: 480)
+        window.setContentSize(NSSize(width: SettingsRootView.width, height: SettingsRootView.height))
         window.onBecomeKey = { [loginItem] in loginItem.refresh() }
         window.center()
         return window
     }
 }
 
-/// One scrolling form: shell settings on top, then a section per tool. A tool's section comes from its own
-/// `settingsView()`, so the shell never lists what a tool can configure.
+/// One scrolling form: shell settings on top, then a section per tool.
+///
+/// A tool's section comes from its own `settingsView()`, and that view is plain content — no nested `Form`, no
+/// `fixedSize` — so it lays out inside this form instead of trying to be a second window's worth of form.
 struct SettingsRootView: View {
+    static let width: CGFloat = 600
+    static let height: CGFloat = 640
+
     let shell: ShellSettings
     let registrations: [ToolRegistration]
     let loginItem: LoginItem
@@ -56,18 +65,14 @@ struct SettingsRootView: View {
                     }
                 }
                 .disabled(!loginItem.isAvailable)
-                Picker(selection: Binding(get: { shell.hubPlacement }, set: { shell.hubPlacement = $0 })) {
-                    Text(Strings.showInMenuBar).tag(MenuBarPlacement.ownIcon)
-                    Text(Strings.hubOnly).tag(MenuBarPlacement.hubOnly)
-                } label: {
-                    Text(Strings.hubMenuBar)
-                    Text(Strings.hubMenuBarNote)
+                LabeledContent(Strings.togglePanelShortcut) {
+                    Text(verbatim: GlobalHotKey.keyName)
                 }
             }
 
             Section {
                 ForEach(registrations, id: \.id) { registration in
-                    toolRow(registration)
+                    ToolSettingsRow(shell: shell, registration: registration)
                 }
             } header: {
                 Text(Strings.toolsSection)
@@ -78,45 +83,67 @@ struct SettingsRootView: View {
             }
 
             Section(Strings.shortcuts) {
-                LabeledContent(Strings.togglePanelShortcut) {
-                    Text(verbatim: GlobalHotKey.keyName)
-                }
+                Text(Strings.hubMenuBarNote)
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
             }
         }
         .formStyle(.grouped)
-        .frame(width: 480)
-        .fixedSize(horizontal: false, vertical: true)
-    }
-
-    private func toolRow(_ registration: ToolRegistration) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Toggle(isOn: Binding(
-                get: { shell.isEnabled(registration.id) },
-                set: { shell.setEnabled($0, for: registration.id) }
-            )) {
-                Text(registration.tool.title)
-            }
-            Picker("", selection: Binding(
-                get: { shell.placement(of: registration.id) },
-                set: { shell.setPlacement($0, for: registration.id) }
-            )) {
-                Text(Strings.showInMenuBar).tag(MenuBarPlacement.ownIcon)
-                Text(Strings.hubOnly).tag(MenuBarPlacement.hubOnly)
-            }
-            .pickerStyle(.segmented)
-            .labelsHidden()
-            .disabled(!shell.isEnabled(registration.id))
-            if shell.isEnabled(registration.id), let detail = registration.tool.settingsView() {
-                detail
-                    .padding(.leading, 2)
-            }
-        }
-        .padding(.vertical, 2)
+        .frame(width: Self.width, height: Self.height)
     }
 
     private var loginNote: String? {
         if let error = loginItem.error { return error }
         return loginItem.status == .requiresApproval ? Strings.loginItemNeedsApproval : nil
+    }
+}
+
+/// One tool in Settings: whether it runs, where it shows, and whatever it configures itself.
+private struct ToolSettingsRow: View {
+    let shell: ShellSettings
+    let registration: ToolRegistration
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(spacing: 8) {
+                Image(systemName: registration.tool.symbolName)
+                    .font(.system(size: 13))
+                    .foregroundStyle(.secondary)
+                    .frame(width: 18)
+                Text(registration.tool.title)
+                    .font(.system(size: 13, weight: .medium))
+                Spacer(minLength: 8)
+                Toggle("", isOn: Binding(
+                    get: { shell.isEnabled(registration.id) },
+                    set: { shell.setEnabled($0, for: registration.id) }
+                ))
+                .labelsHidden()
+                .toggleStyle(.switch)
+                .controlSize(.small)
+            }
+
+            if shell.isEnabled(registration.id) {
+                // Stacked label-over-segments: a side-by-side label squeezes the segments until the text clips.
+                // A menu, not segments: two options do not need a control as tall as a row, and the menu keeps the
+                // label and the choice on one line at any window width.
+                Picker(selection: Binding(
+                    get: { shell.placement(of: registration.id) },
+                    set: { shell.setPlacement($0, for: registration.id) }
+                )) {
+                    Text(Strings.showInMenuBar).tag(MenuBarPlacement.ownIcon)
+                    Text(Strings.hubOnly).tag(MenuBarPlacement.hubOnly)
+                } label: {
+                    Text(Strings.menuBar)
+                        .foregroundStyle(.secondary)
+                }
+                .pickerStyle(.menu)
+
+                if let detail = registration.tool.settingsView() {
+                    detail
+                }
+            }
+        }
+        .padding(.vertical, 4)
     }
 }
 

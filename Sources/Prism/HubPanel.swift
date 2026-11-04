@@ -55,6 +55,13 @@ final class HubPanelController {
         }
     }
 
+    /// Opens at the pointer, for the shortcut and for a tool's "Open Prism" menu item.
+    func show(at point: NSPoint) {
+        rebuild()
+        guard let screen = NSScreen.screens.first(where: { $0.frame.contains(point) }) ?? NSScreen.main else { return }
+        panel.show(anchoredAt: NSRect(x: point.x, y: point.y, width: 1, height: 1), placement: .below, on: screen)
+    }
+
     func hide() { panel.hide() }
 
     /// Re-reads every tool's summary while the panel is open; called from the shell's one-second tick.
