@@ -31,14 +31,6 @@ public final class ToolSettings {
         defaults.set(value, forKey: namespace + key)
     }
 
-    public func int<Value: RawRepresentable>(_ key: String, default fallback: Value) -> Value where Value.RawValue == Int {
-        defaults.object(forKey: namespace + key).flatMap { $0 as? Int }.flatMap(Value.init(rawValue:)) ?? fallback
-    }
-
-    public func set<Value: RawRepresentable>(_ value: Value, for key: String) where Value.RawValue == Int {
-        defaults.set(value.rawValue, forKey: namespace + key)
-    }
-
     public func string(_ key: String, default fallback: String) -> String {
         defaults.string(forKey: namespace + key) ?? fallback
     }
