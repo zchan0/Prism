@@ -1,6 +1,6 @@
 #!/bin/zsh
 # Usage: scripts/release.sh <version> [--install]
-# Tests, builds a release LumosMaxima.app stamped with <version>, zips it into .build/dist and creates the local
+# Tests, builds a release Prism.app stamped with <version>, zips it into .build/dist and creates the local
 # tag v<version>. Nothing is pushed. --install installs the app after the tag exists, so a failed install leaves a
 # complete release behind.
 set -euo pipefail
@@ -34,20 +34,20 @@ fi
 swift test
 
 scripts/package.sh --version $version
-app=.build/app/LumosMaxima.app
+app=.build/app/Prism.app
 # The screenshot hooks are compiled out of release builds; this catches a configuration mistake that let them back in.
-if strings $app/Contents/MacOS/LumosMaxima | grep -q "LUMOS_SNAPSHOT"; then
+if strings $app/Contents/MacOS/Prism | grep -q "PRISM_DUMP"; then
   echo "debug hooks leaked into the release binary" >&2
   exit 1
 fi
 
 mkdir -p .build/dist
-zip=.build/dist/LumosMaxima-$version.zip
+zip=.build/dist/Prism-$version.zip
 rm -f $zip
 # ditto keeps the code signature intact; Finder's Compress does too, plain zip may not.
 ditto -c -k --keepParent $app $zip
 
-git tag -a $tag -m "LumosMaxima $version"
+git tag -a $tag -m "Prism $version"
 echo "released $zip, tagged $tag (not pushed)"
 
 if $install; then

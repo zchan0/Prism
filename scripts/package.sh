@@ -1,12 +1,13 @@
 #!/bin/zsh
 # Usage: scripts/package.sh [--debug] [--install] [--version <version>]
-# Builds .build/app/LumosMaxima.app from the release configuration; --debug keeps the LUMOS_* snapshot hooks.
-# --install replaces /Applications/LumosMaxima.app and relaunches it.
+# Builds .build/app/Prism.app from the release configuration; --debug keeps the PRISM_* debug hooks.
+# --install replaces /Applications/Prism.app and relaunches it.
 set -euo pipefail
 
 cd "${0:A:h}/.."
+# The bundle id stays as it was: changing it would drop the person's settings, notification permission and login item.
 bundle_id=io.github.zchan0.LumosMaxima
-app=.build/app/LumosMaxima.app
+app=.build/app/Prism.app
 
 install=false
 configuration=release
@@ -27,7 +28,7 @@ bin=$(swift build -c $configuration --show-bin-path)
 
 rm -rf $app
 mkdir -p $app/Contents/MacOS $app/Contents/Resources
-cp $bin/LumosMaxima $app/Contents/MacOS/
+cp $bin/Prism $app/Contents/MacOS/
 # actool writes Assets.car for the macOS 26 icon and AppIcon.icns for older systems; a plain .icns gets boxed on macOS 26.
 xcrun actool $PWD/Resources/AppIcon.icon --compile $app/Contents/Resources --app-icon AppIcon \
   --platform macosx --target-device mac --minimum-deployment-target 14.0 \
@@ -43,7 +44,7 @@ cat > $app/Contents/Info.plist <<EOF
     <key>CFBundleDevelopmentRegion</key>
     <string>en</string>
     <key>CFBundleExecutable</key>
-    <string>LumosMaxima</string>
+    <string>Prism</string>
     <key>CFBundleIconFile</key>
     <string>AppIcon</string>
     <key>CFBundleIconName</key>
@@ -58,7 +59,7 @@ cat > $app/Contents/Info.plist <<EOF
     <key>CFBundleInfoDictionaryVersion</key>
     <string>6.0</string>
     <key>CFBundleName</key>
-    <string>LumosMaxima</string>
+    <string>Prism</string>
     <key>CFBundlePackageType</key>
     <string>APPL</string>
     <key>CFBundleShortVersionString</key>

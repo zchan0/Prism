@@ -11,6 +11,16 @@
         }
       }
     },
+    "%@ free of %@": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 可用，共 %@"
+          }
+        }
+      }
+    },
     "%@ left": {
       "localizations": {
         "zh-Hans": {
@@ -181,6 +191,16 @@
         }
       }
     },
+    "Available": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "可用"
+          }
+        }
+      }
+    },
     "Awake": {
       "localizations": {
         "zh-Hans": {
@@ -261,6 +281,16 @@
         }
       }
     },
+    "Capacity": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "容量"
+          }
+        }
+      }
+    },
     "Changing…": {
       "localizations": {
         "zh-Hans": {
@@ -321,12 +351,32 @@
         }
       }
     },
+    "Done": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "完成"
+          }
+        }
+      }
+    },
     "Drag it anywhere; it naps while the Mac may sleep.": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
             "value": "可以拖到任何地方；Mac 能睡时它会打盹。"
+          }
+        }
+      }
+    },
+    "Free": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "可用"
           }
         }
       }
@@ -347,6 +397,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "醒着十小时后成为超新星"
+          }
+        }
+      }
+    },
+    "Includes space macOS can reclaim when it needs it, which is the number Finder shows.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "包含 macOS 在需要时可回收的空间，也就是「访达」显示的数字。"
           }
         }
       }
@@ -441,6 +501,16 @@
         }
       }
     },
+    "Menu bar": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "菜单栏"
+          }
+        }
+      }
+    },
     "Never": {
       "localizations": {
         "zh-Hans": {
@@ -467,6 +537,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "没有定时"
+          }
+        }
+      }
+    },
+    "No tools are on": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "没有启用任何工具"
+          }
+        }
+      }
+    },
+    "No volume": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "没有卷"
           }
         }
       }
@@ -521,12 +611,42 @@
         }
       }
     },
+    "One menu bar app, a handful of small tools.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "一个菜单栏 app，几件小工具。"
+          }
+        }
+      }
+    },
+    "Only in the panel": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "只在面板里"
+          }
+        }
+      }
+    },
     "Open at login": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
             "value": "登录时打开"
+          }
+        }
+      }
+    },
+    "Open or close the panel": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "打开或收起面板"
           }
         }
       }
@@ -561,6 +681,26 @@
         }
       }
     },
+    "Quit Prism": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "退出 Prism"
+          }
+        }
+      }
+    },
+    "Refreshes every minute, and whenever the panel opens.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "每分钟刷新一次，打开面板时也会刷新。"
+          }
+        }
+      }
+    },
     "Settings…": {
       "localizations": {
         "zh-Hans": {
@@ -591,12 +731,42 @@
         }
       }
     },
+    "Show free space next to the icon": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在图标旁显示可用空间"
+          }
+        }
+      }
+    },
+    "Show its own icon": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "显示独立图标"
+          }
+        }
+      }
+    },
     "Show the pet on screen": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
             "value": "在屏幕上显示宠物"
+          }
+        }
+      }
+    },
+    "Show the Prism icon in the menu bar": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在菜单栏显示 Prism 图标"
           }
         }
       }
@@ -701,6 +871,46 @@
         }
       }
     },
+    "The panel is always reachable with the shortcut, even with the icon hidden.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "即使隐藏图标，面板仍可用快捷键打开。"
+          }
+        }
+      }
+    },
+    "This volume is not available.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "这个卷当前不可用。"
+          }
+        }
+      }
+    },
+    "Tools": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "工具"
+          }
+        }
+      }
+    },
+    "Turned-off tools stop running and keep their settings.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "关掉的工具会停止运行，但保留设置。"
+          }
+        }
+      }
+    },
     "Until I stop it": {
       "localizations": {
         "zh-Hans": {
@@ -711,12 +921,32 @@
         }
       }
     },
+    "Used": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已用"
+          }
+        }
+      }
+    },
     "Version %@": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
             "value": "版本 %@"
+          }
+        }
+      }
+    },
+    "Volume": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "卷"
           }
         }
       }

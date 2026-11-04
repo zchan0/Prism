@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.2.0] - 2026-11-04
+
+Prism: LumosMaxima becomes a small toolbox.
+
+- The app is now Prism, with a hub panel listing every tool, and each tool can be shown as its own menu bar icon or
+  only inside the panel — configured per tool in Settings.
+- The awake behaviour is unchanged and is now the first tool (`awake`). Its settings, pet age and lid switch are
+  migrated once from the old bare keys, so an existing install keeps everything.
+- New disk tool (`disk`): free space in the menu bar, a capacity breakdown in the panel, refreshed every minute and
+  whenever the panel opens.
+- Tools are separate SwiftPM modules that only see the shell, never each other. Adding one is a module plus a line
+  in `AppDelegate.registrations()`. A tool can also adopt `MenuBarPresenter` to open its own panel.
+- The bundle id is unchanged on purpose, so notification permission and the login item survive.
+
 ## [0.1.2] - 2026-11-03
 
 - Clicking the pet opens a small strip with just the four lengths and a close button; a double click opens Settings.
