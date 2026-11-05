@@ -1,124 +1,134 @@
 <div align="center">
 
-<img src="docs/images/icon.png" width="128" alt="LumosMaxima app icon: a smiling amber sun with eight rays">
+<img src="docs/images/icon.png" width="128" alt="Prism app icon">
 
-# LumosMaxima
+# Prism
 
-**A sun that keeps your Mac awake, and grows every hour it does.**
+**A small toolbox in the menu bar: keep your Mac awake, and keep an eye on it.**
 
 ![macOS 14+](https://img.shields.io/badge/macOS-14%2B-111?logo=apple&logoColor=white) ![Swift 6](https://img.shields.io/badge/Swift-6-F05138?logo=swift&logoColor=white) ![English and Chinese](https://img.shields.io/badge/UI-English%20%C2%B7%20%E4%B8%AD%E6%96%87-555)
 
-[Install](#install) · [Features](#features) · [The pet](#the-pet) · [Lid sleep](#lid-sleep) · [Development](#development)
+[Install](#install) · [Tools](#tools) · [Menu bar and panels](#menu-bar-and-panels) · [Lid sleep](#lid-sleep) · [Development](#development)
 
 English · [简体中文](README.zh-CN.md)
 
 <br>
 
-<img src="docs/images/panel-light.png" width="330" alt="The panel: a smiling sun, four lengths, and switches for the screen, the lid, the battery and the pet">
+<img src="docs/images/hub.png" width="340" alt="The Prism hub on the Lumos tab: tabs for Lumos, Vitals and Prism's own settings, the switches that turn Lumos on and put it in the menu bar, the session controls, and the settings of Lumos">
 
 </div>
 
-## Features
+Prism holds a few small tools. You can turn each tool on or off, and give each one its own menu bar icon or keep it only in the hub. Today there are two tools: **Lumos** keeps the Mac awake, and **Vitals** shows how it is doing.
 
-**One click, no sleep.** Pick 30 minutes, 1 hour, 2 hours, or until you stop it — the default, and the one pick that starts the session even from asleep, so it is always one click. A kernel power assertion holds the Mac awake; it disappears on its own if the app crashes, so nothing can leave it stuck on.
+## Tools
+
+<p align="center">
+  <img src="docs/images/quick-lumos.png" width="320" alt="The quick panel of Lumos: keeping awake with 29 minutes left, the four lengths and the stop button, and switches for the screen and the lid">
+  <img src="docs/images/quick-vitals.png" width="320" alt="Vitals' quick panel: CPU, memory, disk and battery, each with a bar, and the battery's maximum capacity and cycle count">
+</p>
+
+### Lumos
+
+**One click, no sleep.** Pick 30 minutes, 1 hour, 2 hours, or until you stop it, which is the default. A length picked while the Mac may sleep starts the session at once, so it is always one click. A kernel power assertion holds the Mac awake. The assertion goes away on its own if the app crashes, so nothing can leave the Mac stuck awake.
 
 **Choose what stays on.** Keep the screen on too, or let it turn off while the Mac keeps working.
 
-**The lid, without the guesswork.** Turn on *Keep running with the lid closed* and LumosMaxima installs a tiny root helper once, with a single administrator prompt. After that the switch is instant and password-free, and quitting the app puts your normal sleep setting back.
+**The lid, without the guesswork.** Turn on *Keep running with the lid closed*, and Prism installs a tiny root helper once, with one administrator prompt. After that the switch is instant and asks for no password, and your normal sleep setting comes back when the session ends. See [Lid sleep](#lid-sleep).
 
-**Battery guard.** On battery at the percentage you choose — 20% by default — the session ends itself and tells you why.
+**Battery guard.** On battery, the session ends itself at the percentage you choose, 20% by default, and tells you why. While the Mac runs on battery, the panel shows that percentage under the lengths.
 
-**A pet worth keeping awake for.** The sun naps with floating Zs when the Mac may sleep, and wakes up, breathes, spins its rays and blinks when it may not. It grows from a spark to an ember, a flare, a sun and finally a supernova as it logs hours, all tracked per calendar day. Drag it anywhere. A single click opens a small strip with the four lengths and a close button; a double click opens Settings.
+**Notifications** when the time is up or the battery ends the session, and the time left in the menu bar if you want it.
 
-**Notification when time is up**, and open at login.
+### Vitals
 
-**Cheap when idle.** The pet is a single `Canvas` drawing at 6 frames per second while awake and 3 while it naps; with the pet hidden the app costs about 0.1% of a CPU core.
+**CPU, memory, disk and battery in one place.** The panel shows every reading with a bar:
 
-**English and Chinese.** The app follows the system language. To pick another language for LumosMaxima only, use System Settings → General → Language & Region → Applications.
+- CPU: the average load since the last refresh, split into user and system time.
+- Memory: used memory (active, wired and compressed), of the total.
+- Disk: available space, with the space macOS can reclaim, the same number Finder shows.
+- Battery: the charge and the power source, plus the maximum capacity and the cycle count.
 
-## The pet
+**An icon for each reading you pick.** Turn on the readings you want in the menu bar. Each one gets its own icon, so you can ⌘-drag each one to its own place. Disk is on by default, and at least one stays on. Choose whether the numbers sit next to the icons. Every reading refreshes every 20 seconds and whenever the panel opens.
 
-<p align="center">
-  <img src="docs/images/pet-awake.png" width="150" alt="The pet awake: a bright amber sun with a smile and rays">
-  <img src="docs/images/pet-asleep.png" width="150" alt="The pet asleep: a dim sun with closed eyes, floating Zs and few rays">
-</p>
+## Menu bar and panels
 
-| Stage | After | The sun |
-| --- | --- | --- |
-| Spark | 0 h | Small, with short rays. |
-| Ember | 1 h | Warmer and a little larger. |
-| Flare | 3 h | A full ring of rays. |
-| Sol | 6 h | Deep orange, at its widest. |
-| Nova | 10 h | Brightest, with the longest rays. |
+<img src="docs/images/status.png" width="658" alt="Menu bar icons on a light, a dark and a blue menu bar, from left to right: Lumos while the Mac may sleep, Lumos keeping it awake, Lumos counting down 25 minutes, then the Vitals icons for CPU, memory, disk and battery">
 
-A single click on the sun opens a strip with only the state, the four lengths and a close button; a double click
-opens Settings.
+Every icon is an SF Symbol template with an optional number in monospaced digits, so the menu bar tints it like the system's own icons. Lumos shows a wand, `wand.and.stars`: a bare wand while the Mac may sleep, and the wand with its stars while it is kept awake. Each Vitals icon shows the symbol of its reading: `cpu`, `memorychip`, `internaldrive`, or a battery that empties with the charge.
 
-<p align="center"><img src="docs/images/quick-panel.png" width="268" alt="The strip a click on the pet opens: state on the left, countdown on the right, the four lengths and a close button below"></p>
+Prism has no icon of its own. A tool's icon appears when its *Show in the menu bar* switch is on. When no tool is in the menu bar, a small Prism icon (`triangle`) appears instead, so the hub stays reachable.
 
-Awake time is counted per calendar day: the pet starts each day at whatever stage that day's hours have earned. Settings → Your sun shows the stage list and can start the pet over.
+- **Click a tool's icon** to open its quick panel: the tool's controls and nothing else. The button at its bottom right opens the hub on that tool's tab.
+- **Right-click a tool's icon** for *Open Prism* and *Quit Prism*.
+- **Press <kbd>⌃</kbd><kbd>⌥</kbd><kbd>⌘</kbd><kbd>L</kbd>** anywhere to open or close the hub at the pointer.
 
-## The menu bar
+The hub has one tab for each tool and a gear tab for Prism itself. A tool's tab starts with two switches, *Turned on* and *Show in the menu bar*. Below them are the same controls as in the quick panel, then the tool's settings. A tool that is turned off stops all its work and keeps its settings. The gear tab holds *Open at login*, the shortcut, the version and *Quit Prism*.
 
-<img src="docs/images/status.png" width="540" alt="Menu bar states from left to right: asleep, awake with a timer, awake with no timer, counting down">
-
-The icon is an SF Symbol, so the menu bar tints it exactly like the system's own: `sun.min` while the Mac may sleep, `sun.max` while it is kept awake but the screen may turn off, and `sun.max.fill` while the screen stays on too. With *Show the time left in the menu bar* on, the countdown sits next to it.
-
-The left click opens the panel; a right click opens a menu with the same switches. <kbd>⌃</kbd><kbd>⌥</kbd><kbd>⌘</kbd><kbd>L</kbd> starts or stops from anywhere.
+Only one panel is open at a time, and a click anywhere else closes it. Neither panel takes focus, so a click on it does not interrupt your typing.
 
 ## Install
 
+In a clone of this repository, run:
+
 ```sh
-git clone https://github.com/zchan0/LumosMaxima.git
-cd LumosMaxima
 scripts/package.sh --install
 ```
 
-This builds a release app, signs it with a local Apple Development identity when one exists, and copies it to `/Applications`. There is no notarized download yet.
+This builds a release app, signs it with a local Apple Development identity when one exists, and copies it to `/Applications/Prism.app`. There is no notarized download yet.
 
 ## Lid sleep
 
-A closed lid sleeps a Mac no matter what power assertions it holds. The only way around it is `pmset -a disablesleep 1`, which needs root and stays in effect until it is set back — a crashed app would leave your Mac unable to sleep.
+A closed lid sleeps a Mac no matter what power assertions it holds. The only way around it is `pmset -a disablesleep 1`, which needs root and stays in effect until it is set back. A crashed app would leave your Mac unable to sleep.
 
-So the first time you turn the switch on, LumosMaxima asks for an administrator password and installs one small helper:
+So the first time you turn the switch on, Prism asks for an administrator password and installs one small helper:
 
-- `/Library/PrivilegedHelperTools/LumosMaximaLid.sh` — sets `disablesleep` to match a flag file, and puts it back if LumosMaxima is not running.
-- `/Library/LaunchDaemons/io.github.zchan0.LumosMaxima.lid.plist` — runs that script at boot, every minute, and whenever the flag changes.
+- `/Library/PrivilegedHelperTools/io.github.zchan0.prism.LumosLid.sh` turns `disablesleep` on while Prism holds a flag file open, and off otherwise.
+- `/Library/LaunchDaemons/io.github.zchan0.prism.LumosLid.plist` runs that script at boot, every minute, and whenever the flag changes.
 
-The app never runs as root and never asks twice. Uninstalling the helper takes one command:
+The helper does not look for Prism by name. It asks the kernel whether any process still holds the flag open, and the kernel closes the file however Prism exits, crash included. So a crashed Prism gets its normal sleep setting back within a minute.
+
+The app never runs as root. It asks for the password again only when a new version changes the helper. To uninstall the helper, run:
 
 ```sh
-sudo launchctl bootout system/io.github.zchan0.LumosMaxima.lid
-sudo rm -f /Library/PrivilegedHelperTools/LumosMaximaLid.sh \
-  /Library/LaunchDaemons/io.github.zchan0.LumosMaxima.lid.plist
+sudo launchctl bootout system/io.github.zchan0.prism.LumosLid
+sudo rm -f /Library/PrivilegedHelperTools/io.github.zchan0.prism.LumosLid.sh \
+  /Library/LaunchDaemons/io.github.zchan0.prism.LumosLid.plist
+sudo rm -rf /var/tmp/io.github.zchan0.prism.LumosLid
 sudo pmset -a disablesleep 0
 ```
 
 ## Development
 
 ```sh
-swift build            # build
-swift test             # unit tests (Swift Testing)
-scripts/package.sh     # .build/app/LumosMaxima.app
+swift build                # build
+swift test                 # unit tests (Swift Testing)
+scripts/package.sh         # .build/app/Prism.app
 scripts/readme-assets.sh   # regenerate docs/images
+scripts/release.sh <version>   # test, package, zip and tag locally
 ```
 
-The layout follows the other small menu bar apps in this folder: a SwiftPM executable target, AppKit for the status item and windows, SwiftUI for everything inside them, and one observable model (`AppModel`) that owns the session and its side effects.
+Prism is a SwiftPM package. AppKit draws the status items and the panels, and SwiftUI draws everything inside them.
 
-| File | What it does |
+| Module | What it holds |
 | --- | --- |
-| `SessionEngine.swift` | Holds the power assertion, counts down, reports how a session ended. |
-| `SleepAssertion.swift` | The IOKit assertion: `PreventUserIdleSystemSleep`, plus the display one when asked. |
-| `LidControl.swift` | The helper install, the flag file, and reading `pmset`. |
-| `Battery.swift` | Battery level, charging state, and the low-battery rule. |
-| `SunStage.swift` | The pet's growth thresholds, pure and unit-tested. |
-| `PanelView.swift`, `SunPetView.swift` | The panel and the pet, all drawn in SwiftUI. |
-| `AppDelegate.swift` | Launch, the one-second tick, quitting cleanly. |
+| `PrismKit` | The shell's parts: the `Tool` protocol, status items, the floating panel, the menu bar glyph, shared rows and switches, per-tool settings. |
+| `LumosTool` | The session engine and its power assertion, the lid helper, the battery guard, notifications. |
+| `VitalsTool` | The CPU, memory, disk and battery readings. |
+| `Prism` | The app: it registers the tools and owns the menu bar items, the hub and the quick panel. |
 
-Debug builds understand a few environment variables for screenshots, which is how `docs/images` is made: `LUMOS_SNAPSHOT`, `LUMOS_PANEL_STATE=asleep`, `LUMOS_STATUS_SNAPSHOT`, `LUMOS_PET_SNAPSHOT`, `LUMOS_PET_STATE`, `LUMOS_APPEARANCE`, `LUMOS_AUTO_START`, `LUMOS_OPEN_PANEL`, `LUMOS_PANEL_CAPTURE`.
+A tool depends only on `PrismKit`, never on another tool. To add one, write a module with a type that conforms to `Tool`, and add one line to `AppDelegate.registrations()`.
+
+Debug builds read a few environment variables, which is how `docs/images` is made:
+
+| Variable | What it does |
+| --- | --- |
+| `PRISM_CAPTURE=<dir>` | Screenshots every hub tab and every quick panel into the folder, then quits. |
+| `PRISM_STATUS_CAPTURE=<file>` | Draws every menu bar icon on a light, a dark and a blue menu bar, then quits. |
+| `PRISM_START_LUMOS=1` | Starts a 30 minute Lumos session at launch. |
+| `PRISM_APPEARANCE=light` or `dark` | Forces the appearance. |
+| `PRISM_DUMP=1` | Prints each tool's summary, then quits. |
 
 ## Notes
 
-- Without a battery, the battery row and the low-battery rule simply do nothing.
-- *Reduce Motion* turns the pet's breathing, spinning and blinking off; it keeps its expression.
-- The app never takes focus: the panel and the pet are non-activating, so a click does not interrupt typing.
+- Without a battery, Vitals leaves the battery reading out, and the battery guard does nothing.
+- The app follows the system language, English or Chinese. To pick a language for Prism only, use System Settings → General → Language & Region → Applications.

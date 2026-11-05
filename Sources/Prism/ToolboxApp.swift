@@ -3,45 +3,38 @@ import Observation
 import PrismKit
 import SwiftUI
 
-/// The app: it knows the tools, owns the one menu bar host and the one settings window, and routes clicks.
+/// The app: it knows the tools, owns the menu bar items and the two panels, and routes clicks.
 ///
-/// Everything tool-specific lives behind `ToolRegistration`, so adding a tool is a line in `AppDelegate` plus a
-/// module, and no change here.
+/// Only one panel is open at a time: a click on a tool's icon opens its quick panel, and every way into the hub
+/// closes the quick panel first.
 @MainActor
 final class ToolboxApp {
     let shell: ShellSettings
     let registrations: [ToolRegistration]
     private let statusItems: StatusItemHost
     private let hub: HubPanelController
-    private let settings: SettingsWindowController
+    private let quick = QuickPanelController()
     private let ticker = Ticker()
     private var started: Set<ToolID> = []
+    /// The icon the quick panel hangs from. A tool can have several, and a click on another one moves the panel.
+    private weak var quickAnchor: NSStatusBarButton?
 
     init(registrations: [ToolRegistration], shell: ShellSettings) {
         self.registrations = registrations
         self.shell = shell
         statusItems = StatusItemHost(settings: shell)
         hub = HubPanelController(shell: shell, registrations: registrations)
-        settings = SettingsWindowController(shell: shell, registrations: registrations)
         configure()
     }
 
     func launch() {
         syncTools()
         statusItems.sync(with: registrations)
-        // One shared clock: each tool is asked for its menu bar image once a second, and it returns nil or an
-        // unchanged image when nothing moved, so SwiftUI and AppKit do no work in the common case.
         ticker.start(every: 1) { [weak self] in
             guard let self else { return }
-            statusItems.refreshImages(registrations)
+            statusItems.sync(with: registrations)
             hub.refreshIfVisible()
-        }
-        NotificationCenter.default.addObserver(
-            forName: PrismNotifications.openSettings,
-            object: nil,
-            queue: .main
-        ) { [weak self] _ in
-            MainActor.assumeIsolated { self?.settings.show() }
+            quick.refreshIfVisible()
         }
     }
 
@@ -49,7 +42,6 @@ final class ToolboxApp {
         shell.setEnabled(isOn, for: id)
         syncTools()
         statusItems.sync(with: registrations)
-        hub.refresh()
     }
 
     func setPlacement(_ placement: MenuBarPlacement, for id: ToolID) {
@@ -57,39 +49,69 @@ final class ToolboxApp {
         statusItems.sync(with: registrations)
     }
 
-    /// The shared shortcut: opens the hub, which is the one surface that shows every tool.
-    /// The shared shortcut opens the hub under the pointer: with no icon of its own, the hub has no anchor to hang
-    /// from, and the pointer is where the person is looking.
+    /// The shortcut: the hub under the pointer, on the tab it showed last.
     func toggleHub() {
         if hub.isShown {
             hub.hide()
         } else {
-            hub.show(at: NSEvent.mouseLocation)
+            quick.hide()
+            hub.show(tab: nil, at: NSEvent.mouseLocation)
         }
     }
 
-    #if DEBUG
-    func settingsWindow() -> NSWindow { settings.makeWindow() }
-    #endif
-
+    func terminate() {
+        for registration in registrations where started.contains(registration.id) {
+            registration.tool.stop()
+        }
+        ticker.stop()
+    }
 
     private func configure() {
         statusItems.onToolClick = { [weak self] id, button in
-            guard let self, let registration = registrations.first(where: { $0.id == id }) else { return }
-            // A tool that has its own panel opens it; otherwise the hub is its panel.
-            if let presenter = registration.tool as? MenuBarPresenter {
-                presenter.showPanel(below: button)
-            } else {
-                hub.toggle(below: button)
-            }
-        }
-        statusItems.onFallbackClick = { [weak self] button in
-            self?.hub.toggle(below: button)
+            self?.toggleQuickPanel(for: id, below: button)
         }
         statusItems.onToolMenu = { [weak self] id, button in
             self?.showToolMenu(for: id, below: button)
         }
-        hub.onOpenSettings = { [weak self] in self?.settings.show() }
+        statusItems.onFallbackClick = { [weak self] button in
+            guard let self else { return }
+            if hub.isShown {
+                hub.hide()
+            } else {
+                quick.hide()
+                hub.show(tab: nil, below: button)
+            }
+        }
+        quick.onOpenHub = { [weak self] id in
+            self?.openHub(on: id, below: self?.quickAnchor)
+        }
+        hub.onSetEnabled = { [weak self] id, isOn in
+            self?.setToolEnabled(id, isOn)
+        }
+        hub.onSetPlacement = { [weak self] id, placement in
+            self?.setPlacement(placement, for: id)
+        }
+    }
+
+    private func toggleQuickPanel(for id: ToolID, below button: NSStatusBarButton) {
+        if quick.shownTool == id, quickAnchor === button {
+            quick.hide()
+            return
+        }
+        guard let registration = registrations.first(where: { $0.id == id }) else { return }
+        hub.hide()
+        quick.show(registration, below: button)
+        quickAnchor = button
+    }
+
+    /// The hub on one tool's tab, hanging from the given icon, or else from one of the tool's icons.
+    private func openHub(on id: ToolID, below button: NSStatusBarButton?) {
+        quick.hide()
+        if let button = button ?? statusItems.firstButton(of: id) {
+            hub.show(tab: .tool(id), below: button)
+        } else {
+            hub.show(tab: .tool(id), at: NSEvent.mouseLocation)
+        }
     }
 
     private func syncTools() {
@@ -109,26 +131,17 @@ final class ToolboxApp {
         }
     }
 
-    /// Every tool's icon carries the way back to Prism: the hub, the settings, and quitting. Without a Prism icon of
-    /// its own, this menu is what keeps the app as a whole reachable from any of its tools.
+    /// Right-click on a tool's icon: the way to Prism itself, which has no icon of its own.
     private func showToolMenu(for id: ToolID, below button: NSStatusBarButton) {
+        quick.hide()
+        hub.hide()
         let menu = NSMenu()
         menu.autoenablesItems = false
 
-        if let tool = registrations.first(where: { $0.id == id })?.tool {
-            let open = NSMenuItem(title: Strings.openTool(tool.title), action: #selector(openToolPanel(_:)), keyEquivalent: "")
-            open.target = self
-            open.representedObject = id.rawValue
-            menu.addItem(open)
-        }
-
-        let hubItem = NSMenuItem(title: Strings.openHub, action: #selector(openHub), keyEquivalent: "")
-        hubItem.target = self
-        menu.addItem(hubItem)
-
-        let settingsItem = NSMenuItem(title: Strings.openSettings, action: #selector(openSettings), keyEquivalent: ",")
-        settingsItem.target = self
-        menu.addItem(settingsItem)
+        let open = NSMenuItem(title: Strings.openHub, action: #selector(openHubFromMenu(_:)), keyEquivalent: "")
+        open.target = self
+        open.representedObject = MenuTarget(id: id, button: button)
+        menu.addItem(open)
         menu.addItem(.separator())
         let quit = NSMenuItem(title: Strings.quit, action: #selector(quitApp), keyEquivalent: "q")
         quit.target = self
@@ -137,36 +150,39 @@ final class ToolboxApp {
         menu.popUp(positioning: nil, at: NSPoint(x: 0, y: button.bounds.height + 4), in: button)
     }
 
-    @objc private func openSettings() {
-        settings.show()
+    @objc private func openHubFromMenu(_ sender: NSMenuItem) {
+        guard let target = sender.representedObject as? MenuTarget else { return }
+        openHub(on: target.id, below: target.button)
     }
 
     @objc private func quitApp() {
         NSApp.terminate(nil)
     }
 
-    @objc private func openHub() {
-        if let button = statusItems.button(of: registrations.first(where: { shell.isEnabled($0.id) })?.id) {
-            hub.toggle(below: button)
-        } else {
-            hub.show(at: NSEvent.mouseLocation)
-        }
+    private struct MenuTarget {
+        let id: ToolID
+        let button: NSStatusBarButton
     }
 
-    @objc private func openToolPanel(_ sender: NSMenuItem) {
-        guard let raw = sender.representedObject as? String, let button = statusItems.button(of: ToolID(raw)) else { return }
-        guard let registration = registrations.first(where: { $0.id == ToolID(raw) }) else { return }
-        if let presenter = registration.tool as? MenuBarPresenter {
-            presenter.showPanel(below: button)
-        } else {
-            hub.toggle(below: button)
+    #if DEBUG
+    /// Opens each panel in turn at a fixed spot and screenshots it: every hub tab, then every quick panel.
+    func capturePanels(to directory: String) async -> Bool {
+        guard let screen = NSScreen.main else { return false }
+        let frame = screen.visibleFrame
+        let anchor = NSRect(x: frame.midX - HubPanelController.width / 2, y: frame.maxY, width: 1, height: 1)
+        var ok = true
+        let tabs = registrations.map { (HubTab.tool($0.id), $0.id.rawValue) } + [(HubTab.general, "general")]
+        for (tab, name) in tabs {
+            hub.show(tab: tab, anchoredAt: anchor, on: screen)
+            ok = await DebugCapture.window(hub.window, to: "\(directory)/hub-\(name).png") && ok
         }
-    }
-
-    func terminate() {
-        for registration in registrations where started.contains(registration.id) {
-            registration.tool.stop()
+        hub.hide()
+        for registration in registrations {
+            quick.show(registration, anchoredAt: anchor, on: screen)
+            ok = await DebugCapture.window(quick.window, to: "\(directory)/quick-\(registration.id.rawValue).png") && ok
         }
-        ticker.stop()
+        quick.hide()
+        return ok
     }
+    #endif
 }

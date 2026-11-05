@@ -1,123 +1,134 @@
 <div align="center">
 
-<img src="docs/images/icon.png" width="128" alt="LumosMaxima 图标：一颗带八道光芒的笑脸太阳">
+<img src="docs/images/icon.png" width="128" alt="Prism 图标">
 
-# LumosMaxima
+# Prism
 
-**一颗让 Mac 保持清醒的小太阳，醒着的每一小时它都会长大。**
+**菜单栏里的小工具箱：让 Mac 保持唤醒，也随时看看它的状态。**
 
 ![macOS 14+](https://img.shields.io/badge/macOS-14%2B-111?logo=apple&logoColor=white) ![Swift 6](https://img.shields.io/badge/Swift-6-F05138?logo=swift&logoColor=white) ![English and Chinese](https://img.shields.io/badge/UI-English%20%C2%B7%20%E4%B8%AD%E6%96%87-555)
 
-[安装](#安装) · [功能](#功能) · [宠物](#宠物) · [合盖保持运行](#合盖保持运行) · [开发](#开发)
+[安装](#安装) · [工具](#工具) · [菜单栏和面板](#菜单栏和面板) · [合盖保持运行](#合盖保持运行) · [开发](#开发)
 
 [English](README.md) · 简体中文
 
 <br>
 
-<img src="docs/images/panel-zh.png" width="330" alt="面板：一颗笑脸太阳、四个时长，以及屏幕、合盖、电池和宠物的开关">
+<img src="docs/images/hub-zh.png" width="340" alt="Prism 主面板停在 Lumos 页：顶部是 Lumos、Vitals 和 Prism 自身设置三个 tab，下面是开启 Lumos、把它显示在菜单栏的两个开关，然后是会话控件和 Lumos 的设置">
 
 </div>
 
-## 功能
+Prism 装着几个小工具。每个工具都能单独开启或关闭，也能单独决定要不要在菜单栏显示自己的图标，不显示时只在主面板里出现。目前有两个工具：**Lumos** 让 Mac 保持唤醒，**Vitals** 显示 Mac 的状态。
 
-**一点就醒，绝不睡过头。** 选「直到我手动停止」（默认）、30 分钟、1 小时或 2 小时——睡着时点时长也会直接开始，所以永远是一次点击。保持唤醒靠的是内核电源断言，即使 app 崩溃，断言也会随之消失，不会让你的 Mac 永远无法睡眠。
+## 工具
+
+<p align="center">
+  <img src="docs/images/quick-lumos-zh.png" width="320" alt="Lumos 的快捷面板：保持唤醒中、还剩 29 分钟，四个时长和停止按钮，以及屏幕和合盖两个开关">
+  <img src="docs/images/quick-vitals-zh.png" width="320" alt="Vitals 的快捷面板：CPU、内存、磁盘、电池各一条读数条，电池下面是最大容量和循环次数">
+</p>
+
+### Lumos
+
+**一点就醒。** 可以选 30 分钟、1 小时、2 小时，或者「直到我手动停止」（默认）。Mac 可以睡眠时，点一个时长就会直接开始，所以永远只要点一次。保持唤醒靠的是内核电源断言。app 崩溃时断言会自动消失，Mac 不会因此一直睡不了。
 
 **屏幕由你决定。** 可以连屏幕一起常亮，也可以让屏幕熄灭、Mac 继续干活。
 
-**合盖也能继续跑。** 打开「合上盖子也继续运行」，LumosMaxima 只弹一次管理员密码，安装一个很小的 root 助手。之后开关都是即时的、不再问密码；退出 app 时会自动把你的睡眠设置还原。
+**合盖也能继续跑。** 打开「合上盖子也继续运行」，Prism 会要一次管理员密码，安装一个很小的 root 助手。之后开关都是即时的、不再问密码，会话结束时你原来的睡眠设置会自动恢复。详见[合盖保持运行](#合盖保持运行)。
 
-**低电量保护。** 用电池时，电量降到你设定的百分比（默认 20%），会话会自动结束并告诉你原因。
+**低电量保护。** 用电池时，电量降到你设定的百分比（默认 20%），会话会自动结束并告诉你原因。用电池期间，面板会在时长按钮下面显示这个百分比。
 
-**值得为它保持清醒的宠物。** 能睡的时候，太阳会闭眼打盹、飘出几个 z；不能睡的时候它会醒来，呼吸、转光芒、眨眼睛。醒着的时长按自然日累计，它从「火苗」长成「余烬」「耀斑」「恒星」，最后成为「超新星」。可以拖到屏幕任何位置：单击弹出一条只含四个时长和关闭按钮的小条，双击打开设置。
+**通知**：时间到了、或者低电量结束了会话时都会通知你。还可以在菜单栏显示剩余时间。
 
-**时间到了会通知你**，也可以设置登录时启动。
+### Vitals
 
-**闲着也省电。** 宠物是一整块 `Canvas` 按每秒 6 帧绘制，打盹时降到 3 帧；隐藏宠物后 app 只占约 0.1% 的 CPU。
+**CPU、内存、磁盘、电池放在一处。** 面板里每项读数都带一条读数条：
 
-**中英双语。** 界面跟随系统语言。如果只想给 LumosMaxima 换语言，去「系统设置 → 通用 → 语言与地区 → 应用程序」。
+- CPU：上次刷新以来的平均占用率，分成用户和系统两部分。
+- 内存：已用内存（活跃、联动和压缩三部分之和），以及总量。
+- 磁盘：可用空间，包含 macOS 可回收的空间，和「访达」显示的数字一致。
+- 电池：电量和供电来源，以及最大容量和循环次数。
 
-## 宠物
+**每项读数一个图标。** 打开想放进菜单栏的读数，每项各有一个图标，可以各自按住 ⌘ 拖到想要的位置。默认只开磁盘，至少保留一项。可以选择要不要在图标旁边显示数字。所有读数每 20 秒刷新一次，打开面板时也会刷新。
 
-<p align="center">
-  <img src="docs/images/pet-awake.png" width="150" alt="醒着的宠物：明亮的琥珀色太阳，带笑容和光芒">
-  <img src="docs/images/pet-asleep.png" width="150" alt="睡着的宠物：暗淡的太阳，闭着眼，飘着 z，光芒也少了">
-</p>
+## 菜单栏和面板
 
-单击宠物弹出来的小条：只有状态、四个时长和关闭。双击打开完整设置。
+<img src="docs/images/status.png" width="658" alt="浅色、深色、蓝色三种菜单栏上的图标，从左到右：Lumos 可以睡眠、Lumos 保持唤醒、Lumos 倒计时 25 分钟，然后是 Vitals 的 CPU、内存、磁盘和电池图标">
 
-<p align="center"><img src="docs/images/quick-panel.png" width="268" alt="宠物旁的小条：左侧是太阳和状态，右侧是倒计时，下面一排是四个时长和关闭按钮"></p>
+所有图标都是 SF Symbol 模板图，可以在右边跟一段等宽数字，所以菜单栏会像给系统自带图标着色一样给它着色。Lumos 显示一根魔杖 `wand.and.stars`：Mac 可以睡眠时只有魔杖，保持唤醒时魔杖旁出现星星。Vitals 的每个图标显示它那项读数的符号：`cpu`、`memorychip`、`internaldrive`，或者一个随电量变空的电池。
 
-| 阶段 | 需要醒着 | 样子 |
-| --- | --- | --- |
-| 火苗 | 0 小时 | 很小，光芒短短的。 |
-| 余烬 | 1 小时 | 更暖、稍大一点。 |
-| 耀斑 | 3 小时 | 整整一圈光芒。 |
-| 恒星 | 6 小时 | 深橙色，个头最大。 |
-| 超新星 | 10 小时 | 最亮，光芒最长。 |
+Prism 没有自己的常驻图标。工具的「显示在菜单栏」开关打开时，它的图标才出现。所有工具都不在菜单栏时，会出现一个 Prism 小图标（`triangle`），保证随时能打开主面板。
 
-醒着的时间按自然日累计：每天从当天累计时长对应的阶段开始。设置 →「你的太阳」里能看到阶段列表，也可以重新养一只。
+- **左键点工具图标**，打开它的快捷面板：只有这个工具的控件。右下角的按钮会打开主面板，并停在这个工具的 tab。
+- **右键点工具图标**，菜单里有「打开 Prism」和「退出 Prism」。
+- **按 <kbd>⌃</kbd><kbd>⌥</kbd><kbd>⌘</kbd><kbd>L</kbd>**，在任何地方都能在鼠标位置打开或关闭主面板。
 
-## 菜单栏
+主面板每个工具一个 tab，最右边的齿轮 tab 是 Prism 自身的设置。工具的 tab 最上面是「已开启」和「显示在菜单栏」两个开关，下面是和快捷面板一样的控件，再下面是这个工具的设置。关闭的工具会停止所有工作，设置会保留。齿轮 tab 里有「登录时打开」、快捷键、版本号和「退出 Prism」。
 
-<img src="docs/images/status.png" width="540" alt="菜单栏各状态：睡着、醒着有倒计时、醒着无倒计时、以及倒计时中">
-
-图标用的是 SF Symbol，菜单栏会像给系统自带图标着色一样给它着色，任何背景都清楚：能睡时是 `sun.min`，保持唤醒但屏幕可熄灭时是 `sun.max`，连屏幕也常亮时是 `sun.max.fill`。打开「在菜单栏显示剩余时间」后，倒计时会显示在旁边。
-
-左键打开面板，右键打开同样的菜单。<kbd>⌃</kbd><kbd>⌥</kbd><kbd>⌘</kbd><kbd>L</kbd> 在任何地方都能开始或停止。
+同一时间只会打开一个面板，点面板外任何地方都会把它关掉。两种面板都不抢焦点，点它们不会打断你正在打的字。
 
 ## 安装
 
+在这个仓库的 clone 里运行：
+
 ```sh
-git clone https://github.com/zchan0/LumosMaxima.git
-cd LumosMaxima
 scripts/package.sh --install
 ```
 
-这会构建 release 版 app，有 Apple Development 证书时用它签名，然后复制到 `/Applications`。目前还没有公证过的下载版本。
+这会构建 release 版 app，有 Apple Development 证书时用它签名，然后复制到 `/Applications/Prism.app`。目前还没有公证过的下载版本。
 
 ## 合盖保持运行
 
-合上盖子后，无论持有多少电源断言，Mac 都会睡。唯一的办法是 `pmset -a disablesleep 1`，它需要 root，而且会一直生效——如果 app 崩了，你的 Mac 就再也睡不着了。
+合上盖子后，无论持有多少电源断言，Mac 都会睡。唯一的办法是 `pmset -a disablesleep 1`，它需要 root，而且会一直生效，直到被改回去。如果 app 崩了，Mac 就再也睡不了。
 
-所以第一次打开这个开关时，LumosMaxima 会要一次管理员密码，装上一个小助手：
+所以第一次打开这个开关时，Prism 会要一次管理员密码，装上一个小助手：
 
-- `/Library/PrivilegedHelperTools/LumosMaximaLid.sh` —— 让 `disablesleep` 和标记文件保持一致；LumosMaxima 没在运行时把它还原。
-- `/Library/LaunchDaemons/io.github.zchan0.LumosMaxima.lid.plist` —— 开机、每分钟、以及标记变化时运行上面那个脚本。
+- `/Library/PrivilegedHelperTools/io.github.zchan0.prism.LumosLid.sh`：Prism 打开着标记文件时把 `disablesleep` 设为 1，否则设为 0。
+- `/Library/LaunchDaemons/io.github.zchan0.prism.LumosLid.plist`：开机、每分钟、以及标记变化时运行上面那个脚本。
 
-app 本身从不以 root 运行，也不会问第二次密码。想卸载助手只要一条命令：
+助手不按名字找 Prism，而是问内核还有没有进程打开着标记文件。Prism 不管怎么退出，包括崩溃，内核都会关闭这个文件。所以 Prism 崩溃后，最多一分钟就会恢复正常的睡眠设置。
+
+app 本身从不以 root 运行。只有新版本改了助手时，才会再要一次密码。卸载助手运行：
 
 ```sh
-sudo launchctl bootout system/io.github.zchan0.LumosMaxima.lid
-sudo rm -f /Library/PrivilegedHelperTools/LumosMaximaLid.sh \
-  /Library/LaunchDaemons/io.github.zchan0.LumosMaxima.lid.plist
+sudo launchctl bootout system/io.github.zchan0.prism.LumosLid
+sudo rm -f /Library/PrivilegedHelperTools/io.github.zchan0.prism.LumosLid.sh \
+  /Library/LaunchDaemons/io.github.zchan0.prism.LumosLid.plist
+sudo rm -rf /var/tmp/io.github.zchan0.prism.LumosLid
 sudo pmset -a disablesleep 0
 ```
 
 ## 开发
 
 ```sh
-swift build            # 编译
-swift test             # 单元测试（Swift Testing）
-scripts/package.sh     # 生成 .build/app/LumosMaxima.app
+swift build                # 编译
+swift test                 # 单元测试（Swift Testing）
+scripts/package.sh         # 生成 .build/app/Prism.app
 scripts/readme-assets.sh   # 重新生成 docs/images
+scripts/release.sh <version>   # 测试、打包、压缩并在本地打 tag
 ```
 
-工程结构和这个目录下其他小菜单栏 app 一致：SwiftPM 可执行 target，状态栏和窗口用 AppKit，里面的界面用 SwiftUI，再用一个可观察的 `AppModel` 管住会话和它的副作用。
+Prism 是一个 SwiftPM 包。菜单栏图标和面板用 AppKit，里面的界面用 SwiftUI。
 
-| 文件 | 作用 |
+| 模块 | 内容 |
 | --- | --- |
-| `SessionEngine.swift` | 持有电源断言、倒计时、报告会话是怎么结束的。 |
-| `SleepAssertion.swift` | IOKit 断言：`PreventUserIdleSystemSleep`，需要时再加显示器那条。 |
-| `LidControl.swift` | 安装助手、标记文件，以及读取 `pmset`。 |
-| `Battery.swift` | 电量、充电状态和低电量规则。 |
-| `SunStage.swift` | 宠物的成长阈值，纯函数、有单元测试。 |
-| `PanelView.swift`、`SunPetView.swift` | 面板和宠物，全部用 SwiftUI 画。 |
-| `AppDelegate.swift` | 启动、每秒的 tick、干净地退出。 |
+| `PrismKit` | 外壳的零件：`Tool` 协议、菜单栏图标、浮动面板、菜单栏图标的画法、共用的行和开关、每个工具的设置存储。 |
+| `LumosTool` | 会话引擎和电源断言、合盖助手、低电量保护、通知。 |
+| `VitalsTool` | CPU、内存、磁盘和电池读数。 |
+| `Prism` | app 本身：注册工具，管理菜单栏图标、主面板和快捷面板。 |
 
-debug 版本认几个用于截图的环境变量，`docs/images` 就是这么来的：`LUMOS_SNAPSHOT`、`LUMOS_PANEL_STATE=asleep`、`LUMOS_STATUS_SNAPSHOT`、`LUMOS_PET_SNAPSHOT`、`LUMOS_PET_STATE`、`LUMOS_APPEARANCE`、`LUMOS_AUTO_START`、`LUMOS_OPEN_PANEL`、`LUMOS_PANEL_CAPTURE`。
+工具只依赖 `PrismKit`，工具之间互不依赖。加一个工具：写一个模块，里面有一个遵循 `Tool` 的类型，再在 `AppDelegate.registrations()` 里加一行。
+
+debug 版本认几个环境变量，`docs/images` 就是这么生成的：
+
+| 变量 | 作用 |
+| --- | --- |
+| `PRISM_CAPTURE=<目录>` | 把主面板的每个 tab 和每个快捷面板截图到这个目录，然后退出。 |
+| `PRISM_STATUS_CAPTURE=<文件>` | 把所有菜单栏图标画在浅色、深色、蓝色三种菜单栏上，然后退出。 |
+| `PRISM_START_LUMOS=1` | 启动时开始一个 30 分钟的 Lumos 会话。 |
+| `PRISM_APPEARANCE=light` 或 `dark` | 强制外观。 |
+| `PRISM_DUMP=1` | 打印每个工具的摘要，然后退出。 |
 
 ## 说明
 
-- 没有电池的机器，电池那一行和低电量规则什么都不做。
-- 打开「减弱动态效果」后，宠物不再呼吸、转光芒、眨眼，但表情还在。
-- app 从不抢焦点：面板和宠物都是非激活窗口，点它们不会打断你正在打的字。
+- 没有电池的机器上，Vitals 不显示电池读数，低电量保护也不起作用。
+- 界面跟随系统语言，支持中文和英文。如果只想给 Prism 换语言，去「系统设置 → 通用 → 语言与地区 → 应用程序」。

@@ -1,7 +1,7 @@
 #!/bin/zsh
 # Usage: scripts/readme-assets.sh
-# Regenerates docs/images from a packaged debug build: the icon, the menu bar states, the panel in both
-# appearances, and the pet awake and asleep.
+# Regenerates docs/images from a packaged debug build: the icon, the menu bar icons, and the hub and the quick
+# panels in English and Chinese, with Lumos counting down.
 set -euo pipefail
 
 cd "${0:A:h}/.."
@@ -10,28 +10,26 @@ work=$(mktemp -d)
 trap 'rm -rf $work' EXIT
 
 scripts/package.sh --debug > /dev/null
-bin=.build/app/LumosMaxima.app/Contents/MacOS/LumosMaxima
+bin=.build/app/Prism.app/Contents/MacOS/Prism
 mkdir -p $out
 
 ictool="$(xcode-select -p)/../Applications/Icon Composer.app/Contents/Executables/ictool"
 $ictool Resources/AppIcon.icon --export-image --output-file $out/icon.png \
   --platform macOS --rendition Default --width 256 --height 256 --scale 2
 
-LUMOS_STATUS_SNAPSHOT=$work/status.png $bin
-# The grid is one 94x26 point cell per state (columns) and menu bar (rows: light, dark, blue) at 4x.
-cp $work/status.png $out/status.png
+# One 94x26 point cell per icon (columns) and menu bar (rows: light, dark, blue) at 4x.
+PRISM_STATUS_CAPTURE=$out/status.png $bin
 
-LUMOS_SNAPSHOT=$work/panel-light.png $bin
-cp $work/panel-light.png $out/panel-light.png
-LUMOS_APPEARANCE=dark LUMOS_SNAPSHOT=$work/panel-dark.png $bin
-cp $work/panel-dark.png $out/panel-dark.png
-LUMOS_PANEL_STATE=asleep LUMOS_SNAPSHOT=$out/panel-asleep.png $bin
-LUMOS_SNAPSHOT=$out/panel-zh.png $bin -AppleLanguages "(zh-Hans)" 
-
-LUMOS_PET_CLICK=1 LUMOS_PANEL_CAPTURE=$work/quick.png $bin || true
-if [[ -f $work/quick.png ]]; then cp $work/quick.png $out/quick-panel.png; fi
-
-LUMOS_PET_SNAPSHOT=$out/pet-awake.png $bin
-LUMOS_PET_STATE=asleep LUMOS_PET_SNAPSHOT=$out/pet-asleep.png $bin
+# <language> <file name suffix>
+capture() {
+  local dir=$work/$1
+  mkdir -p $dir
+  PRISM_APPEARANCE=light PRISM_START_LUMOS=1 PRISM_CAPTURE=$dir $bin -AppleLanguages "($1)"
+  cp $dir/hub-lumos.png $out/hub$2.png
+  cp $dir/quick-lumos.png $out/quick-lumos$2.png
+  cp $dir/quick-vitals.png $out/quick-vitals$2.png
+}
+capture en ""
+capture zh-Hans -zh
 
 ls -l $out

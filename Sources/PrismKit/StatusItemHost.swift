@@ -1,18 +1,23 @@
 import AppKit
 import Observation
 
-/// Owns one status item per enabled tool.
+/// Owns the status items of every enabled tool: one for each icon the tool asks for.
 ///
 /// There is deliberately no icon for the app itself: a Prism icon competing with the tools' own icons would be a
 /// second door to the same room. Every tool icon carries the way back to Prism instead, in its right-click menu.
 ///
-/// AppKit persists each item's position and visibility against its `autosaveName`, so a tool keeps its spot in the
+/// AppKit persists each item's position and visibility against its `autosaveName`, so an icon keeps its spot in the
 /// menu bar across launches, and macOS's own ⌘-drag reordering works per icon.
 @MainActor
 public final class StatusItemHost: NSObject {
+    private struct Key: Hashable {
+        let tool: ToolID
+        let icon: String
+    }
+
     private let settings: ShellSettings
-    private var items: [ToolID: NSStatusItem] = [:]
-    private var ticks: [ToolID: NSImage?] = [:]
+    private var items: [Key: NSStatusItem] = [:]
+    private var images: [Key: NSImage] = [:]
     /// Shown only when no tool has its own icon. Without it, "only in the panel" for every tool would leave no way
     /// into the panel at all.
     private var fallbackItem: NSStatusItem?
@@ -27,48 +32,59 @@ public final class StatusItemHost: NSObject {
         super.init()
     }
 
-    /// Rebuilds the menu bar to match the current settings. Cheap enough to call on any change.
+    /// Makes the menu bar match the settings and the icons the tools ask for. Cheap enough to call every second.
     public func sync(with registrations: [ToolRegistration]) {
         let visibleTools = registrations.filter {
             settings.isEnabled($0.id) && settings.placement(of: $0.id) == .ownIcon
         }
+        syncFallback(needed: visibleTools.isEmpty)
 
-        // Drop items whose tool was turned off or moved into the hub.
-        let keep = Set(visibleTools.map(\.id))
-        for (id, item) in items where !keep.contains(id) {
+        let wanted = visibleTools.flatMap { registration in
+            registration.tool.statusIcons().map { (key: Key(tool: registration.id, icon: $0.id), image: $0.image) }
+        }
+        let keep = Set(wanted.map(\.key))
+        for (key, item) in items where !keep.contains(key) {
             NSStatusBar.system.removeStatusItem(item)
-            items[id] = nil
-            ticks[id] = nil
+            items[key] = nil
+            images[key] = nil
         }
-
-        syncFallback(needed: visibleTools.isEmpty, registrations: registrations)
-
-        for registration in visibleTools where items[registration.id] == nil {
-            let item = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
-            // The autosave name is the tool id, so the position survives both relaunches and layout changes.
-            item.autosaveName = NSStatusItem.AutosaveName("prism.tool." + registration.id.rawValue)
-            if let button = item.button {
-                button.target = self
-                button.action = #selector(toolItemClicked(_:))
-                button.sendAction(on: [.leftMouseUp, .rightMouseUp])
-                button.imagePosition = .imageOnly
-                button.toolTip = registration.tool.title
-            }
-            item.isVisible = true
-            items[registration.id] = item
+        // A new item goes to the left of the ones already there, so creating them right to left keeps a tool's order.
+        for (key, _) in wanted.reversed() where items[key] == nil {
+            items[key] = makeItem(key, title: registrations.first { $0.id == key.tool }?.tool.title ?? "")
         }
-        refreshImages(registrations)
+        for (key, image) in wanted where images[key] !== image {
+            images[key] = image
+            items[key]?.button?.image = image
+        }
+    }
+
+    private func makeItem(_ key: Key, title: String) -> NSStatusItem {
+        let item = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
+        item.autosaveName = NSStatusItem.AutosaveName("prism.tool.\(key.tool.rawValue).\(key.icon)")
+        if let button = item.button {
+            button.target = self
+            button.action = #selector(toolItemClicked(_:))
+            button.sendAction(on: [.leftMouseUp, .rightMouseUp])
+            button.imagePosition = .imageOnly
+            button.toolTip = title
+        }
+        item.isVisible = true
+        return item
     }
 
     /// One small Prism icon, present only when it is the only way in.
-    private func syncFallback(needed: Bool, registrations: [ToolRegistration]) {
+    private func syncFallback(needed: Bool) {
         if needed, fallbackItem == nil {
             let item = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
             item.autosaveName = NSStatusItem.AutosaveName("prism.fallback")
             if let button = item.button {
                 button.target = self
                 button.action = #selector(fallbackClicked(_:))
-                button.image = FallbackIcon.image
+                button.image = MenuBarGlyph.image(
+                    symbol: "triangle",
+                    text: nil,
+                    accessibilityDescription: Strings.appName
+                )
                 button.imagePosition = .imageOnly
                 button.toolTip = Strings.appName
             }
@@ -84,26 +100,15 @@ public final class StatusItemHost: NSObject {
         onFallbackClick?(sender)
     }
 
-    /// The button for a tool's icon, for opening a panel that has to hang from it.
-    public func button(of id: ToolID?) -> NSStatusBarButton? {
-        guard let id else { return nil }
-        return items[id]?.button
-    }
-
-    /// Redraws only the icons whose tool returned something new, so an idle app does not repaint the menu bar.
-    public func refreshImages(_ registrations: [ToolRegistration]) {
-        for registration in registrations {
-            guard let item = items[registration.id], let button = item.button else { continue }
-            let image = registration.tool.statusItemImage()
-            guard image != ticks[registration.id] else { continue }
-            ticks[registration.id] = image
-            button.image = image
-        }
+    /// The leftmost icon of a tool, for opening the hub from somewhere that is not one of its icons.
+    public func firstButton(of id: ToolID) -> NSStatusBarButton? {
+        items.filter { $0.key.tool == id }
+            .compactMap(\.value.button)
+            .min { ($0.window?.frame.minX ?? 0) < ($1.window?.frame.minX ?? 0) }
     }
 
     @objc private func toolItemClicked(_ sender: NSStatusBarButton) {
-        // Never xcrun: the sender's own item is the one that identifies its tool.
-        guard let id = items.first(where: { $0.value.button === sender })?.key else { return }
+        guard let id = items.first(where: { $0.value.button === sender })?.key.tool else { return }
         let isRightClick = NSApp.currentEvent?.type == .rightMouseUp
             || NSApp.currentEvent?.modifierFlags.contains(.control) == true
         if isRightClick {
@@ -111,45 +116,5 @@ public final class StatusItemHost: NSObject {
         } else {
             onToolClick?(id, sender)
         }
-    }
-}
-
-/// The last-resort menu bar entry: the app's own mark, used only when every tool is inside the panel.
-@MainActor
-enum FallbackIcon {
-    static var image: NSImage {
-        let image = NSImage(size: NSSize(width: 18, height: 18), flipped: false) { rect in
-            NSColor.black.setStroke()
-            NSColor.black.setFill()
-            // A prism with a beam going in and three rays coming out.
-            let beam = NSBezierPath()
-            beam.move(to: NSPoint(x: 0.5, y: rect.midY))
-            beam.line(to: NSPoint(x: 6.0, y: rect.midY))
-            beam.lineWidth = 1.5
-            beam.lineCapStyle = .round
-            beam.stroke()
-
-            let prism = NSBezierPath()
-            prism.move(to: NSPoint(x: 9.0, y: rect.maxY - 1.2))
-            prism.line(to: NSPoint(x: 14.2, y: rect.minY + 1.6))
-            prism.line(to: NSPoint(x: 3.8, y: rect.minY + 1.6))
-            prism.close()
-            prism.lineWidth = 1.4
-            prism.lineJoinStyle = .round
-            prism.stroke()
-
-            for offset in [-3.2, 0.0, 3.2] {
-                let ray = NSBezierPath()
-                ray.move(to: NSPoint(x: 10.4, y: rect.midY))
-                ray.line(to: NSPoint(x: 17.5, y: rect.midY + offset))
-                ray.lineWidth = 1.2
-                ray.lineCapStyle = .round
-                ray.stroke()
-            }
-            return true
-        }
-        image.isTemplate = true
-        image.accessibilityDescription = Strings.appName
-        return image
     }
 }

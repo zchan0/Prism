@@ -1,20 +1,22 @@
 import AppKit
 import SwiftUI
 
-/// One widget in the toolbox.
+/// One tool in the toolbox.
 ///
-/// A tool owns its state and its windows, and tells the shell what to show. The shell never asks a tool what kind it
-/// is: it reads `id`, `title` and `summary` for the hub, and calls into the tool through the methods below. That is
-/// what keeps tools apart while they share one menu bar item, one panel window and one login item.
+/// A tool owns its state and tells the shell what to draw. The shell draws every window: a click on the tool's icon
+/// opens a quick panel with `controlsView()`, and the tool's tab in the hub shows the same controls above
+/// `settingsView()`.
 @MainActor
 public protocol Tool: AnyObject {
-    /// Stable and used for every name the tool persists: preferences, notifications, the status item's autosave name.
+    /// Stable and used for every name the tool persists: preferences, the status item's autosave name.
     /// Renaming it loses the person's settings, so it must not change.
     static var id: ToolID { get }
 
     var title: String { get }
     var symbolName: String { get }
-    /// One line in the hub, such as "24:12 left" or "119 GB free". Cheap: it is read on every panel opening.
+    /// Draws only the symbol's primary layer, such as Lumos's wand without its stars while the Mac may sleep.
+    var symbolPrimaryLayerOnly: Bool { get }
+    /// One line, such as "24:12 left" or "119 GB free".
     var summary: String { get }
 
     /// Called once, when the app is ready. Not called for tools the person has turned off.
@@ -22,34 +24,32 @@ public protocol Tool: AnyObject {
     /// Called when the tool is turned off, and when the app quits.
     func stop()
 
-    /// The tool's own controls, shown when its row is opened in the hub. Nil means the tool has nothing to configure.
+    /// The tool's icons in the menu bar, left to right; most tools have one. Asked once a second while the tool is
+    /// on. Returning the same image instance as last time skips the repaint.
+    func statusIcons() -> [StatusIcon]
+    /// What the tool does: all of its quick panel, and the top of its tab in the hub.
+    func controlsView() -> AnyView
+    /// How the tool is configured: only on its tab in the hub. Nil when there is nothing to configure.
     func settingsView() -> AnyView?
-
-    /// A menu bar image, or nil for a tool that only lives in the hub. Called every second while the tool is on,
-    /// so it must be cheap and should return nil when nothing it draws has changed.
-    func statusItemImage() -> NSImage?
-
-    /// The tool's own controls inside the hub panel, below its summary line. Nil keeps the row as a plain summary.
-    func hubView() -> AnyView?
-
-    /// A short panel that a click on the tool's own menu bar icon opens. Nil falls back to the hub.
-    func quickPanel() -> AnyView?
 }
 
 public extension Tool {
+    var symbolPrimaryLayerOnly: Bool { false }
+    func statusIcons() -> [StatusIcon] { [] }
     func settingsView() -> AnyView? { nil }
-    func statusItemImage() -> NSImage? { nil }
-    func hubView() -> AnyView? { nil }
-    func quickPanel() -> AnyView? { nil }
 }
 
-/// A tool that opens its own panel from its menu bar icon, instead of the hub.
-///
-/// This is a separate protocol rather than a requirement of `Tool`, so a tool that has nothing but a row in the hub
-/// does not have to implement an empty method.
+/// One of a tool's icons in the menu bar.
 @MainActor
-public protocol MenuBarPresenter: AnyObject {
-    func showPanel(below button: NSStatusBarButton)
+public struct StatusIcon {
+    /// Stable within the tool: it names the icon's saved place in the menu bar.
+    public let id: String
+    public let image: NSImage
+
+    public init(id: String, image: NSImage) {
+        self.id = id
+        self.image = image
+    }
 }
 
 /// A tool's identity. A wrapper rather than a bare `String` so an id cannot be passed where a label belongs.
@@ -67,11 +67,10 @@ public struct ToolID: Hashable, Sendable, RawRepresentable, CustomStringConverti
     public var description: String { rawValue }
 }
 
-/// How a tool shows up in the menu bar.
+/// Whether a tool has its own icon in the menu bar.
 public enum MenuBarPlacement: String, CaseIterable, Sendable {
-    /// Its own icon next to the shell's.
     case ownIcon
-    /// Only inside the hub panel.
+    /// Reachable only from the hub.
     case hubOnly
 
     public var id: String { rawValue }

@@ -1,1126 +1,676 @@
 {
-  "sourceLanguage": "en",
-  "strings": {
-    "%@ awake today": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "今天醒着 %@"
+  "sourceLanguage" : "en",
+  "strings" : {
+    "%@ left" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "还剩 %@"
           }
         }
       }
     },
-    "%@ free of %@": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ 可用，共 %@"
+    "%lld cycles" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "循环 %lld 次"
           }
         }
       }
     },
-    "%@ left": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "还剩 %@"
+    "%lld hours" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld 小时"
           }
         }
       }
     },
-    "%lld hours": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld 小时"
+    "%lld hr" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld 小时"
           }
         }
       }
     },
-    "%lld hr": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld 小时"
+    "%lld hr %lld min" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld 小时 %lld 分钟"
           }
         }
       }
     },
-    "%lld hr %lld min": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld 小时 %lld 分钟"
+    "%lld min" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld 分钟"
           }
         }
       }
     },
-    "%lld min": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld 分钟"
+    "%lld minutes" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld 分钟"
           }
         }
       }
     },
-    "%lld minutes": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld 分钟"
+    "%lld%%" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld%%"
           }
         }
       }
     },
-    "%lld sessions together": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "一起醒了 %lld 次"
+    "Allow it in System Settings → General → Login Items" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "请在“系统设置 → 通用 → 登录项”中允许"
           }
         }
       }
     },
-    "%lld%": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld%"
+    "An administrator password is needed to change lid sleep." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "修改合盖睡眠需要管理员密码。"
           }
         }
       }
     },
-    "1 session together": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "一起醒了 1 次"
+    "Asks for your password once, then disables lid sleep until the session ends." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "会要求输入一次密码，随后关闭合盖睡眠，直到本次会话结束。"
           }
         }
       }
     },
-    "A spark that sleeps all day": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "一睡就是一整天的小火苗"
+    "At %lld%%, Prism stopped keeping your Mac awake." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "电量降到 %lld%%，Prism 已停止让 Mac 保持唤醒。"
           }
         }
       }
     },
-    "A sun that keeps your Mac awake, and gets brighter the longer you work.": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "一颗让 Mac 醒着的小太阳，工作越久它越亮。"
+    "Available includes space macOS can reclaim, which is the number Finder shows." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "「可用」包含 macOS 可回收的空间，也就是「访达」显示的数字。"
           }
         }
       }
     },
-    "About": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "关于"
+    "Awake" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "醒着"
           }
         }
       }
     },
-    "Allow it in System Settings → General → Login Items": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "请在“系统设置 → 通用 → 登录项”中允许"
+    "Awake time is up" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "唤醒时间到了"
           }
         }
       }
     },
-    "Allow lid sleep to change, or System Settings → Energy may be affected.": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "允许修改合盖睡眠，否则会影响“系统设置 → 电池”。"
+    "Battery" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "电池"
           }
         }
       }
     },
-    "An administrator password is needed to change lid sleep.": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "修改合盖睡眠需要管理员密码。"
+    "Battery is low" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "电量偏低"
           }
         }
       }
     },
-    "Asks for your password once, then disables lid sleep until the session ends.": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "会要求输入一次密码，随后关闭合盖睡眠，直到本次会话结束。"
+    "Cancel" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "取消"
           }
         }
       }
     },
-    "At %lld%, LumosMaxima stopped keeping your Mac awake.": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "电量降到 %lld%，LumosMaxima 已停止让 Mac 保持唤醒。"
+    "Changing…" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "正在切换…"
           }
         }
       }
     },
-    "Available": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "可用"
+    "charging" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "充电中"
           }
         }
       }
     },
-    "Available includes space macOS can reclaim, which is the number Finder shows.": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "「可用」包含 macOS 可回收的空间，也就是「访达」显示的数字。"
+    "Continue" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "继续"
           }
         }
       }
     },
-    "Awake": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "醒着"
+    "Could not keep this Mac awake" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "无法让这台 Mac 保持唤醒"
           }
         }
       }
     },
-    "Awake for %@": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "已经醒着 %@"
+    "CPU" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CPU"
           }
         }
       }
     },
-    "Awake for %@ with no timer": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "已经醒着 %@，没有定时"
+    "Default length" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "默认时长"
           }
         }
       }
     },
-    "Awake time is up": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "唤醒时间到了"
+    "Disk" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "磁盘"
           }
         }
       }
     },
-    "Battery": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "电池"
+    "Each reading that is on gets its own icon. To take Vitals out of the menu bar, turn off Show in the menu bar." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "每项打开的读数各有一个图标。要让 Vitals 离开菜单栏，请关掉「显示在菜单栏」。"
           }
         }
       }
     },
-    "Battery is low": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "电量偏低"
+    "Every reading refreshes every 20 seconds, and whenever the panel opens. CPU shows the average load since the last refresh." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "所有读数每 20 秒刷新一次，打开面板时也会刷新。CPU 显示的是上次刷新以来的平均占用率。"
           }
         }
       }
     },
-    "Blazes after six hours": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "醒着六小时后熊熊燃烧"
+    "free of %@" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "可用，共 %@"
           }
         }
       }
     },
-    "Cancel": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "取消"
+    "General" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "通用"
           }
         }
       }
     },
-    "Capacity": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "容量"
+    "Icons in the menu bar" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "菜单栏图标"
           }
         }
       }
     },
-    "Changing…": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "正在切换…"
+    "Keep Awake" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "保持唤醒"
           }
         }
       }
     },
-    "charging": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "充电中"
+    "Keep running with the lid closed" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "合上盖子也继续运行"
           }
         }
       }
     },
-    "Click to open the controls, drag to move": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "单击打开快捷面板，双击打开设置，拖动换位置"
+    "Keep the screen on too" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "同时保持屏幕常亮"
           }
         }
       }
     },
-    "Close": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "关闭"
+    "Keeping awake" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "保持唤醒中"
           }
         }
       }
     },
-    "Continue": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "继续"
+    "less than a minute" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "不到一分钟"
           }
         }
       }
     },
-    "Could not keep this Mac awake": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "无法让这台 Mac 保持唤醒"
+    "Let It Sleep" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "让它睡吧"
           }
         }
       }
     },
-    "Default length": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "默认时长"
+    "Maximum capacity %lld%%" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "最大容量 %lld%%"
           }
         }
       }
     },
-    "Disk": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "磁盘"
+    "Memory" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "内存"
           }
         }
       }
     },
-    "Disk and memory refresh every 20 seconds, and whenever the panel opens.": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "磁盘和内存每 20 秒刷新一次，打开面板时也会刷新。"
+    "Never" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "从不"
           }
         }
       }
     },
-    "Done": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "完成"
+    "No reading" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "没有读数"
           }
         }
       }
     },
-    "Drag it anywhere; it naps while the Mac may sleep.": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "可以拖到任何地方；Mac 能睡时它会打盹。"
+    "No timer" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "没有定时"
           }
         }
       }
     },
-    "Free": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "可用"
+    "of %@" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "共 %@"
           }
         }
       }
     },
-    "free of %@": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "可用，共 %@"
+    "Off: the Mac stays awake while its screen can turn off." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "关闭时：Mac 保持唤醒，但屏幕可以熄灭。"
           }
         }
       }
     },
-    "General": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "通用"
+    "on battery" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "使用电池"
           }
         }
       }
     },
-    "Goes supernova after ten hours": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "醒着十小时后成为超新星"
+    "Open at login" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "登录时打开"
           }
         }
       }
     },
-    "Includes space macOS can reclaim when it needs it, which is the number Finder shows.": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "包含 macOS 在需要时可回收的空间，也就是「访达」显示的数字。"
+    "Open or close the panel" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "打开或收起面板"
           }
         }
       }
     },
-    "It grows every hour it keeps your Mac awake, and naps on days it does not.": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "它每让你的 Mac 醒着一小时就会长大一点，闲着的时候打盹。"
+    "Open Prism" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "打开 Prism"
           }
         }
       }
     },
-    "It hasn’t woken up today": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "今天还没醒过"
+    "plugged in" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已接通电源"
           }
         }
       }
     },
-    "Keep Awake": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "保持唤醒"
+    "pmset refused the change: %@" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "pmset 拒绝了这次修改：%@"
           }
         }
       }
     },
-    "Keep running with the lid closed": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "合上盖子也继续运行"
+    "Prism let your Mac sleep again." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prism 已让你的 Mac 重新可以睡眠。"
           }
         }
       }
     },
-    "Keep the screen on too": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "同时保持屏幕常亮"
+    "Quit Prism" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "退出 Prism"
           }
         }
       }
     },
-    "Keeping awake": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "保持唤醒中"
+    "Show in the menu bar" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "显示在菜单栏"
           }
         }
       }
     },
-    "less than a minute": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "不到一分钟"
+    "Show the number next to the icon" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在图标旁显示数字"
           }
         }
       }
     },
-    "Let It Sleep": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "让它睡吧"
+    "Show the time left in the menu bar" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在菜单栏显示剩余时间"
           }
         }
       }
     },
-    "LumosMaxima let your Mac sleep again.": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "LumosMaxima 已让你的 Mac 重新可以睡眠。"
+    "Sleeping" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "睡着了"
           }
         }
       }
     },
-    "Memory": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "内存"
+    "Stop keeping awake when the battery falls to" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "电量降到以下时停止保持唤醒"
           }
         }
       }
     },
-    "Menu bar": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "菜单栏"
+    "Stops keeping awake at %lld%% to save the battery" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "电量降到 %lld%% 时停止保持唤醒"
           }
         }
       }
     },
-    "Never": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "从不"
+    "Tell me when the battery stops the session" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "电量让会话结束时通知我"
           }
         }
       }
     },
-    "No battery": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "没有电池"
+    "Tell me when the session ends" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "会话结束时通知我"
           }
         }
       }
     },
-    "No reading": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "没有读数"
+    "The lid helper could not be installed." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "无法安装合盖助手。"
           }
         }
       }
     },
-    "No timer": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "没有定时"
+    "The lid setting did not change. Try again, or turn it off in System Settings → Battery." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "合盖设置没有生效。请重试，或到“系统设置 → 电池”里关掉。"
           }
         }
       }
     },
-    "No tools are on": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "没有启用任何工具"
+    "Turned off. Its settings are kept." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已关闭，设置会保留。"
           }
         }
       }
     },
-    "No volume": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "没有卷"
+    "Turned on" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已开启"
           }
         }
       }
     },
-    "Notifications": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "通知"
+    "Until I stop it" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "直到我手动停止"
           }
         }
       }
     },
-    "of %@": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "共 %@"
+    "user %lld%% · system %lld%%" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "用户 %lld%% · 系统 %lld%%"
           }
         }
       }
     },
-    "Off": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "关"
+    "Version %@" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "版本 %@"
           }
         }
       }
     },
-    "Off: the Mac stays awake while its screen can turn off.": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "关闭时：Mac 保持唤醒，但屏幕可以熄灭。"
-          }
-        }
-      }
-    },
-    "On": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "开"
-          }
-        }
-      }
-    },
-    "On battery": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "使用电池"
-          }
-        }
-      }
-    },
-    "on battery": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "使用电池"
-          }
-        }
-      }
-    },
-    "One menu bar app, a handful of small tools.": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "一个菜单栏 app，几件小工具。"
-          }
-        }
-      }
-    },
-    "Only in the panel": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "只在面板里"
-          }
-        }
-      }
-    },
-    "Open %@": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "打开 %@"
-          }
-        }
-      }
-    },
-    "Open at login": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "登录时打开"
-          }
-        }
-      }
-    },
-    "Open or close the panel": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "打开或收起面板"
-          }
-        }
-      }
-    },
-    "Open Prism": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "打开 Prism"
-          }
-        }
-      }
-    },
-    "Plugged in": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "已接通电源"
-          }
-        }
-      }
-    },
-    "plugged in": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "已接通电源"
-          }
-        }
-      }
-    },
-    "pmset refused the change: %@": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "pmset 拒绝了这次修改：%@"
-          }
-        }
-      }
-    },
-    "Quit LumosMaxima": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "退出 LumosMaxima"
-          }
-        }
-      }
-    },
-    "Quit Prism": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "退出 Prism"
-          }
-        }
-      }
-    },
-    "Refreshes every minute, and whenever the panel opens.": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "每分钟刷新一次，打开面板时也会刷新。"
-          }
-        }
-      }
-    },
-    "Settings…": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "设置…"
-          }
-        }
-      }
-    },
-    "Shines after three hours": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "醒着三小时后开始闪耀"
-          }
-        }
-      }
-    },
-    "Shortcuts": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "快捷键"
-          }
-        }
-      }
-    },
-    "Show free space next to the icon": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "在图标旁显示可用空间"
-          }
-        }
-      }
-    },
-    "Show its own icon": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "显示独立图标"
-          }
-        }
-      }
-    },
-    "Show the number next to the icon": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "在图标旁显示数字"
-          }
-        }
-      }
-    },
-    "Show the pet on screen": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "在屏幕上显示宠物"
-          }
-        }
-      }
-    },
-    "Show the Prism icon in the menu bar": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "在菜单栏显示 Prism 图标"
-          }
-        }
-      }
-    },
-    "Show the time left in the menu bar": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "在菜单栏显示剩余时间"
-          }
-        }
-      }
-    },
-    "Shows in the menu bar": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "在菜单栏显示"
-          }
-        }
-      }
-    },
-    "Sleeping": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "睡着了"
-          }
-        }
-      }
-    },
-    "Start or stop keeping awake": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "开始或停止保持唤醒"
-          }
-        }
-      }
-    },
-    "Start the pet over": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "重新养一只"
-          }
-        }
-      }
-    },
-    "Stop keeping awake when the battery falls to": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "电量降到以下时停止保持唤醒"
-          }
-        }
-      }
-    },
-    "Stops keeping awake at %lld% to save the battery": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "电量降到 %lld% 时停止保持唤醒"
-          }
-        }
-      }
-    },
-    "Tell me when the battery stops the session": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "电量让会话结束时通知我"
-          }
-        }
-      }
-    },
-    "Tell me when the session ends": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "会话结束时通知我"
-          }
-        }
-      }
-    },
-    "The lid helper could not be installed.": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "无法安装合盖助手。"
-          }
-        }
-      }
-    },
-    "The lid setting did not change. Try again, or turn it off in System Settings → Battery.": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "合盖设置没有生效。请重试，或到“系统设置 → 电池”里关掉。"
-          }
-        }
-      }
-    },
-    "The panel is always reachable with the shortcut, even with the icon hidden.": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "即使没有独立图标，面板仍可用快捷键打开。"
-          }
-        }
-      }
-    },
-    "This volume is not available.": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "这个卷当前不可用。"
-          }
-        }
-      }
-    },
-    "Tools": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "工具"
-          }
-        }
-      }
-    },
-    "Turned-off tools stop running and keep their settings.": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "关掉的工具会停止运行，但保留设置。"
-          }
-        }
-      }
-    },
-    "Until I stop it": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "直到我手动停止"
-          }
-        }
-      }
-    },
-    "Used": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "已用"
-          }
-        }
-      }
-    },
-    "Version %@": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "版本 %@"
-          }
-        }
-      }
-    },
-    "Volume": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "卷"
-          }
-        }
-      }
-    },
-    "Warms up after an hour awake": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "醒着一小时后开始发光"
-          }
-        }
-      }
-    },
-    "Your Mac may sleep. Tap a length to wake the sun.": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mac 现在可以睡眠。点一个时长把太阳叫醒。"
-          }
-        }
-      }
-    },
-    "Your sun": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "你的太阳"
+    "Your Mac may sleep" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mac 可以睡眠"
           }
         }
       }
     }
   },
-  "version": "1.0"
+  "version" : "1.0"
 }

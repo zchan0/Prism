@@ -1,4 +1,6 @@
 import AppKit
+import Foundation
+import Observation
 import PrismKit
 import Testing
 @testable import VitalsTool
@@ -73,31 +75,53 @@ struct BatteryReadingTests {
     }
 }
 
-@MainActor
-struct VitalsIconTests {
-    private let reading = DiskReading(
-        total: 500_000_000_000,
-        available: 100_000_000_000,
-        forImportantUsage: 120_000_000_000,
-        volumeName: "Macintosh HD"
-    ).reading
-
-    @Test func theIconIsATemplateSoTheMenuBarTintsIt() {
-        #expect(VitalsIcon.image(reading: reading, showsValue: true).isTemplate)
+struct CPUReadingTests {
+    @Test func loadIsTheBusyShareOfTheTicksBetweenTwoSamples() {
+        let old = CPUTicks(user: 100, system: 50, idle: 800, nice: 0)
+        let new = CPUTicks(user: 190, system: 100, idle: 900, nice: 10)
+        let reading = CPUReading.between(old, new)
+        #expect(reading?.user == 0.4)
+        #expect(reading?.system == 0.2)
+        #expect(reading?.reading.value == "60%")
+        #expect(reading?.reading.detail == "user 40% · system 20%")
     }
 
-    @Test func showingTheNumberMakesTheItemWider() {
-        let withText = VitalsIcon.image(reading: reading, showsValue: true)
-        let withoutText = VitalsIcon.image(reading: reading, showsValue: false)
-        #expect(withText.size.width > withoutText.size.width)
-        #expect(withoutText.size.width <= 20)
+    @Test func wrappedCountersStillGiveTheDifference() {
+        let old = CPUTicks(user: UInt32.max - 9, system: 0, idle: 0, nice: 0)
+        let new = CPUTicks(user: 10, system: 0, idle: 20, nice: 0)
+        #expect(CPUReading.between(old, new)?.user == 0.5)
     }
 
-    @Test func everyReadingCanDrawItsIcon() {
-        for kind in Reading.Kind.allCases {
-            let sample = Reading(kind: kind, value: "1", detail: "x", fraction: 0.5)
-            #expect(VitalsIcon.image(reading: sample, showsValue: true).size.width > 0)
-        }
+    @Test func noTimeBetweenSamplesGivesNoReading() {
+        let ticks = CPUTicks(user: 1, system: 2, idle: 3, nice: 4)
+        #expect(CPUReading.between(ticks, ticks) == nil)
+    }
+
+    @Test func aRealSampleCanBeTaken() {
+        #expect(CPUTicks.read() != nil)
+    }
+
+    @Test func theMenuBarTextIsPaddedToThreeDigits() {
+        #expect(CPUReading(user: 0.05, system: 0).reading.menuBarText == "\u{2007}\u{2007}5%")
+        #expect(CPUReading(user: 1, system: 0).reading.menuBarText == "100%")
+        #expect(Reading(kind: .disk, value: "9 GB", detail: "", fraction: 0).menuBarText == "9 GB")
+    }
+}
+
+struct BatteryHealthTests {
+    @Test func maximumCapacityIsTodaysFullChargeOverTheDesign() {
+        #expect(BatteryReading.maximumCapacity(fullCharge: 5529, design: 6249) == 88)
+        #expect(BatteryReading.maximumCapacity(fullCharge: 6400, design: 6249) == 100)
+        #expect(BatteryReading.maximumCapacity(fullCharge: 5529, design: 0) == nil)
+    }
+
+    @Test func theHealthLineShowsWhatIsKnown() {
+        var battery = BatteryReading(level: 80, isCharging: false, isOnAC: true, hasBattery: true)
+        #expect(battery.reading?.note == nil)
+        battery.cycleCount = 78
+        #expect(battery.reading?.note == "78 cycles")
+        battery.maximumCapacity = 88
+        #expect(battery.reading?.note == "Maximum capacity 88% · 78 cycles")
     }
 }
 
@@ -106,5 +130,61 @@ struct ToolIdentityTests {
     @Test func theIdIsStableBecauseItNamesPersistedState() {
         // Changing it would silently orphan a person's settings, so this pins the string.
         #expect(VitalsTool.id.rawValue == "vitals")
+    }
+}
+
+@MainActor
+struct VitalsMenuBarTests {
+    private func freshSettings() -> ToolSettings {
+        let name = "vitals." + UUID().uuidString
+        let defaults = UserDefaults(suiteName: name)!
+        defaults.removePersistentDomain(forName: name)
+        return ToolSettings(tool: VitalsTool.id, defaults: defaults)
+    }
+
+    @Test func diskAloneIsInTheMenuBarByDefault() {
+        let tool = VitalsTool(settings: freshSettings())
+        #expect(tool.menuBarKinds == [.disk])
+        #expect(tool.statusIcons().map(\.id) == ["disk"])
+    }
+
+    @Test func eachReadingThatIsOnGetsItsOwnIconInThePanelsOrder() {
+        let tool = VitalsTool(settings: freshSettings())
+        tool.setInMenuBar(.disk, true)
+        tool.setInMenuBar(.cpu, true)
+        tool.setInMenuBar(.memory, true)
+        // The tool is not started, so CPU has no reading yet: its icon is there, without a number.
+        #expect(tool.statusIcons().map(\.id) == ["cpu", "memory", "disk"])
+    }
+
+    @Test func theLastIconCannotBeTurnedOff() {
+        let tool = VitalsTool(settings: freshSettings())
+        tool.setInMenuBar(.disk, false)
+        #expect(tool.menuBarKinds == [.disk])
+        tool.setInMenuBar(.memory, true)
+        tool.setInMenuBar(.disk, false)
+        #expect(tool.menuBarKinds == [.memory])
+    }
+
+    @Test func theChoiceSurvivesARelaunch() {
+        let settings = freshSettings()
+        let tool = VitalsTool(settings: settings)
+        tool.setInMenuBar(.cpu, true)
+        tool.setInMenuBar(.disk, false)
+        tool.showsValueInMenuBar = false
+        let relaunched = VitalsTool(settings: settings)
+        #expect(relaunched.menuBarKinds == [.cpu])
+        #expect(!relaunched.showsValueInMenuBar)
+    }
+
+    @Test func theSwitchesRedrawWhenTheyChange() {
+        let tool = VitalsTool(settings: freshSettings())
+        final class Flag: @unchecked Sendable { var raised = 0 }
+        let flag = Flag()
+        withObservationTracking { _ = tool.menuBarKinds } onChange: { flag.raised += 1 }
+        tool.setInMenuBar(.cpu, true)
+        withObservationTracking { _ = tool.showsValueInMenuBar } onChange: { flag.raised += 1 }
+        tool.showsValueInMenuBar = false
+        #expect(flag.raised == 2)
     }
 }

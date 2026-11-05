@@ -33,12 +33,12 @@ public struct MemoryReading: Equatable, Sendable {
         var count = mach_msg_type_number_t(MemoryLayout<vm_statistics64_data_t>.size / MemoryLayout<integer_t>.size)
         let status = withUnsafeMutablePointer(to: &stats) { pointer in
             pointer.withMemoryRebound(to: integer_t.self, capacity: Int(count)) {
-                host_statistics64(mach_host_self(), HOST_VM_INFO64, $0, &count)
+                host_statistics64(Host.port, HOST_VM_INFO64, $0, &count)
             }
         }
         guard status == KERN_SUCCESS else { return nil }
         var pageSize: vm_size_t = 0
-        guard host_page_size(mach_host_self(), &pageSize) == KERN_SUCCESS else { return nil }
+        guard host_page_size(Host.port, &pageSize) == KERN_SUCCESS else { return nil }
         let page = Int64(pageSize)
         let total = Int64(ProcessInfo.processInfo.physicalMemory)
         // App memory plus wired plus compressed is what the system would have to swap out to free.

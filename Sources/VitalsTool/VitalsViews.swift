@@ -1,7 +1,8 @@
 import PrismKit
 import SwiftUI
 
-/// The tool's row in the hub: every reading with a bar, so the menu bar number is not the only answer.
+/// Every reading with a bar, so the menu bar number is not the only answer: the quick panel, and the top of the
+/// tool's tab in the hub.
 struct VitalsPanelView: View {
     let tool: VitalsTool
 
@@ -19,7 +20,7 @@ struct VitalsPanelView: View {
                             .font(.system(size: 10.5))
                             .foregroundStyle(Color(nsColor: reading.isTight ? Palette.sunDeep : Palette.ink3))
                             .frame(width: 14)
-                        Text(name(of: reading.kind))
+                        Text(reading.kind.name)
                             .font(.system(size: 11.5))
                             .foregroundStyle(Color(nsColor: Palette.ink2))
                         Spacer(minLength: 6)
@@ -32,6 +33,12 @@ struct VitalsPanelView: View {
                             .foregroundStyle(Color(nsColor: Palette.ink3))
                     }
                     LevelBar(fraction: reading.fraction, isTight: reading.isTight)
+                    if let note = reading.note {
+                        Text(note)
+                            .font(.system(size: 10.5))
+                            .monospacedDigit()
+                            .foregroundStyle(Color(nsColor: Palette.ink3))
+                    }
                 }
             }
             Text(VitalsStrings.includesReclaimable)
@@ -39,10 +46,15 @@ struct VitalsPanelView: View {
                 .foregroundStyle(Color(nsColor: Palette.ink3))
                 .fixedSize(horizontal: false, vertical: true)
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .onAppear { tool.refresh() }
     }
+}
 
-    private func name(of kind: Reading.Kind) -> String {
-        switch kind {
+extension Reading.Kind {
+    var name: String {
+        switch self {
+        case .cpu: VitalsStrings.cpuName
         case .disk: VitalsStrings.diskName
         case .memory: VitalsStrings.memoryName
         case .battery: VitalsStrings.batteryName
@@ -72,31 +84,37 @@ struct VitalsSettingsView: View {
     let tool: VitalsTool
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Picker(VitalsStrings.shownInMenuBar, selection: Binding(
-                get: { tool.shown },
-                set: { tool.shown = $0 }
-            )) {
-                ForEach(Reading.Kind.allCases, id: \.self) { kind in
-                    Text(name(of: kind)).tag(kind)
+        VStack(alignment: .leading, spacing: 0) {
+            PanelRow(VitalsStrings.menuBarIcons, note: VitalsStrings.menuBarIconsNote) {
+                EmptyView()
+            }
+            ForEach(menuBarChoices, id: \.self) { kind in
+                PanelRow(kind.name, symbol: kind.symbolName) {
+                    PanelSwitch(isOn: Binding(
+                        get: { tool.menuBarKinds.contains(kind) },
+                        set: { tool.setInMenuBar(kind, $0) }
+                    ))
+                    .disabled(tool.menuBarKinds == [kind])
                 }
             }
-            .pickerStyle(.menu)
-            Toggle(VitalsStrings.showValue, isOn: Binding(
-                get: { tool.showsValueInMenuBar },
-                set: { tool.showsValueInMenuBar = $0 }
-            ))
+            PanelDivider()
+                .padding(.vertical, 3)
+            PanelRow(VitalsStrings.showValue) {
+                PanelSwitch(isOn: Binding(
+                    get: { tool.showsValueInMenuBar },
+                    set: { tool.showsValueInMenuBar = $0 }
+                ))
+            }
             Text(VitalsStrings.refreshNote)
-                .font(.caption)
-                .foregroundStyle(.secondary)
+                .font(.system(size: 10.5))
+                .foregroundStyle(Color(nsColor: Palette.ink3))
+                .fixedSize(horizontal: false, vertical: true)
+                .padding(.top, 2)
         }
     }
 
-    private func name(of kind: Reading.Kind) -> String {
-        switch kind {
-        case .disk: VitalsStrings.diskName
-        case .memory: VitalsStrings.memoryName
-        case .battery: VitalsStrings.batteryName
-        }
+    /// A Mac without a battery has no battery icon to offer.
+    private var menuBarChoices: [Reading.Kind] {
+        Reading.Kind.allCases.filter { $0 != .battery || tool.isAvailable(.battery) }
     }
 }

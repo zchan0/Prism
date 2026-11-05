@@ -5,13 +5,12 @@
 set -euo pipefail
 
 cd "${0:A:h}/.."
-# The bundle id stays as it was: changing it would drop the person's settings, notification permission and login item.
-bundle_id=io.github.zchan0.LumosMaxima
+bundle_id=io.github.zchan0.prism
 app=.build/app/Prism.app
 
 install=false
 configuration=release
-version=0.1
+version=0.1.0
 usage="usage: $0 [--debug] [--install] [--version <version>]"
 while (( $# )); do
   case $1 in
@@ -79,7 +78,7 @@ cat > $app/Contents/Info.plist <<EOF
 EOF
 plutil -lint -s $app/Contents/Info.plist
 
-identity=${LUMOS_SIGN_IDENTITY:-Apple Development: zchan0}
+identity=${PRISM_SIGN_IDENTITY:-Apple Development: zchan0}
 # The keychain keeps revoked copies under the same name; only a line ending right after the quoted name is usable.
 fingerprint=$(security find-identity -v -p codesigning | awk -v name="\"$identity\"" '
   { at = index($0, name) }

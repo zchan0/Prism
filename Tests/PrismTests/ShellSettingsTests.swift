@@ -1,5 +1,6 @@
 import Foundation
 import PrismKit
+import SwiftUI
 import Testing
 
 @MainActor
@@ -78,6 +79,7 @@ private final class StubTool: Tool {
     var summary: String { "" }
     func start() {}
     func stop() {}
+    func controlsView() -> AnyView { AnyView(EmptyView()) }
 }
 
 /// Each stub needs its own identity, and a static property cannot differ per instance, so the registrations built in
@@ -91,6 +93,7 @@ private final class StubToolA: Tool {
     var summary: String { "" }
     func start() {}
     func stop() {}
+    func controlsView() -> AnyView { AnyView(EmptyView()) }
 }
 
 @MainActor
@@ -101,6 +104,7 @@ private final class StubToolB: Tool {
     var summary: String { "" }
     func start() {}
     func stop() {}
+    func controlsView() -> AnyView { AnyView(EmptyView()) }
 }
 
 @MainActor
@@ -111,4 +115,5 @@ private final class StubToolC: Tool {
     var summary: String { "" }
     func start() {}
     func stop() {}
+    func controlsView() -> AnyView { AnyView(EmptyView()) }
 }

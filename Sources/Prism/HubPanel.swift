@@ -3,214 +3,275 @@ import Observation
 import PrismKit
 import SwiftUI
 
-/// The panel behind Prism's own menu bar icon: one row per enabled tool, each row expandable to that tool's controls.
-///
-/// This is the "merged" side of the menu bar choice. It never reaches into a tool: it reads `title`, `symbolName`
-/// and `summary`, and shows whatever `hubView()` the tool hands back.
-@MainActor
-@Observable
-final class HubModel {
-    var isShown = false
-    var expanded: ToolID?
+enum HubTab: Hashable {
+    case tool(ToolID)
+    case general
 }
 
 @MainActor
-final class HubPanelController {
-    static let width: CGFloat = 332
+@Observable
+final class HubModel {
+    var tab: HubTab
+    /// Bumped on every opening, so each tab's content is built fresh and its `onAppear` runs again.
+    var opening = 0
+    /// Bumped once a second while the hub is open, so content that SwiftUI cannot observe is read again too.
+    var revision = 0
 
-    private let shell: ShellSettings
-    private let registrations: [ToolRegistration]
-    private let model: HubModel
-    private let panel: FloatingPanelController
-    var onOpenSettings: (() -> Void)?
-
-    init(shell: ShellSettings, registrations: [ToolRegistration]) {
-        self.shell = shell
-        self.registrations = registrations
-        model = HubModel()
-        panel = FloatingPanelController(
-            width: Self.width,
-            content: AnyView(HubView(model: model, shell: shell, registrations: registrations, actions: HubActions(
-                toggleExpanded: { _ in },
-                openSettings: {},
-                quit: {},
-                onHeight: { _ in }
-            )))
-        )
-        rebuild()
-        panel.onVisibilityChange = { [weak self] shown in
-            self?.model.isShown = shown
-            if !shown { self?.model.expanded = nil }
-        }
-    }
-
-    var isShown: Bool { panel.isShown }
-
-    func toggle(below button: NSStatusBarButton) {
-        if isShown {
-            panel.hide()
-        } else {
-            rebuild()
-            panel.toggle(below: button)
-        }
-    }
-
-    /// Opens at the pointer, for the shortcut and for a tool's "Open Prism" menu item.
-    func show(at point: NSPoint) {
-        rebuild()
-        guard let screen = NSScreen.screens.first(where: { $0.frame.contains(point) }) ?? NSScreen.main else { return }
-        panel.show(anchoredAt: NSRect(x: point.x, y: point.y, width: 1, height: 1), placement: .below, on: screen)
-    }
-
-    func hide() { panel.hide() }
-
-    /// Re-reads every tool's summary while the panel is open; called from the shell's one-second tick.
-    func refreshIfVisible() {
-        guard isShown else { return }
-        rebuild()
-        panel.refresh()
-    }
-
-    func refresh() {
-        if isShown { refreshIfVisible() }
-    }
-
-    /// Rebuilt on every opening: a tool's summary and its controls are read fresh, so the panel never shows a stale
-    /// countdown or a byte count from a minute ago.
-    private func rebuild() {
-        let actions = HubActions(
-            toggleExpanded: { [weak self] id in
-                guard let self else { return }
-                model.expanded = model.expanded == id ? nil : id
-                rebuild()
-            },
-            openSettings: { [weak self] in
-                self?.panel.hide()
-                self?.onOpenSettings?()
-            },
-            quit: { NSApp.terminate(nil) },
-            onHeight: { [weak self] height in self?.panel.setContentHeight(height) }
-        )
-        panel.setContent(AnyView(HubView(model: model, shell: shell, registrations: registrations, actions: actions)))
+    init(tab: HubTab) {
+        self.tab = tab
     }
 }
 
 struct HubActions {
-    var toggleExpanded: @MainActor (ToolID) -> Void
-    var openSettings: @MainActor () -> Void
+    var setEnabled: @MainActor (ToolID, Bool) -> Void
+    var setPlacement: @MainActor (ToolID, MenuBarPlacement) -> Void
     var quit: @MainActor () -> Void
     var onHeight: @MainActor (CGFloat) -> Void
+}
+
+/// The hub: one tab per tool, each with the tool's switches, controls and settings, and a tab for Prism itself.
+@MainActor
+final class HubPanelController {
+    static let width: CGFloat = 340
+
+    var onSetEnabled: ((ToolID, Bool) -> Void)?
+    var onSetPlacement: ((ToolID, MenuBarPlacement) -> Void)?
+
+    private let model: HubModel
+    private let loginItem = LoginItem()
+    private let panel: FloatingPanelController
+
+    init(shell: ShellSettings, registrations: [ToolRegistration]) {
+        model = HubModel(tab: registrations.first.map { .tool($0.id) } ?? .general)
+        panel = FloatingPanelController(width: Self.width, content: AnyView(EmptyView()))
+        let actions = HubActions(
+            setEnabled: { [weak self] id, isOn in self?.onSetEnabled?(id, isOn) },
+            setPlacement: { [weak self] id, placement in self?.onSetPlacement?(id, placement) },
+            quit: { NSApp.terminate(nil) },
+            onHeight: { [weak self] height in self?.panel.setContentHeight(height) }
+        )
+        panel.setContent(AnyView(HubView(
+            model: model,
+            shell: shell,
+            registrations: registrations,
+            loginItem: loginItem,
+            actions: actions
+        )))
+    }
+
+    var isShown: Bool { panel.isShown }
+
+    /// Opens below a menu bar item. A nil tab keeps the one the hub showed last.
+    func show(tab: HubTab?, below button: NSStatusBarButton) {
+        prepare(tab)
+        panel.show(below: button)
+    }
+
+    /// Opens at the pointer, for the shortcut: there is no icon to hang from.
+    func show(tab: HubTab?, at point: NSPoint) {
+        guard let screen = NSScreen.screens.first(where: { $0.frame.contains(point) }) ?? NSScreen.main else { return }
+        show(tab: tab, anchoredAt: NSRect(x: point.x, y: point.y, width: 1, height: 1), on: screen)
+    }
+
+    func show(tab: HubTab?, anchoredAt rect: NSRect, on screen: NSScreen) {
+        prepare(tab)
+        panel.show(anchoredAt: rect, placement: .below, on: screen)
+    }
+
+    func hide() {
+        panel.hide()
+    }
+
+    func refreshIfVisible() {
+        guard isShown else { return }
+        model.revision += 1
+    }
+
+    #if DEBUG
+    var window: NSWindow { panel.window }
+    #endif
+
+    private func prepare(_ tab: HubTab?) {
+        if let tab { model.tab = tab }
+        model.opening += 1
+    }
 }
 
 struct HubView: View {
     let model: HubModel
     let shell: ShellSettings
     let registrations: [ToolRegistration]
+    let loginItem: LoginItem
     let actions: HubActions
 
-    private var enabled: [ToolRegistration] {
-        registrations.filter { shell.isEnabled($0.id) }
-    }
-
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            if enabled.isEmpty {
-                Text(Strings.noTools)
-                    .font(.system(size: 12))
-                    .foregroundStyle(Color(nsColor: Palette.ink3))
-                    .padding(.vertical, 10)
-            }
-            ForEach(enabled, id: \.id) { registration in
-                row(registration)
-            }
-            footer
+        let _ = model.revision
+        VStack(spacing: 0) {
+            tabBar
+            PanelDivider()
+            page
+                .id(model.opening)
+                .padding(.horizontal, 14)
+                .padding(.top, 6)
+                .padding(.bottom, 12)
         }
-        .padding(EdgeInsets(top: 10, leading: 10, bottom: 8, trailing: 10))
         .frame(width: HubPanelController.width)
+        .fixedSize(horizontal: false, vertical: true)
         .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { actions.onHeight($0) }
     }
 
-    private func row(_ registration: ToolRegistration) -> some View {
-        let isExpanded = model.expanded == registration.id
-        return VStack(alignment: .leading, spacing: 8) {
-            Button {
-                actions.toggleExpanded(registration.id)
-            } label: {
-                HStack(spacing: 8) {
-                    Image(systemName: registration.tool.symbolName)
-                        .font(.system(size: 13))
-                        .foregroundStyle(Color(nsColor: isExpanded ? Palette.sun : Palette.ink2))
-                        .frame(width: 18)
-                    VStack(alignment: .leading, spacing: 1) {
-                        Text(registration.tool.title)
-                            .font(.system(size: 12.5, weight: .medium))
-                            .foregroundStyle(Color(nsColor: Palette.ink))
-                        Text(registration.tool.summary)
-                            .font(.system(size: 11, design: .rounded))
-                            .monospacedDigit()
-                            .foregroundStyle(Color(nsColor: Palette.ink3))
-                            .lineLimit(1)
-                    }
-                    Spacer(minLength: 4)
-                    Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
-                        .font(.system(size: 9, weight: .semibold))
-                        .foregroundStyle(Color(nsColor: Palette.ink3))
-                }
-                .padding(.horizontal, 10)
-                .padding(.vertical, 8)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .background(
-                    RoundedRectangle(cornerRadius: 9)
-                        .fill(Color(nsColor: Palette.card))
-                )
-                .contentShape(Rectangle())
-            }
-            .buttonStyle(.plain)
-
-            if isExpanded, let detail = registration.tool.hubView() {
-                detail
-                    .padding(.horizontal, 4)
-                    .padding(.bottom, 4)
-            }
-        }
-    }
-
-    private var footer: some View {
+    private var tabBar: some View {
         HStack(spacing: 2) {
-            Text(verbatim: Strings.appName)
-                .font(.system(size: 11, weight: .semibold, design: .rounded))
-                .foregroundStyle(Color(nsColor: Palette.ink3))
-            Spacer(minLength: 0)
-            iconButton("slider.horizontal.3", Strings.settings, action: actions.openSettings)
-            iconButton("power", Strings.quit, action: actions.quit)
+            ForEach(registrations, id: \.id) { registration in
+                HubTabButton(
+                    symbol: registration.tool.symbolName,
+                    primaryLayerOnly: registration.tool.symbolPrimaryLayerOnly,
+                    title: registration.tool.title,
+                    accessibilityTitle: registration.tool.title,
+                    isSelected: model.tab == .tool(registration.id),
+                    isDimmed: !shell.isEnabled(registration.id)
+                ) {
+                    model.tab = .tool(registration.id)
+                }
+            }
+            Spacer(minLength: 6)
+            Rectangle()
+                .fill(Color(nsColor: Palette.hair))
+                .frame(width: 1, height: 16)
+            HubTabButton(
+                symbol: "gearshape",
+                title: nil,
+                accessibilityTitle: Strings.generalTab,
+                isSelected: model.tab == .general,
+                isDimmed: false
+            ) {
+                model.tab = .general
+            }
         }
-        .padding(.top, 4)
-        .padding(.horizontal, 4)
+        .padding(.horizontal, 8)
+        .padding(.vertical, 7)
     }
 
-    private func iconButton(_ symbol: String, _ title: String, action: @escaping @MainActor () -> Void) -> some View {
-        HubIconButton(symbol: symbol, title: title, action: action)
+    @ViewBuilder
+    private var page: some View {
+        switch model.tab {
+        case .general:
+            HubGeneralPage(loginItem: loginItem, quit: actions.quit)
+        case .tool(let id):
+            if let registration = registrations.first(where: { $0.id == id }) {
+                HubToolPage(registration: registration, shell: shell, actions: actions)
+            }
+        }
     }
 }
 
-private struct HubIconButton: View {
-    let symbol: String
-    let title: String
+/// A tool's tab: the shell's two switches on top, then what the tool draws itself.
+private struct HubToolPage: View {
+    let registration: ToolRegistration
+    let shell: ShellSettings
+    let actions: HubActions
+
+    var body: some View {
+        let id = registration.id
+        let isOn = shell.isEnabled(id)
+        VStack(alignment: .leading, spacing: 0) {
+            PanelRow(Strings.turnedOn) {
+                PanelSwitch(isOn: Binding(
+                    get: { shell.isEnabled(id) },
+                    set: { actions.setEnabled(id, $0) }
+                ))
+            }
+            PanelRow(Strings.showInMenuBar) {
+                PanelSwitch(isOn: Binding(
+                    get: { shell.placement(of: id) == .ownIcon },
+                    set: { actions.setPlacement(id, $0 ? .ownIcon : .hubOnly) }
+                ))
+                .disabled(!isOn)
+            }
+            if isOn {
+                PanelDivider()
+                    .padding(.top, 4)
+                    .padding(.bottom, 12)
+                registration.tool.controlsView()
+                if let settings = registration.tool.settingsView() {
+                    PanelDivider()
+                        .padding(.top, 10)
+                        .padding(.bottom, 3)
+                    settings
+                }
+            } else {
+                Text(Strings.turnedOffNote)
+                    .font(.system(size: 11))
+                    .foregroundStyle(Color(nsColor: Palette.ink3))
+                    .padding(.top, 4)
+            }
+        }
+    }
+}
+
+/// Prism's own tab: what used to be the settings window.
+private struct HubGeneralPage: View {
+    let loginItem: LoginItem
+    let quit: @MainActor () -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            PanelRow(Strings.loginItem, note: loginNote) {
+                PanelSwitch(isOn: Binding(
+                    get: { loginItem.isOn },
+                    set: { loginItem.setOn($0) }
+                ))
+                .disabled(!loginItem.isAvailable)
+            }
+            PanelRow(Strings.togglePanelShortcut) {
+                Text(verbatim: GlobalHotKey.keyName)
+                    .font(.system(size: 11.5, weight: .medium, design: .rounded))
+                    .foregroundStyle(Color(nsColor: Palette.ink2))
+                    .padding(.horizontal, 7)
+                    .frame(height: 20)
+                    .background(RoundedRectangle(cornerRadius: 5).fill(Color(nsColor: Palette.chip)))
+            }
+            Text(Strings.version(Self.version))
+                .font(.system(size: 11.5))
+                .foregroundStyle(Color(nsColor: Palette.ink3))
+                .padding(.vertical, 7)
+            PanelDivider()
+                .padding(.top, 4)
+                .padding(.bottom, 10)
+            HubQuitButton(action: quit)
+        }
+        .onAppear { loginItem.refresh() }
+    }
+
+    private var loginNote: String? {
+        if let error = loginItem.error { return error }
+        return loginItem.status == .requiresApproval ? Strings.loginItemNeedsApproval : nil
+    }
+
+    private static var version: String {
+        Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "dev"
+    }
+}
+
+private struct HubQuitButton: View {
     let action: @MainActor () -> Void
     @State private var hovered = false
 
     var body: some View {
         Button(action: action) {
-            Image(systemName: symbol)
-                .font(.system(size: 12))
-                .foregroundStyle(Color(nsColor: hovered ? Palette.ink : Palette.ink2))
-                .frame(width: 24, height: 22)
-                .background(RoundedRectangle(cornerRadius: 6).fill(hovered ? Color(nsColor: Palette.rowHover) : .clear))
-                .contentShape(Rectangle())
+            HStack(spacing: 6) {
+                Image(systemName: "power")
+                    .font(.system(size: 11, weight: .semibold))
+                Text(Strings.quit)
+                    .font(.system(size: 12, weight: .medium))
+            }
+            .foregroundStyle(Color(nsColor: Palette.ink2))
+            .frame(maxWidth: .infinity)
+            .frame(height: 28)
+            .background(RoundedRectangle(cornerRadius: 8).fill(Color(nsColor: hovered ? Palette.rowHover : Palette.chip)))
+            .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .help(title)
-        .accessibilityLabel(title)
         .onHover { hovered = $0 }
     }
 }

@@ -17,6 +17,7 @@ public enum Palette {
     public static let panelFill = dynamic(light: rgb(0xF7F7FA), dark: rgb(0x1D1E23))
     public static let panelBorder = dynamic(light: white(0.65), dark: white(0.10))
     public static let rowHover = dynamic(light: black(0.045), dark: white(0.06))
+    public static let switchOff = dynamic(light: black(0.13), dark: white(0.18))
     public static let onFill = dynamic(light: rgb(0xFFFFFF), dark: rgb(0x1E1F24))
     public static let onWarm = rgb(0x3A2500)
     public static let dim = dynamic(light: black(0.22), dark: white(0.24))

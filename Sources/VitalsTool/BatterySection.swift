@@ -1,12 +1,16 @@
 import Foundation
+import IOKit
 import IOKit.ps
 
-/// The battery, from IOPowerSources.
+/// The battery: the charge from IOPowerSources, the health from the battery controller's registry entry.
 public struct BatteryReading: Equatable, Sendable {
     public var level: Int
     public var isCharging: Bool
     public var isOnAC: Bool
     public var hasBattery: Bool
+    public var cycleCount: Int?
+    /// Today's full charge as a percentage of the capacity the battery was designed for.
+    public var maximumCapacity: Int?
 
     public var reading: Reading? {
         guard hasBattery else { return nil }
@@ -15,8 +19,23 @@ public struct BatteryReading: Equatable, Sendable {
             value: VitalsStrings.percent(level),
             detail: isCharging ? VitalsStrings.charging : (isOnAC ? VitalsStrings.pluggedIn : VitalsStrings.onBattery),
             fraction: Double(level) / 100,
-            isTight: level <= 20 && !isOnAC
+            isTight: level <= 20 && !isOnAC,
+            note: healthNote
         )
+    }
+
+    var healthNote: String? {
+        let parts = [
+            maximumCapacity.map(VitalsStrings.maximumCapacity),
+            cycleCount.map(VitalsStrings.cycles),
+        ].compactMap { $0 }
+        return parts.isEmpty ? nil : parts.joined(separator: " · ")
+    }
+
+    /// A new battery can hold slightly more than it was designed for; the system shows that as 100%, and so does this.
+    static func maximumCapacity(fullCharge: Int, design: Int) -> Int? {
+        guard design > 0, fullCharge > 0 else { return nil }
+        return min(100, Int((Double(fullCharge) / Double(design) * 100).rounded()))
     }
 
     public static func read() -> BatteryReading {
@@ -36,6 +55,25 @@ public struct BatteryReading: Equatable, Sendable {
             }
             break
         }
+        if result.hasBattery {
+            readHealth(into: &result)
+        }
         return result
+    }
+
+    /// IOPowerSources has no cycle count or capacity, and its own health key disagrees with System Information, so
+    /// these come straight from the `AppleSmartBattery` registry entry, the same one `ioreg` prints.
+    private static func readHealth(into result: inout BatteryReading) {
+        let service = IOServiceGetMatchingService(kIOMainPortDefault, IOServiceMatching("AppleSmartBattery"))
+        guard service != IO_OBJECT_NULL else { return }
+        defer { IOObjectRelease(service) }
+        func integer(_ key: String) -> Int? {
+            IORegistryEntryCreateCFProperty(service, key as CFString, kCFAllocatorDefault, 0)?
+                .takeRetainedValue() as? Int
+        }
+        result.cycleCount = integer("CycleCount")
+        if let fullCharge = integer("AppleRawMaxCapacity"), let design = integer("DesignCapacity") {
+            result.maximumCapacity = maximumCapacity(fullCharge: fullCharge, design: design)
+        }
     }
 }

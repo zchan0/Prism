@@ -3,10 +3,10 @@ import Observation
 import PrismKit
 import SwiftUI
 
-/// System readings in the menu bar: disk, memory and battery.
+/// System readings in the menu bar: CPU, memory, disk and battery.
 ///
-/// The tool shows one reading at a time in the menu bar — the one the person picked — because three numbers next to
-/// three glyphs is more menu bar than this earns. All of them are in the panel.
+/// Each reading the person turns on gets its own icon in the menu bar, so each one can be ⌘-dragged or hidden on its
+/// own. All of them are in the panel.
 @MainActor
 @Observable
 public final class VitalsTool: Tool {
@@ -14,58 +14,91 @@ public final class VitalsTool: Tool {
 
     private let settings: ToolSettings
     private let ticker = Ticker()
-    /// Which reading the menu bar shows. Disk by default: it changes slowly, so the number does not flicker.
-    public var shown: Reading.Kind {
-        get { Reading.Kind(rawValue: settings.string("shown", default: Reading.Kind.disk.rawValue)) ?? .disk }
-        set { settings.set(newValue.rawValue, for: "shown") }
-    }
+    /// The readings with an icon in the menu bar. Disk alone by default: it changes slowly, so its number does not
+    /// flicker.
+    public private(set) var menuBarKinds: Set<Reading.Kind>
     public var showsValueInMenuBar: Bool {
-        get { settings.bool("showsValue", default: true) }
-        set { settings.set(newValue, for: "showsValue") }
+        didSet { settings.set(showsValueInMenuBar, for: "showsValue") }
     }
 
+    public private(set) var cpu: CPUReading?
     public private(set) var disk: DiskReading?
     public private(set) var memory: MemoryReading?
     public private(set) var battery: BatteryReading?
     private var started = false
-    private var lastImage: NSImage?
+    @ObservationIgnored private var lastTicks: CPUTicks?
+    @ObservationIgnored private var glyphs: [Reading.Kind: MenuBarGlyph.Cache] = [:]
 
     public init(settings: ToolSettings = ToolSettings(tool: VitalsTool.id)) {
         self.settings = settings
+        menuBarKinds = Set(Reading.Kind.allCases.filter { settings.bool(Self.menuBarKey($0), default: $0 == .disk) })
+        showsValueInMenuBar = settings.bool("showsValue", default: true)
         refresh()
     }
 
     public var title: String { "Vitals" }
-    public var symbolName: String { shownReading?.symbolName ?? "internaldrive.fill" }
+    public var symbolName: String { menuBarReadings.first?.symbolName ?? Reading.Kind.disk.symbolName }
 
     public var summary: String {
-        guard let reading = shownReading else { return VitalsStrings.unavailable }
-        return reading.summary
+        guard !menuBarReadings.isEmpty else { return VitalsStrings.unavailable }
+        return menuBarReadings.map(\.summary).joined(separator: " · ")
     }
 
-    /// Every reading that has something to say, in a stable order.
+    /// Every reading that has something to say, fastest-moving first.
     public var readings: [Reading] {
-        [disk?.reading, memory?.reading, battery?.reading].compactMap { $0 }
+        [cpu?.reading, memory?.reading, disk?.reading, battery?.reading].compactMap { $0 }
     }
 
-    public var shownReading: Reading? {
-        readings.first { $0.kind == shown } ?? readings.first
+    public var menuBarReadings: [Reading] {
+        readings.filter { menuBarKinds.contains($0.kind) }
+    }
+
+    /// Turning off the last one is refused: taking Vitals out of the menu bar is the shell's own switch.
+    public func setInMenuBar(_ kind: Reading.Kind, _ isOn: Bool) {
+        guard isOn || menuBarKinds != [kind] else { return }
+        if isOn {
+            menuBarKinds.insert(kind)
+        } else {
+            menuBarKinds.remove(kind)
+        }
+        settings.set(isOn, for: Self.menuBarKey(kind))
+    }
+
+    private static func menuBarKey(_ kind: Reading.Kind) -> String {
+        "menuBar.\(kind.rawValue)"
     }
 
     public func start() {
         guard !started else { return }
         started = true
         refresh()
-        // Memory moves constantly and disk barely moves; one slow timer keeps both honest without a per-second read.
+        // Every reading moves on one slow timer, so the panel does not have one number jumping while the rest sit still.
         ticker.start(every: 20) { [weak self] in self?.refresh() }
+        // CPU load is the difference between two samples, so the first reading needs a second sample soon after.
+        Task { [weak self] in
+            try? await Task.sleep(for: .seconds(2))
+            guard let self, started else { return }
+            refresh()
+        }
     }
 
     public func stop() {
         started = false
         ticker.stop()
+        lastTicks = nil
+        cpu = nil
+    }
+
+    private func sampleCPU() {
+        guard started, let ticks = CPUTicks.read() else { return }
+        if let lastTicks, let next = CPUReading.between(lastTicks, ticks), next != cpu {
+            cpu = next
+        }
+        lastTicks = ticks
     }
 
     public func refresh() {
+        sampleCPU()
         let nextDisk = DiskReading.read(volumeAt: settings.string("volumePath", default: "/"))
         let nextMemory = MemoryReading.read()
         let nextBattery = BatteryReading.read()
@@ -77,21 +110,29 @@ public final class VitalsTool: Tool {
 
     public func isAvailable(_ kind: Reading.Kind) -> Bool {
         switch kind {
+        case .cpu: cpu != nil
         case .disk: disk != nil
         case .memory: memory != nil
         case .battery: battery?.hasBattery ?? false
         }
     }
 
-    public func statusItemImage() -> NSImage? {
-        guard let reading = shownReading else { return nil }
-        let image = VitalsIcon.image(reading: reading, showsValue: showsValueInMenuBar)
-        guard image !== lastImage else { return lastImage }
-        lastImage = image
-        return image
+    public func statusIcons() -> [StatusIcon] {
+        Reading.Kind.allCases.filter(menuBarKinds.contains).compactMap { kind in
+            let reading = readings.first { $0.kind == kind }
+            // CPU load needs a second sample, so until then its icon shows without a number rather than appear late.
+            guard reading != nil || kind == .cpu else { return nil }
+            let glyph = glyphs[kind] ?? MenuBarGlyph.Cache()
+            glyphs[kind] = glyph
+            return StatusIcon(id: kind.rawValue, image: glyph.image(
+                symbol: reading?.symbolName ?? kind.symbolName,
+                text: showsValueInMenuBar ? reading?.menuBarText : nil,
+                accessibilityDescription: reading?.summary ?? kind.name
+            ))
+        }
     }
 
-    public func hubView() -> AnyView? {
+    public func controlsView() -> AnyView {
         AnyView(VitalsPanelView(tool: self))
     }
 
@@ -108,11 +149,16 @@ internal enum VitalsStrings {
     static let charging = String(localized: "charging")
     static let pluggedIn = String(localized: "plugged in")
     static let onBattery = String(localized: "on battery")
+    static let cpuName = String(localized: "CPU")
+    static func cpuSplit(user: Int, system: Int) -> String { String(localized: "user \(user)% · system \(system)%") }
+    static func maximumCapacity(_ percent: Int) -> String { String(localized: "Maximum capacity \(percent)%") }
+    static func cycles(_ count: Int) -> String { String(localized: "\(count) cycles") }
     static let diskName = String(localized: "Disk")
     static let memoryName = String(localized: "Memory")
     static let batteryName = String(localized: "Battery")
-    static let shownInMenuBar = String(localized: "Shows in the menu bar")
+    static let menuBarIcons = String(localized: "Icons in the menu bar")
+    static let menuBarIconsNote = String(localized: "Each reading that is on gets its own icon. To take Vitals out of the menu bar, turn off Show in the menu bar.")
     static let showValue = String(localized: "Show the number next to the icon")
-    static let refreshNote = String(localized: "Disk and memory refresh every 20 seconds, and whenever the panel opens.")
+    static let refreshNote = String(localized: "Every reading refreshes every 20 seconds, and whenever the panel opens. CPU shows the average load since the last refresh.")
     static let includesReclaimable = String(localized: "Available includes space macOS can reclaim, which is the number Finder shows.")
 }

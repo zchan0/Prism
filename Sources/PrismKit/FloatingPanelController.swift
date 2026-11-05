@@ -3,7 +3,7 @@ import SwiftUI
 
 /// A borderless panel that hangs off an anchor and closes when the person clicks elsewhere.
 ///
-/// Every tool's own panel and the hub use this one, so they share the glass background, the placement arithmetic and
+/// The quick panel and the hub both use this, so they share the glass background, the placement arithmetic and
 /// the outside click handling instead of each reimplementing them slightly differently.
 @MainActor
 public final class FloatingPanelController {
@@ -43,17 +43,13 @@ public final class FloatingPanelController {
         hosting.rootView = content
     }
 
-    public func toggle(below button: NSStatusBarButton) {
-        if isShown {
-            hide()
-        } else {
-            guard let window = button.window, let screen = window.screen ?? NSScreen.main else { return }
-            show(
-                anchoredAt: window.convertToScreen(button.convert(button.bounds, to: nil)),
-                placement: .below,
-                on: screen
-            )
-        }
+    public func show(below button: NSStatusBarButton) {
+        guard let window = button.window, let screen = window.screen ?? NSScreen.main else { return }
+        show(
+            anchoredAt: window.convertToScreen(button.convert(button.bounds, to: nil)),
+            placement: .below,
+            on: screen
+        )
     }
 
     public func show(anchoredAt rect: NSRect, placement: Placement, on screen: NSScreen) {
@@ -68,7 +64,7 @@ public final class FloatingPanelController {
         onVisibilityChange?(true)
     }
 
-    /// Rebuilds the content without moving the window, so a tool's row can be expanded while the panel stays open.
+    /// Lays the content out again after it changed while the panel is open.
     public func refresh() {
         guard isShown else { return }
         panel.contentView?.layoutSubtreeIfNeeded()

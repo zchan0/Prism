@@ -1,5 +1,5 @@
 import AppKit
-import AwakeTool
+import LumosTool
 import VitalsTool
 import PrismKit
 
@@ -14,8 +14,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
         #endif
 
-        // Before any tool reads a setting, so the first launch after the rename looks like an upgrade.
-        SettingsMigration.runIfNeeded()
         let registrations = Self.registrations()
         let toolbox = ToolboxApp(
             registrations: registrations,
@@ -29,16 +27,19 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
 
         #if DEBUG
-        if ProcessInfo.processInfo.environment["PRISM_START_AWAKE"] == "1",
-           let awake = registrations.first(where: { $0.id.rawValue == "awake" })?.tool as? AwakeTool {
-            awake.startForDebug()
+        if ProcessInfo.processInfo.environment["PRISM_START_LUMOS"] == "1",
+           let lumos = registrations.first(where: { $0.id.rawValue == "lumos" })?.tool as? LumosTool {
+            lumos.startForDebug()
         }
-        if let path = ProcessInfo.processInfo.environment["PRISM_SETTINGS_CAPTURE"] {
+        if let directory = ProcessInfo.processInfo.environment["PRISM_CAPTURE"] {
             Task {
                 try? await Task.sleep(for: .seconds(1.5))
-                let ok = await DebugCapture.window(toolbox.settingsWindow(), to: path)
+                let ok = await toolbox.capturePanels(to: directory)
                 exit(ok ? 0 : 1)
             }
+        }
+        if let path = ProcessInfo.processInfo.environment["PRISM_STATUS_CAPTURE"] {
+            exit(DebugCapture.statusIcons(to: path) ? 0 : 1)
         }
         if ProcessInfo.processInfo.environment["PRISM_DUMP"] == "1" {
             Task {
@@ -61,7 +62,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     /// The one place that lists the tools. Adding one means adding a module and a line here.
     private static func registrations() -> [ToolRegistration] {
         [
-            ToolRegistration(AwakeTool(), defaultPlacement: .ownIcon),
+            ToolRegistration(LumosTool(), defaultPlacement: .ownIcon),
             ToolRegistration(VitalsTool(), defaultPlacement: .ownIcon),
         ]
     }

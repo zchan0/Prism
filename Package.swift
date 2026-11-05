@@ -10,16 +10,16 @@ let package = Package(
 
         // One module per tool. A tool only exposes the type that conforms to `Tool`; the rest stays internal to it,
         // so two tools cannot reach into each other by accident.
-        .target(name: "AwakeTool", dependencies: ["PrismKit"]),
+        .target(name: "LumosTool", dependencies: ["PrismKit"]),
         .target(name: "VitalsTool", dependencies: ["PrismKit"]),
 
         .executableTarget(
             name: "Prism",
-            dependencies: ["PrismKit", "AwakeTool", "VitalsTool"]
+            dependencies: ["PrismKit", "LumosTool", "VitalsTool"]
         ),
         .testTarget(
             name: "PrismTests",
-            dependencies: ["PrismKit", "AwakeTool", "VitalsTool"]
+            dependencies: ["PrismKit", "LumosTool", "VitalsTool"]
         ),
     ]
 )

@@ -8,7 +8,7 @@ public enum GlobalHotKey {
 
     private static var action: (@MainActor () -> Void)?
     private static var hotKeyRef: EventHotKeyRef?
-    private static let logger = Logger(subsystem: "LumosMaxima", category: "GlobalHotKey")
+    private static let logger = Logger(subsystem: "io.github.zchan0.prism", category: "GlobalHotKey")
 
     @discardableResult
     public static func registerToggle(_ action: @escaping @MainActor () -> Void) -> OSStatus {

@@ -1,6 +1,7 @@
 import Foundation
+import Observation
 import Testing
-@testable import AwakeTool
+@testable import LumosTool
 import PrismKit
 
 struct BatteryPolicyTests {
@@ -32,34 +33,6 @@ struct BatteryPolicyTests {
     @Test func ignoresABatteryThatReportsNoLevel() {
         let snapshot = BatterySnapshot(hasBattery: true, level: nil, isCharging: false, isOnAC: false)
         #expect(!BatteryPolicy.stopsSession(snapshot, threshold: 50))
-    }
-}
-
-struct SunStageTests {
-    @Test func startsAsASpark() {
-        #expect(SunStage.stage(for: 0) == .spark)
-        #expect(SunStage.stage(for: 0.9) == .spark)
-    }
-
-    @Test func crossesEachThresholdExactly() {
-        #expect(SunStage.stage(for: 1) == .ember)
-        #expect(SunStage.stage(for: 3) == .flare)
-        #expect(SunStage.stage(for: 6) == .sol)
-        #expect(SunStage.stage(for: 10) == .nova)
-        #expect(SunStage.stage(for: 400) == .nova)
-    }
-
-    @Test func growsWithTheStage() {
-        let scales = SunStage.allCases.map(\.scale)
-        #expect(scales == scales.sorted())
-    }
-
-    @Test func progressFillsBetweenStages() {
-        #expect(SunStage.progress(for: 0) == 0)
-        #expect(SunStage.progress(for: 0.5) == 0.5)
-        #expect(SunStage.progress(for: 1) == 0)
-        #expect(SunStage.progress(for: 2) == 0.5)
-        #expect(SunStage.progress(for: 11) == 1)
     }
 }
 
@@ -114,6 +87,32 @@ struct SessionEngineTests {
         let ticker = FakeTicker()
         let engine = SessionEngine(assertion: assertion, ticker: ticker, clock: now)
         return (engine, assertion, ticker)
+    }
+
+    /// The controls read only these three, so a session that changes none of them would not redraw them.
+    private func observesChange(of engine: SessionEngine, when change: () -> Void) -> Bool {
+        final class Flag: @unchecked Sendable { var raised = false }
+        let flag = Flag()
+        withObservationTracking {
+            _ = engine.isAwake
+            _ = engine.length
+            _ = engine.remaining()
+        } onChange: {
+            flag.raised = true
+        }
+        change()
+        return flag.raised
+    }
+
+    @Test func startingWithTheLengthItAlreadyHadStillRedraws() {
+        let (engine, _, _) = makeEngine { Date(timeIntervalSinceReferenceDate: 0) }
+        #expect(observesChange(of: engine) { engine.start(length: .forever, keepsDisplayAwake: true) })
+    }
+
+    @Test func stoppingAnOpenEndedSessionRedraws() {
+        let (engine, _, _) = makeEngine { Date(timeIntervalSinceReferenceDate: 0) }
+        engine.start(length: .forever, keepsDisplayAwake: true)
+        #expect(observesChange(of: engine) { engine.stop(.manual) })
     }
 
     @Test func startingHoldsTheAssertionAndTicks() {
@@ -193,15 +192,47 @@ struct LidControlTests {
         #expect(!LidControl.parseSleepDisabled("System-wide power settings:\n sleep 1"))
     }
 
-    @Test func installerWritesARootDaemonThatRechecksTheApp() {
+    @Test func installerWritesARootDaemonThatWatchesTheFlag() {
         let script = LidControl.installerScript
-        #expect(script.contains("/Library/PrivilegedHelperTools/LumosMaximaLid.sh"))
-        #expect(script.contains(LidControl.daemonPath))
+        #expect(script.contains("cat > \(LidControl.scriptPath)"))
+        #expect(script.contains("cat > \(LidControl.daemonPath)"))
         #expect(script.contains("launchctl bootstrap system"))
-        #expect(script.contains("pmset -a disablesleep $want"))
-        #expect(script.contains("pgrep -x LumosMaxima"))
-        #expect(script.contains("<key>WatchPaths</key>"))
         #expect(LidControl.daemonPlist.contains("<string>\(LidControl.flagDirectory)</string>"))
-        #expect(LidControl.helperScript.contains("pmset -g"))
+        #expect(LidControl.helperScript.contains("flag=\(LidControl.flagPath)"))
+        #expect(LidControl.helperScript.contains("/usr/sbin/lsof -t -- \"$flag\""))
+        #expect(LidControl.helperScript.contains("pmset -a disablesleep $want"))
+        #expect(!LidControl.helperScript.contains("pgrep"))
+    }
+
+    /// The helper's whole test of whether the app is running: does any process hold the flag open.
+    @Test func aHeldFlagIsSeenUntilItIsReleased() throws {
+        let path = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString).path
+        defer { try? FileManager.default.removeItem(atPath: path) }
+
+        var flag = LidControl.holdFile(at: path)
+        #expect(flag != nil)
+        #expect(try processes(holding: path) == [getpid()])
+
+        flag = nil
+        #expect(try processes(holding: path).isEmpty)
+    }
+
+    @Test func aHelperFromAnotherBuildIsReplaced() {
+        #expect(LidControl.matches(installed: LidControl.helperScript + "\n", expected: LidControl.helperScript))
+        #expect(!LidControl.matches(installed: nil, expected: LidControl.helperScript))
+        #expect(!LidControl.matches(installed: "#!/bin/zsh\nexit 0", expected: LidControl.helperScript))
+    }
+
+    private func processes(holding path: String) throws -> [Int32] {
+        let lsof = Process()
+        lsof.executableURL = URL(fileURLWithPath: "/usr/sbin/lsof")
+        lsof.arguments = ["-t", "--", path]
+        let output = Pipe()
+        lsof.standardOutput = output
+        lsof.standardError = FileHandle.nullDevice
+        try lsof.run()
+        lsof.waitUntilExit()
+        let text = String(decoding: output.fileHandleForReading.readDataToEndOfFile(), as: UTF8.self)
+        return text.split(separator: "\n").compactMap { Int32($0) }
     }
 }

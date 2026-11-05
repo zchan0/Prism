@@ -1,33 +1,48 @@
 {
-  "fill" : {
-    "linear-gradient" : [
-      "srgb:0.20392,0.15686,0.29020,1.00000",
-      "srgb:0.07059,0.05490,0.10196,1.00000"
+  "fill": {
+    "linear-gradient": [
+      "srgb:0.13725,0.14902,0.29020,1.00000",
+      "srgb:0.05490,0.06275,0.14118,1.00000"
     ]
   },
-  "groups" : [
+  "groups": [
     {
-      "layers" : [
-        { "image-name" : "halo.svg", "name" : "halo", "glass" : false }
+      "layers": [
+        {
+          "image-name": "prism.svg",
+          "name": "prism"
+        }
       ]
     },
     {
-      "layers" : [
-        { "image-name" : "rays.svg", "name" : "rays" }
+      "layers": [
+        {
+          "image-name": "inside.svg",
+          "name": "inside",
+          "glass": false
+        }
       ]
     },
     {
-      "layers" : [
-        { "image-name" : "disc.svg", "name" : "disc" }
+      "layers": [
+        {
+          "image-name": "spectrum.svg",
+          "name": "spectrum",
+          "glass": false
+        }
       ]
     },
     {
-      "layers" : [
-        { "image-name" : "face.svg", "name" : "face", "glass" : false }
+      "layers": [
+        {
+          "image-name": "beam.svg",
+          "name": "beam",
+          "glass": false
+        }
       ]
     }
   ],
-  "supported-platforms" : {
-    "squares" : "shared"
+  "supported-platforms": {
+    "squares": "shared"
   }
 }
