@@ -6,9 +6,9 @@
 
 **菜单栏里的小工具箱：让 Mac 保持唤醒，也随时看看它的状态。**
 
-![macOS 14+](https://img.shields.io/badge/macOS-14%2B-111?logo=apple&logoColor=white) ![Swift 6](https://img.shields.io/badge/Swift-6-F05138?logo=swift&logoColor=white) ![English and Chinese](https://img.shields.io/badge/UI-English%20%C2%B7%20%E4%B8%AD%E6%96%87-555)
+![macOS 14+](https://img.shields.io/badge/macOS-14%2B-111?logo=apple&logoColor=white) ![Swift 6](https://img.shields.io/badge/Swift-6-F05138?logo=swift&logoColor=white) ![English and Chinese](https://img.shields.io/badge/UI-English%20%C2%B7%20%E4%B8%AD%E6%96%87-555) ![MIT License](https://img.shields.io/badge/license-MIT-555)
 
-[安装](#安装) · [工具](#工具) · [菜单栏和面板](#菜单栏和面板) · [合盖保持运行](#合盖保持运行) · [开发](#开发)
+[下载](https://github.com/zchan0/Prism/releases/latest) · [安装](#安装) · [工具](#工具) · [菜单栏和面板](#菜单栏和面板) · [合盖保持运行](#合盖保持运行) · [开发](#开发)
 
 [English](README.md) · 简体中文
 
@@ -68,13 +68,17 @@ Prism 没有自己的常驻图标。工具的「显示在菜单栏」开关打�
 
 ## 安装
 
-在这个仓库的 clone 里运行：
+1. 从 [Releases](https://github.com/zchan0/Prism/releases/latest) 下载 `Prism-<版本号>.zip`，解压后把 `Prism.app` 拖进「应用程序」。
+2. 打开 app。Prism 没有经过 Apple 公证，macOS 会提示无法验证开发者：点「完成」。
+3. 打开「系统设置 → 隐私与安全性」，在靠下的位置找到 Prism，点「仍要打开」并确认。之后就能正常打开了。
 
-```sh
-scripts/package.sh --install
-```
+也可以跳过第 2、3 步，改为运行一次 `xattr -dr com.apple.quarantine /Applications/Prism.app`。
 
-这会构建 release 版 app，有 Apple Development 证书时用它签名，然后复制到 `/Applications/Prism.app`。目前还没有公证过的下载版本。
+更新时，退出 Prism，用新的 `Prism.app` 替换旧的。如果 macOS 拦下新版本，再做一遍第 2、3 步。
+
+Prism 需要 macOS 14 或更高版本，Apple 芯片和 Intel 芯片的 Mac 都能用。
+
+想自己构建的话，在这个仓库的 clone 里运行 `scripts/package.sh --install`。它会构建 universal 的 release 版 app，用 ad hoc 签名，然后复制到 `/Applications/Prism.app`。
 
 ## 合盖保持运行
 
@@ -100,11 +104,12 @@ sudo pmset -a disablesleep 0
 ## 开发
 
 ```sh
-swift build                # 编译
-swift test                 # 单元测试（Swift Testing）
-scripts/package.sh         # 生成 .build/app/Prism.app
-scripts/readme-assets.sh   # 重新生成 docs/images
-scripts/release.sh <version>   # 测试、打包、压缩并在本地打 tag
+swift build                    # 编译
+swift test                     # 单元测试（Swift Testing）
+scripts/package.sh             # 生成 .build/app/Prism.app，universal，ad hoc 签名
+scripts/readme-assets.sh       # 重新生成 docs/images
+scripts/dist.sh <version>      # 和正式发布一样测试、打包，压缩到 .build/dist
+scripts/release.sh <version>   # 推送 tag，触发发布
 ```
 
 Prism 是一个 SwiftPM 包。菜单栏图标和面板用 AppKit，里面的界面用 SwiftUI。
@@ -128,7 +133,17 @@ debug 版本认几个环境变量，`docs/images` 就是这么生成的：
 | `PRISM_APPEARANCE=light` 或 `dark` | 强制外观。 |
 | `PRISM_DUMP=1` | 打印每个工具的摘要，然后退出。 |
 
+### 发布
+
+1. 在 `CHANGELOG.md` 里加一节 `## [X.Y.Z] - YYYY-MM-DD`，并在文末加上它的链接。提交并推送 `main`。
+2. 运行 `scripts/release.sh X.Y.Z`。`main` 有未提交的改动或没推送、changelog 缺这一节、tag `vX.Y.Z` 已存在时，它都会停下。检查通过后，它先用 `scripts/dist.sh` 在本地试一遍，再推送 tag。
+3. tag 会触发 `.github/workflows/release.yml` 里的 Release workflow。它在 macOS 26 runner 上测试、构建 Prism，然后把 zip、它的 SHA-256 和这一版的 changelog 发布成 GitHub Release。`release.sh` 会等它跑完，并打印 Release 链接。
+
 ## 说明
 
 - 没有电池的机器上，Vitals 不显示电池读数，低电量保护也不起作用。
 - 界面跟随系统语言，支持中文和英文。如果只想给 Prism 换语言，去「系统设置 → 通用 → 语言与地区 → 应用程序」。
+
+## 许可
+
+[MIT](LICENSE)

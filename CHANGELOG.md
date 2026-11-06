@@ -1,8 +1,10 @@
 # Changelog
 
-## [0.1.0] - 2026-11-05
+All notable changes to Prism are listed here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow [Semantic Versioning](https://semver.org/).
 
-First version.
+## [0.1.0] - 2026-11-06
+
+First version. It runs on macOS 14 or later, on Apple silicon and Intel.
 
 - A menu bar toolbox. Each tool can be turned on or off, and shown as its own menu bar icon or kept only in the
   hub. When no tool is in the menu bar, a small Prism icon keeps the hub reachable.
@@ -20,3 +22,5 @@ First version.
 - Menu bar icons are SF Symbol templates with an optional monospaced number, so the menu bar tints them like the
   system's own.
 - English and Chinese.
+
+[0.1.0]: https://github.com/zchan0/Prism/releases/tag/v0.1.0

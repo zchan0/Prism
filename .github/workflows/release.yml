@@ -1,0 +1,32 @@
+name: Release
+
+on:
+  push:
+    tags: ['v[0-9]+.[0-9]+.[0-9]+']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          # package.sh numbers the build by its commit count, which a shallow clone gets wrong.
+          fetch-depth: 0
+
+      - name: Show the toolchain
+        run: xcodebuild -version && swift --version
+
+      - name: Test and build
+        run: scripts/dist.sh "${GITHUB_REF_NAME#v}"
+
+      - name: Publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          version=${GITHUB_REF_NAME#v}
+          gh release create "$GITHUB_REF_NAME" \
+            ".build/dist/Prism-$version.zip" ".build/dist/Prism-$version.zip.sha256" \
+            --title "Prism $version" --notes-file .build/dist/notes.md --verify-tag

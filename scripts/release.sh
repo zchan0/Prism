@@ -1,55 +1,38 @@
 #!/bin/zsh
-# Usage: scripts/release.sh <version> [--install]
-# Tests, builds a release Prism.app stamped with <version>, zips it into .build/dist and creates the local
-# tag v<version>. Nothing is pushed. --install installs the app after the tag exists, so a failed install leaves a
-# complete release behind.
+# Usage: scripts/release.sh <version>
+# Checks that main is ready for <version>, tries the release locally with scripts/dist.sh, then pushes the tag
+# v<version>. The tag starts the Release workflow, which builds Prism on GitHub and publishes it; this script waits for
+# the workflow and prints the release link.
 set -euo pipefail
 
 cd "${0:A:h}/.."
-usage="usage: $0 <version, e.g. 1.0.0> [--install]"
 version=${1:-}
-[[ $version =~ '^[0-9]+(\.[0-9]+){1,2}$' ]] || { echo $usage >&2; exit 2 }
-shift
-install=false
-case ${1:-} in
-  "") ;;
-  --install) install=true ;;
-  *) echo $usage >&2; exit 2 ;;
-esac
+[[ $version =~ '^[0-9]+\.[0-9]+\.[0-9]+$' ]] || { echo "usage: $0 <version, e.g. 1.0.0>" >&2; exit 2 }
 tag=v$version
+fail() { echo "$1" >&2; exit 1 }
 
-if [[ -n $(git status --porcelain) ]]; then
-  echo "uncommitted changes" >&2
-  exit 1
-fi
-if ! grep -q "^## \[$version\]" CHANGELOG.md; then
-  echo "CHANGELOG.md has no ## [$version] section" >&2
-  exit 1
-fi
-if git rev-parse -q --verify "refs/tags/$tag" > /dev/null; then
-  echo "tag $tag already exists" >&2
-  exit 1
-fi
+[[ $(git branch --show-current) == main ]] || fail "not on main"
+[[ -z $(git status --porcelain) ]] || fail "uncommitted changes"
+git fetch -q origin main
+[[ $(git rev-parse HEAD) == $(git rev-parse origin/main) ]] || fail "main and origin/main differ; push or pull first"
+grep -qE "^## \[$version\] - [0-9]{4}-[0-9]{2}-[0-9]{2}$" CHANGELOG.md || fail "CHANGELOG.md has no ## [$version] - <date> section"
+! git rev-parse -q --verify refs/tags/$tag > /dev/null || fail "tag $tag already exists here"
+[[ -z $(git ls-remote --tags origin refs/tags/$tag) ]] || fail "tag $tag already exists on GitHub"
 
-swift test
-
-scripts/package.sh --version $version
-app=.build/app/Prism.app
-# The screenshot hooks are compiled out of release builds; this catches a configuration mistake that let them back in.
-if strings $app/Contents/MacOS/Prism | grep -q "PRISM_DUMP"; then
-  echo "debug hooks leaked into the release binary" >&2
-  exit 1
-fi
-
-mkdir -p .build/dist
-zip=.build/dist/Prism-$version.zip
-rm -f $zip
-# ditto keeps the code signature intact; Finder's Compress does too, plain zip may not.
-ditto -c -k --keepParent $app $zip
+# A local trial first, so a failing test or build stops the release before anything is pushed.
+scripts/dist.sh $version
 
 git tag -a $tag -m "Prism $version"
-echo "released $zip, tagged $tag (not pushed)"
+git push origin $tag
+commit=$(git rev-parse HEAD)
 
-if $install; then
-  scripts/install.sh
-fi
+# The run shows up a few seconds after the push.
+for _ in {1..30}; do
+  run=$(gh run list --workflow release.yml --event push --limit 10 --json databaseId,headSha \
+    --jq "map(select(.headSha == \"$commit\")) | first | .databaseId // empty")
+  [[ -n $run ]] && break
+  sleep 2
+done
+[[ -n ${run:-} ]] || fail "the Release workflow did not start; see https://github.com/zchan0/Prism/actions"
+gh run watch $run --exit-status
+gh release view $tag --json url --jq .url

@@ -6,9 +6,9 @@
 
 **A small toolbox in the menu bar: keep your Mac awake, and keep an eye on it.**
 
-![macOS 14+](https://img.shields.io/badge/macOS-14%2B-111?logo=apple&logoColor=white) ![Swift 6](https://img.shields.io/badge/Swift-6-F05138?logo=swift&logoColor=white) ![English and Chinese](https://img.shields.io/badge/UI-English%20%C2%B7%20%E4%B8%AD%E6%96%87-555)
+![macOS 14+](https://img.shields.io/badge/macOS-14%2B-111?logo=apple&logoColor=white) ![Swift 6](https://img.shields.io/badge/Swift-6-F05138?logo=swift&logoColor=white) ![English and Chinese](https://img.shields.io/badge/UI-English%20%C2%B7%20%E4%B8%AD%E6%96%87-555) ![MIT License](https://img.shields.io/badge/license-MIT-555)
 
-[Install](#install) · [Tools](#tools) · [Menu bar and panels](#menu-bar-and-panels) · [Lid sleep](#lid-sleep) · [Development](#development)
+[Download](https://github.com/zchan0/Prism/releases/latest) · [Install](#install) · [Tools](#tools) · [Menu bar and panels](#menu-bar-and-panels) · [Lid sleep](#lid-sleep) · [Development](#development)
 
 English · [简体中文](README.zh-CN.md)
 
@@ -68,13 +68,17 @@ Only one panel is open at a time, and a click anywhere else closes it. Neither p
 
 ## Install
 
-In a clone of this repository, run:
+1. Download `Prism-<version>.zip` from [Releases](https://github.com/zchan0/Prism/releases/latest), unzip it, and drag `Prism.app` into Applications.
+2. Open the app. macOS says it cannot verify the developer, because Prism is not notarized by Apple: click Done.
+3. Open System Settings → Privacy & Security. Near the bottom, find Prism, click Open Anyway, and confirm. After that, the app opens normally.
 
-```sh
-scripts/package.sh --install
-```
+Instead of steps 2 and 3, you can run `xattr -dr com.apple.quarantine /Applications/Prism.app` once.
 
-This builds a release app, signs it with a local Apple Development identity when one exists, and copies it to `/Applications/Prism.app`. There is no notarized download yet.
+To update, quit Prism and replace `Prism.app` with the new one. If macOS blocks the new version, repeat steps 2 and 3.
+
+Prism needs macOS 14 or later, on Apple silicon or Intel.
+
+To build it yourself instead, run `scripts/package.sh --install` in a clone of this repository. It builds a universal release app, signs it ad hoc, and copies it to `/Applications/Prism.app`.
 
 ## Lid sleep
 
@@ -100,11 +104,12 @@ sudo pmset -a disablesleep 0
 ## Development
 
 ```sh
-swift build                # build
-swift test                 # unit tests (Swift Testing)
-scripts/package.sh         # .build/app/Prism.app
-scripts/readme-assets.sh   # regenerate docs/images
-scripts/release.sh <version>   # test, package, zip and tag locally
+swift build                    # build
+swift test                     # unit tests (Swift Testing)
+scripts/package.sh             # .build/app/Prism.app, universal and signed ad hoc
+scripts/readme-assets.sh       # regenerate docs/images
+scripts/dist.sh <version>      # test, package and zip into .build/dist, as a release does
+scripts/release.sh <version>   # push the tag that publishes a release
 ```
 
 Prism is a SwiftPM package. AppKit draws the status items and the panels, and SwiftUI draws everything inside them.
@@ -128,7 +133,17 @@ Debug builds read a few environment variables, which is how `docs/images` is mad
 | `PRISM_APPEARANCE=light` or `dark` | Forces the appearance. |
 | `PRISM_DUMP=1` | Prints each tool's summary, then quits. |
 
+### Releasing
+
+1. Add a `## [X.Y.Z] - YYYY-MM-DD` section to `CHANGELOG.md`, and its link at the bottom. Commit it and push `main`.
+2. Run `scripts/release.sh X.Y.Z`. It stops unless `main` is clean and pushed, the changelog has the section, and the tag `vX.Y.Z` is new. Then it tries the release locally with `scripts/dist.sh` and pushes the tag.
+3. The tag starts the Release workflow in `.github/workflows/release.yml`. On a macOS 26 runner, the workflow tests and builds Prism, then publishes the zip, its SHA-256 and the changelog section as a GitHub release. `release.sh` waits for it and prints the link.
+
 ## Notes
 
 - Without a battery, Vitals leaves the battery reading out, and the battery guard does nothing.
 - The app follows the system language, English or Chinese. To pick a language for Prism only, use System Settings → General → Language & Region → Applications.
+
+## License
+
+[MIT](LICENSE)
