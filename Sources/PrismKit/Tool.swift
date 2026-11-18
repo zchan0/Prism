@@ -3,9 +3,9 @@ import SwiftUI
 
 /// One tool in the toolbox.
 ///
-/// A tool owns its state and tells the shell what to draw. The shell draws every window: a click on the tool's icon
+/// A tool owns its state and tells the shell what to draw. The shell draws the panels: a click on the tool's icon
 /// opens a quick panel with `controlsView()`, and the tool's tab in the hub shows the same controls above
-/// `settingsView()`.
+/// `settingsView()`. A tool that needs more room opens its own window with `ToolWindowController`.
 @MainActor
 public protocol Tool: AnyObject {
     /// Stable and used for every name the tool persists: preferences, the status item's autosave name.

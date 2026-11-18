@@ -223,14 +223,6 @@ private struct HubGeneralPage: View {
                 ))
                 .disabled(!loginItem.isAvailable)
             }
-            PanelRow(Strings.togglePanelShortcut) {
-                Text(verbatim: GlobalHotKey.keyName)
-                    .font(.system(size: 11.5, weight: .medium, design: .rounded))
-                    .foregroundStyle(Color(nsColor: Palette.ink2))
-                    .padding(.horizontal, 7)
-                    .frame(height: 20)
-                    .background(RoundedRectangle(cornerRadius: 5).fill(Color(nsColor: Palette.chip)))
-            }
             Text(Strings.version(Self.version))
                 .font(.system(size: 11.5))
                 .foregroundStyle(Color(nsColor: Palette.ink3))

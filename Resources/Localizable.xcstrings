@@ -1,12 +1,32 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "%@ is used by %@" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ 已经给了 %2$@"
+          }
+        }
+      }
+    },
     "%@ left" : {
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "还剩 %@"
+          }
+        }
+      }
+    },
+    "%lld apps" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld 个 app"
           }
         }
       }
@@ -81,6 +101,36 @@
         }
       }
     },
+    "1 app" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 个 app"
+          }
+        }
+      }
+    },
+    "A shortcut needs ⌘, ⌃ or ⌥" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "快捷键要包含 ⌘、⌃ 或 ⌥"
+          }
+        }
+      }
+    },
+    "Add app" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "添加 app"
+          }
+        }
+      }
+    },
     "Allow it in System Settings → General → Login Items" : {
       "localizations" : {
         "zh-Hans" : {
@@ -97,6 +147,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "修改合盖睡眠需要管理员密码。"
+          }
+        }
+      }
+    },
+    "Apps and shortcuts" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "App 与快捷键"
           }
         }
       }
@@ -201,6 +261,16 @@
         }
       }
     },
+    "Clear shortcut" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "清除快捷键"
+          }
+        }
+      }
+    },
     "Continue" : {
       "localizations" : {
         "zh-Hans" : {
@@ -251,12 +321,32 @@
         }
       }
     },
+    "Dock" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "程序坞"
+          }
+        }
+      }
+    },
     "Each reading that is on gets its own icon. To take Vitals out of the menu bar, turn off Show in the menu bar." : {
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "每项打开的读数各有一个图标。要让 Vitals 离开菜单栏，请关掉「显示在菜单栏」。"
+          }
+        }
+      }
+    },
+    "Edit…" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "编辑…"
           }
         }
       }
@@ -391,6 +481,26 @@
         }
       }
     },
+    "No apps" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "没有 app"
+          }
+        }
+      }
+    },
+    "No apps yet. Add the apps you switch to most." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "还没有 app。添加你最常切换的 app。"
+          }
+        }
+      }
+    },
     "No reading" : {
       "localizations" : {
         "zh-Hans" : {
@@ -441,6 +551,16 @@
         }
       }
     },
+    "Open" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已打开"
+          }
+        }
+      }
+    },
     "Open at login" : {
       "localizations" : {
         "zh-Hans" : {
@@ -451,22 +571,22 @@
         }
       }
     },
-    "Open or close the panel" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "打开或收起面板"
-          }
-        }
-      }
-    },
     "Open Prism" : {
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "打开 Prism"
+          }
+        }
+      }
+    },
+    "Other…" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "其他…"
           }
         }
       }
@@ -491,6 +611,16 @@
         }
       }
     },
+    "Press a shortcut to jump to an app.\nPress it again to hide the app." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "按快捷键切换到 app，再按一次隐藏它。"
+          }
+        }
+      }
+    },
     "Prism let your Mac sleep again." : {
       "localizations" : {
         "zh-Hans" : {
@@ -507,6 +637,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "退出 Prism"
+          }
+        }
+      }
+    },
+    "Record shortcut" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "录制快捷键"
+          }
+        }
+      }
+    },
+    "Remove %@" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "移除 %@"
           }
         }
       }
@@ -611,6 +761,16 @@
         }
       }
     },
+    "This shortcut could not be set up." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "这个快捷键无法使用。"
+          }
+        }
+      }
+    },
     "Turned off. Its settings are kept." : {
       "localizations" : {
         "zh-Hans" : {
@@ -627,6 +787,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "已开启"
+          }
+        }
+      }
+    },
+    "Type shortcut, or ⌫ to clear" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "按快捷键，或按 ⌫ 清除"
+          }
+        }
+      }
+    },
+    "Type shortcut…" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "请按快捷键…"
           }
         }
       }

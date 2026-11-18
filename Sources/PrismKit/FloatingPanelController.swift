@@ -17,6 +17,8 @@ public final class FloatingPanelController {
     public static let menuBarGap: CGFloat = 6
     public static let screenMargin: CGFloat = 8
 
+    private static let instances = NSHashTable<FloatingPanelController>.weakObjects()
+
     public var onVisibilityChange: ((Bool) -> Void)?
 
     private let width: CGFloat
@@ -34,6 +36,14 @@ public final class FloatingPanelController {
         self.cornerRadius = cornerRadius
         hosting = NSHostingView(rootView: content)
         panel = Self.makePanel(width: width, cornerRadius: cornerRadius, host: hosting)
+        Self.instances.add(self)
+    }
+
+    /// Closes every panel that is open, each through `hide()`, so their owners hear about it.
+    public static func hideAll() {
+        for controller in instances.allObjects {
+            controller.hide()
+        }
     }
 
     public var isShown: Bool { panel.isVisible }

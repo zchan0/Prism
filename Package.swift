@@ -12,14 +12,15 @@ let package = Package(
         // so two tools cannot reach into each other by accident.
         .target(name: "LumosTool", dependencies: ["PrismKit"]),
         .target(name: "VitalsTool", dependencies: ["PrismKit"]),
+        .target(name: "PortkeyTool", dependencies: ["PrismKit"]),
 
         .executableTarget(
             name: "Prism",
-            dependencies: ["PrismKit", "LumosTool", "VitalsTool"]
+            dependencies: ["PrismKit", "LumosTool", "VitalsTool", "PortkeyTool"]
         ),
         .testTarget(
             name: "PrismTests",
-            dependencies: ["PrismKit", "LumosTool", "VitalsTool"]
+            dependencies: ["PrismKit", "LumosTool", "VitalsTool", "PortkeyTool"]
         ),
     ]
 )

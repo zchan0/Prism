@@ -18,7 +18,7 @@ English · [简体中文](README.zh-CN.md)
 
 </div>
 
-Prism holds a few small tools. You can turn each tool on or off, and give each one its own menu bar icon or keep it only in the hub. Today there are two tools: **Lumos** keeps the Mac awake, and **Vitals** shows how it is doing.
+Prism holds a few small tools. You can turn each tool on or off, and give each one its own menu bar icon or keep it only in the hub. Today there are three tools: **Lumos** keeps the Mac awake, **Vitals** shows how it is doing, and **Portkey** gives each of your apps a shortcut. The name comes from the portkeys of Harry Potter, objects that take you somewhere else at a touch: press an app's shortcut, and you are in that app.
 
 ## Tools
 
@@ -50,6 +50,18 @@ Prism holds a few small tools. You can turn each tool on or off, and give each o
 
 **An icon for each reading you pick.** Turn on the readings you want in the menu bar. Each one gets its own icon, so you can ⌘-drag each one to its own place. Disk is on by default, and at least one stays on. Choose whether the numbers sit next to the icons. Every reading refreshes every 20 seconds and whenever the panel opens.
 
+### Portkey
+
+**One shortcut for each app.** Add the apps you use most, and record a shortcut for each one. Press it to bring the app to the front. If the app is not running, Portkey opens it. If the app is in front already, the same shortcut hides it.
+
+**Record the keys you want.** Click *Edit…* on the Portkey tab or in its panel to open the Portkey window. Click an app's shortcut field and press the keys, such as ⌥⇧C or ⌃⌘F5. A shortcut needs ⌘, ⌃ or ⌥. Press Esc to stop recording, or Delete to clear the shortcut. A shortcut belongs to one app at a time: if another app has it already, or macOS refuses it, the window says so under the app, and the app keeps its old shortcut.
+
+**Add apps from anywhere.** The + button at the top of the window lists the apps that are open and the apps in the Dock, and *Other…* picks any app in Applications. A new app has no shortcut until you record one. Portkey has no menu bar icon by default, and its shortcuts work without one. To give it an icon, turn on *Show in the menu bar*.
+
+**A shortcut stays on its key.** Portkey remembers the key you pressed, not the letter on it. If you switch to another keyboard layout later, the shortcut stays on the same key and keeps the name it had when you recorded it.
+
+**No permission needed.** Portkey uses the system's hot key API, `RegisterEventHotKey`, so it needs no Accessibility permission. Recording reads only the keys you type into the Portkey window.
+
 ## Menu bar and panels
 
 <img src="docs/images/status.png" width="658" alt="Menu bar icons on a light, a dark and a blue menu bar, from left to right: Lumos while the Mac may sleep, Lumos keeping it awake, Lumos counting down 25 minutes, then the Vitals icons for CPU, memory, disk and battery">
@@ -60,9 +72,9 @@ Prism has no icon of its own. A tool's icon appears when its *Show in the menu b
 
 - **Click a tool's icon** to open its quick panel: the tool's controls and nothing else. The button at its bottom right opens the hub on that tool's tab.
 - **Right-click a tool's icon** for *Open Prism* and *Quit Prism*.
-- **Press <kbd>⌃</kbd><kbd>⌥</kbd><kbd>⌘</kbd><kbd>L</kbd>** anywhere to open or close the hub at the pointer.
+- **Click the Prism icon**, when it shows, to open or close the hub.
 
-The hub has one tab for each tool and a gear tab for Prism itself. A tool's tab starts with two switches, *Turned on* and *Show in the menu bar*. Below them are the same controls as in the quick panel, then the tool's settings. A tool that is turned off stops all its work and keeps its settings. The gear tab holds *Open at login*, the shortcut, the version and *Quit Prism*.
+The hub has one tab for each tool and a gear tab for Prism itself. A tool's tab starts with two switches, *Turned on* and *Show in the menu bar*. Below them are the same controls as in the quick panel, then the tool's settings. A tool that is turned off stops all its work and keeps its settings. The gear tab holds *Open at login*, the version and *Quit Prism*.
 
 Only one panel is open at a time, and a click anywhere else closes it. Neither panel takes focus, so a click on it does not interrupt your typing.
 
@@ -119,6 +131,7 @@ Prism is a SwiftPM package. AppKit draws the status items and the panels, and Sw
 | `PrismKit` | The shell's parts: the `Tool` protocol, status items, the floating panel, the menu bar glyph, shared rows and switches, per-tool settings. |
 | `LumosTool` | The session engine and its power assertion, the lid helper, the battery guard, notifications. |
 | `VitalsTool` | The CPU, memory, disk and battery readings. |
+| `PortkeyTool` | The apps and their shortcuts, and the switch to an app: bring it to the front, open it, or hide it. |
 | `Prism` | The app: it registers the tools and owns the menu bar items, the hub and the quick panel. |
 
 A tool depends only on `PrismKit`, never on another tool. To add one, write a module with a type that conforms to `Tool`, and add one line to `AppDelegate.registrations()`.
@@ -132,6 +145,9 @@ Debug builds read a few environment variables, which is how `docs/images` is mad
 | `PRISM_START_LUMOS=1` | Starts a 30 minute Lumos session at launch. |
 | `PRISM_APPEARANCE=light` or `dark` | Forces the appearance. |
 | `PRISM_DUMP=1` | Prints each tool's summary, then quits. |
+| `PRISM_PORTKEY_SWITCH=<bundle id>` | Switches to that app 3 seconds after launch, as a Portkey shortcut does. |
+| `PRISM_SHOW_PANEL=<name>` | Opens one panel at launch and leaves it open. The name is a `PRISM_CAPTURE` file name without `.png`, such as `hub-portkey` or `quick-portkey`. |
+| `PRISM_PORTKEY_WINDOW=1` | Opens the Portkey window at launch. |
 
 ### Releasing
 

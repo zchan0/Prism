@@ -8,17 +8,18 @@ import SwiftUI
 @MainActor
 public enum MenuBarGlyph {
     public static let height: CGFloat = 22
-    private static let symbolPointSize: CGFloat = 15.5
+    public static let defaultSymbolPointSize: CGFloat = 15.5
     private static let textGap: CGFloat = 4
     private static let font = NSFont.monospacedDigitSystemFont(ofSize: 12.5, weight: .medium)
 
     public static func image(
         symbol name: String,
         primaryLayerOnly: Bool = false,
+        symbolPointSize: CGFloat = defaultSymbolPointSize,
         text: String?,
         accessibilityDescription: String
     ) -> NSImage {
-        let symbol = symbolImage(name, primaryLayerOnly: primaryLayerOnly)
+        let symbol = symbolImage(name, primaryLayerOnly: primaryLayerOnly, pointSize: symbolPointSize)
         let symbolWidth = symbol.size.width.rounded(.up)
         let attributes: [NSAttributedString.Key: Any] = [.font: font, .foregroundColor: NSColor.black]
         let text = text?.isEmpty == false ? text : nil
@@ -44,13 +45,13 @@ public enum MenuBarGlyph {
         return image
     }
 
-    private static func symbolImage(_ name: String, primaryLayerOnly: Bool) -> NSImage {
+    private static func symbolImage(_ name: String, primaryLayerOnly: Bool, pointSize: CGFloat) -> NSImage {
         // A clear layer still takes its space, so the icon keeps its width with or without it.
-        let configuration = NSImage.SymbolConfiguration(pointSize: symbolPointSize, weight: .regular)
+        let configuration = NSImage.SymbolConfiguration(pointSize: pointSize, weight: .regular)
             .applying(NSImage.SymbolConfiguration(paletteColors: primaryLayerOnly ? [.black, .clear] : [.black]))
         guard let symbol = NSImage(systemSymbolName: name, accessibilityDescription: nil)?
             .withSymbolConfiguration(configuration) else {
-            return NSImage(size: NSSize(width: symbolPointSize, height: symbolPointSize), flipped: false) { rect in
+            return NSImage(size: NSSize(width: pointSize, height: pointSize), flipped: false) { rect in
                 NSColor.black.setFill()
                 NSBezierPath(ovalIn: rect.insetBy(dx: 3, dy: 3)).fill()
                 return true
@@ -70,14 +71,16 @@ public enum MenuBarGlyph {
         public func image(
             symbol: String,
             primaryLayerOnly: Bool = false,
+            symbolPointSize: CGFloat = MenuBarGlyph.defaultSymbolPointSize,
             text: String?,
             accessibilityDescription: String
         ) -> NSImage {
-            let key = "\(symbol)|\(primaryLayerOnly)|\(text ?? "")|\(accessibilityDescription)"
+            let key = "\(symbol)|\(primaryLayerOnly)|\(symbolPointSize)|\(text ?? "")|\(accessibilityDescription)"
             if key == self.key, let image { return image }
             let image = MenuBarGlyph.image(
                 symbol: symbol,
                 primaryLayerOnly: primaryLayerOnly,
+                symbolPointSize: symbolPointSize,
                 text: text,
                 accessibilityDescription: accessibilityDescription
             )

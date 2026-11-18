@@ -56,6 +56,31 @@ struct MenuBarGlyphTests {
         #expect(cache.image(symbol: "wand.and.stars", text: "25m", accessibilityDescription: "x") !== first)
     }
 
+    @Test func aSmallerPointSizeDrawsASmallerDoor() {
+        let regular = MenuBarGlyph.image(symbol: "door.left.hand.open", text: nil, accessibilityDescription: "x")
+        let small = MenuBarGlyph.image(symbol: "door.left.hand.open", symbolPointSize: 13.5, text: nil, accessibilityDescription: "x")
+        #expect(small.size.width <= regular.size.width)
+        #expect(small.size.height == MenuBarGlyph.height)
+        #expect(Self.coverage(small) < Self.coverage(regular))
+        #expect(Self.inkHeight(small) < Self.inkHeight(regular))
+    }
+
+    @Test func withoutAPointSizeTheIconIsDrawnAtTheDefault() {
+        let implicit = MenuBarGlyph.image(symbol: "door.left.hand.open", text: nil, accessibilityDescription: "x")
+        let explicit = MenuBarGlyph.image(symbol: "door.left.hand.open", symbolPointSize: 15.5, text: nil, accessibilityDescription: "x")
+        #expect(MenuBarGlyph.defaultSymbolPointSize == 15.5)
+        #expect(implicit.size == explicit.size)
+        #expect(Self.coverage(implicit) == Self.coverage(explicit))
+    }
+
+    @Test func theCacheTellsPointSizesApart() {
+        let cache = MenuBarGlyph.Cache()
+        let regular = cache.image(symbol: "door.left.hand.open", text: nil, accessibilityDescription: "x")
+        let small = cache.image(symbol: "door.left.hand.open", symbolPointSize: 13.5, text: nil, accessibilityDescription: "x")
+        #expect(small !== regular)
+        #expect(cache.image(symbol: "door.left.hand.open", symbolPointSize: 13.5, text: nil, accessibilityDescription: "x") === small)
+    }
+
     /// The sum of every pixel's alpha: how much ink the menu bar would draw.
     private static func coverage(_ image: NSImage) -> Double {
         guard let data = image.tiffRepresentation, let bitmap = NSBitmapImageRep(data: data) else { return 0 }
@@ -66,6 +91,14 @@ struct MenuBarGlyphTests {
             }
         }
         return total
+    }
+
+    /// How many pixel rows have any ink.
+    private static func inkHeight(_ image: NSImage) -> Int {
+        guard let data = image.tiffRepresentation, let bitmap = NSBitmapImageRep(data: data) else { return 0 }
+        return (0..<bitmap.pixelsHigh).filter { y in
+            (0..<bitmap.pixelsWide).contains { x in (bitmap.colorAt(x: x, y: y)?.alphaComponent ?? 0) > 0 }
+        }.count
     }
 }
 

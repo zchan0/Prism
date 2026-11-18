@@ -49,16 +49,6 @@ final class ToolboxApp {
         statusItems.sync(with: registrations)
     }
 
-    /// The shortcut: the hub under the pointer, on the tab it showed last.
-    func toggleHub() {
-        if hub.isShown {
-            hub.hide()
-        } else {
-            quick.hide()
-            hub.show(tab: nil, at: NSEvent.mouseLocation)
-        }
-    }
-
     func terminate() {
         for registration in registrations where started.contains(registration.id) {
             registration.tool.stop()
@@ -168,8 +158,7 @@ final class ToolboxApp {
     /// Opens each panel in turn at a fixed spot and screenshots it: every hub tab, then every quick panel.
     func capturePanels(to directory: String) async -> Bool {
         guard let screen = NSScreen.main else { return false }
-        let frame = screen.visibleFrame
-        let anchor = NSRect(x: frame.midX - HubPanelController.width / 2, y: frame.maxY, width: 1, height: 1)
+        let anchor = Self.debugAnchor(on: screen)
         var ok = true
         let tabs = registrations.map { (HubTab.tool($0.id), $0.id.rawValue) } + [(HubTab.general, "general")]
         for (tab, name) in tabs {
@@ -183,6 +172,25 @@ final class ToolboxApp {
         }
         quick.hide()
         return ok
+    }
+
+    /// Opens one panel at the spot `capturePanels` uses and leaves it open. `name` is a capture's file name without
+    /// the extension, such as `hub-portkey` or `quick-portkey`.
+    func showPanelForDebug(_ name: String) {
+        guard let screen = NSScreen.main else { return }
+        let anchor = Self.debugAnchor(on: screen)
+        if name == "hub-general" {
+            hub.show(tab: .general, anchoredAt: anchor, on: screen)
+        } else if let registration = registrations.first(where: { "hub-\($0.id.rawValue)" == name }) {
+            hub.show(tab: .tool(registration.id), anchoredAt: anchor, on: screen)
+        } else if let registration = registrations.first(where: { "quick-\($0.id.rawValue)" == name }) {
+            quick.show(registration, anchoredAt: anchor, on: screen)
+        }
+    }
+
+    private static func debugAnchor(on screen: NSScreen) -> NSRect {
+        let frame = screen.visibleFrame
+        return NSRect(x: frame.midX - HubPanelController.width / 2, y: frame.maxY, width: 1, height: 1)
     }
     #endif
 }

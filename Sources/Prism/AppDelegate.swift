@@ -1,5 +1,6 @@
 import AppKit
 import LumosTool
+import PortkeyTool
 import VitalsTool
 import PrismKit
 
@@ -21,10 +22,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         )
         self.toolbox = toolbox
         toolbox.launch()
-
-        GlobalHotKey.registerToggle { [weak toolbox] in
-            toolbox?.toggleHub()
-        }
 
         #if DEBUG
         if ProcessInfo.processInfo.environment["PRISM_START_LUMOS"] == "1",
@@ -48,6 +45,25 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 exit(0)
             }
         }
+        if let bundleID = ProcessInfo.processInfo.environment["PRISM_PORTKEY_SWITCH"] {
+            Task {
+                try? await Task.sleep(for: .seconds(3))
+                PortkeyDebug.switchTo(bundleID: bundleID)
+            }
+        }
+        if let name = ProcessInfo.processInfo.environment["PRISM_SHOW_PANEL"] {
+            Task {
+                try? await Task.sleep(for: .seconds(1.5))
+                toolbox.showPanelForDebug(name)
+            }
+        }
+        if ProcessInfo.processInfo.environment["PRISM_PORTKEY_WINDOW"] == "1",
+           let portkey = registrations.first(where: { $0.id == PortkeyTool.id })?.tool as? PortkeyTool {
+            Task {
+                try? await Task.sleep(for: .seconds(1.5))
+                PortkeyDebug.openWindow(portkey)
+            }
+        }
         #endif
     }
 
@@ -64,6 +80,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         [
             ToolRegistration(LumosTool(), defaultPlacement: .ownIcon),
             ToolRegistration(VitalsTool(), defaultPlacement: .ownIcon),
+            ToolRegistration(PortkeyTool(), defaultPlacement: .hubOnly),
         ]
     }
 }

@@ -11,7 +11,6 @@ public enum Strings {
     public static let turnedOn = String(localized: "Turned on")
     public static let showInMenuBar = String(localized: "Show in the menu bar")
     public static let turnedOffNote = String(localized: "Turned off. Its settings are kept.")
-    public static let togglePanelShortcut = String(localized: "Open or close the panel")
     public static let loginItem = String(localized: "Open at login")
     public static let loginItemNeedsApproval = String(localized: "Allow it in System Settings → General → Login Items")
     public static func version(_ version: String) -> String { String(localized: "Version \(version)") }
