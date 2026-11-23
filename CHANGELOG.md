@@ -2,7 +2,7 @@
 
 All notable changes to Prism are listed here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow [Semantic Versioning](https://semver.org/).
 
-## [Unreleased]
+## [0.2.0] - 2026-11-23
 
 - Portkey, a new tool: a global shortcut for each app you add. The shortcut brings the app to the front, opens it if
   it is not running, and hides it if it is in front already. It needs no Accessibility permission.
@@ -34,4 +34,5 @@ First version. It runs on macOS 14 or later, on Apple silicon and Intel.
   system's own.
 - English and Chinese.
 
+[0.2.0]: https://github.com/zchan0/Prism/releases/tag/v0.2.0
 [0.1.0]: https://github.com/zchan0/Prism/releases/tag/v0.1.0
