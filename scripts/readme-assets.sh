@@ -1,7 +1,7 @@
 #!/bin/zsh
 # Usage: scripts/readme-assets.sh
-# Regenerates docs/images from a packaged debug build: the icon, the menu bar icons, and the hub and the quick
-# panels in English and Chinese, with Lumos counting down.
+# Regenerates docs/images from a packaged debug build: the icon, the menu bar icons, and in English and Chinese the
+# hub and the quick panels, with Lumos counting down, and the Portkey window, with sample apps.
 set -euo pipefail
 
 cd "${0:A:h}/.."
@@ -28,6 +28,7 @@ capture() {
   cp $dir/hub-lumos.png $out/hub$2.png
   cp $dir/quick-lumos.png $out/quick-lumos$2.png
   cp $dir/quick-vitals.png $out/quick-vitals$2.png
+  cp $dir/portkey-window.png $out/portkey$2.png
 }
 capture en ""
 capture zh-Hans -zh

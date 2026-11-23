@@ -24,14 +24,25 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         toolbox.launch()
 
         #if DEBUG
+        let portkey = registrations.first(where: { $0.id == PortkeyTool.id })?.tool as? PortkeyTool
         if ProcessInfo.processInfo.environment["PRISM_START_LUMOS"] == "1",
            let lumos = registrations.first(where: { $0.id.rawValue == "lumos" })?.tool as? LumosTool {
             lumos.startForDebug()
         }
         if let directory = ProcessInfo.processInfo.environment["PRISM_CAPTURE"] {
+            // Right away: a packaged debug build reads the installed Prism's settings, so it has just set up the same
+            // shortcuts.
+            if let portkey {
+                PortkeyDebug.showSamples(portkey)
+            }
             Task {
                 try? await Task.sleep(for: .seconds(1.5))
-                let ok = await toolbox.capturePanels(to: directory)
+                var ok = await toolbox.capturePanels(to: directory)
+                if let portkey {
+                    let window = PortkeyDebug.window(portkey)
+                    window.center()
+                    ok = await DebugCapture.window(window, to: "\(directory)/portkey-window.png") && ok
+                }
                 exit(ok ? 0 : 1)
             }
         }
@@ -57,8 +68,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 toolbox.showPanelForDebug(name)
             }
         }
-        if ProcessInfo.processInfo.environment["PRISM_PORTKEY_WINDOW"] == "1",
-           let portkey = registrations.first(where: { $0.id == PortkeyTool.id })?.tool as? PortkeyTool {
+        if ProcessInfo.processInfo.environment["PRISM_PORTKEY_WINDOW"] == "1", let portkey {
             Task {
                 try? await Task.sleep(for: .seconds(1.5))
                 PortkeyDebug.openWindow(portkey)

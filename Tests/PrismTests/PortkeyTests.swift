@@ -311,6 +311,49 @@ struct PortkeyToolTests {
     }
 }
 
+#if DEBUG
+extension PortkeyToolTests {
+    @Test func theSamplesAreAppsEveryMacHas() {
+        for app in PortkeyDebug.samples {
+            #expect(FileManager.default.fileExists(atPath: app.path), "\(app.path)")
+            #expect(Bundle(path: app.path)?.bundleIdentifier == app.bundleID, "\(app.path)")
+        }
+        #expect(PortkeyDebug.samples.map { $0.shortcut?.text } == ["⌥⇧S", "⌥⇧M", "⌃⌘N", nil])
+    }
+
+    @Test func samplesAreNeitherSavedNorSetUp() throws {
+        let portkey = tool()
+        portkey.add(candidate(1))
+        let app = try #require(portkey.apps.first)
+        portkey.start()
+        defer { portkey.stop() }
+        #expect(portkey.setShortcut(f17, for: app.id) == nil)
+        #expect(!isFree(f17))
+        let stored = ToolSettings(tool: PortkeyTool.id, defaults: defaults)
+        let saved = stored.string("apps", default: "")
+
+        PortkeyDebug.showSamples(portkey)
+        #expect(portkey.apps == PortkeyDebug.samples)
+        #expect(portkey.registrations.isEmpty)
+        #expect(isFree(f17))
+
+        // Nothing the window or the hub can do afterwards sets up a shortcut or saves the list.
+        let terminal = try #require(portkey.apps.last)
+        #expect(portkey.setShortcut(f18, for: terminal.id) == nil)
+        portkey.setShortcutsPaused(true)
+        portkey.setShortcutsPaused(false)
+        portkey.stop()
+        portkey.start()
+        #expect(portkey.registrations.isEmpty)
+        #expect(isFree(f17))
+        #expect(isFree(f18))
+        portkey.remove(terminal.id)
+        #expect(portkey.add(candidate(2)))
+        #expect(stored.string("apps", default: "") == saved)
+    }
+}
+#endif
+
 struct DockAppsTests {
     private func tile(_ bundleID: String?, _ url: String?, label: String? = nil) -> [String: Any] {
         var tile: [String: Any] = [:]

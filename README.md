@@ -14,7 +14,7 @@ English · [简体中文](README.zh-CN.md)
 
 <br>
 
-<img src="docs/images/hub.png" width="340" alt="The Prism hub on the Lumos tab: tabs for Lumos, Vitals and Prism's own settings, the switches that turn Lumos on and put it in the menu bar, the session controls, and the settings of Lumos">
+<img src="docs/images/hub.png" width="340" alt="The Prism hub on the Lumos tab: tabs for Lumos, Vitals, Portkey and Prism's own settings, the switches that turn Lumos on and put it in the menu bar, the session controls, and the settings of Lumos">
 
 </div>
 
@@ -51,6 +51,10 @@ Prism holds a few small tools. You can turn each tool on or off, and give each o
 **An icon for each reading you pick.** Turn on the readings you want in the menu bar. Each one gets its own icon, so you can ⌘-drag each one to its own place. Disk is on by default, and at least one stays on. Choose whether the numbers sit next to the icons. Every reading refreshes every 20 seconds and whenever the panel opens.
 
 ### Portkey
+
+<p align="center">
+  <img src="docs/images/portkey.png" width="460" alt="The Portkey window: the title, what a shortcut does and the + button that adds apps, then a row for each of four apps: Safari, Mail and Notes with their shortcuts as keycaps, ⌥⇧S, ⌥⇧M and ⌃⌘N, and Terminal, which has no shortcut yet">
+</p>
 
 **One shortcut for each app.** Add the apps you use most, and record a shortcut for each one. Press it to bring the app to the front. If the app is not running, Portkey opens it. If the app is in front already, the same shortcut hides it.
 
@@ -140,7 +144,7 @@ Debug builds read a few environment variables, which is how `docs/images` is mad
 
 | Variable | What it does |
 | --- | --- |
-| `PRISM_CAPTURE=<dir>` | Screenshots every hub tab and every quick panel into the folder, then quits. |
+| `PRISM_CAPTURE=<dir>` | Screenshots every hub tab, every quick panel and the Portkey window into the folder, then quits. Portkey shows sample apps instead of yours, and its shortcuts are off. |
 | `PRISM_STATUS_CAPTURE=<file>` | Draws every menu bar icon on a light, a dark and a blue menu bar, then quits. |
 | `PRISM_START_LUMOS=1` | Starts a 30 minute Lumos session at launch. |
 | `PRISM_APPEARANCE=light` or `dark` | Forces the appearance. |

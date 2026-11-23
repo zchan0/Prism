@@ -34,11 +34,15 @@ public final class PortkeyTool: Tool {
     /// Bumped when an app opens or quits, so the add menu lists the apps that are open now.
     private var runningAppsChanges = 0
     @ObservationIgnored private var workspaceObservers: [NSObjectProtocol] = []
-    @ObservationIgnored private var registrations: [UUID: GlobalHotKey.Registration] = [:]
+    @ObservationIgnored private(set) var registrations: [UUID: GlobalHotKey.Registration] = [:]
     @ObservationIgnored private var icons: [String: NSImage] = [:]
     @ObservationIgnored private var menuIcons: [String: NSImage] = [:]
     @ObservationIgnored private let glyph = MenuBarGlyph.Cache()
     @ObservationIgnored private var windowController: ToolWindowController?
+    #if DEBUG
+    /// The apps are samples for screenshots: they are never saved, and their shortcuts are never set up.
+    @ObservationIgnored private var showsSamples = false
+    #endif
 
     public init(settings: ToolSettings = ToolSettings(tool: PortkeyTool.id)) {
         self.settings = settings
@@ -80,16 +84,19 @@ public final class PortkeyTool: Tool {
     public func settingsView() -> AnyView? { nil }
 
     func openWindow() {
-        if windowController == nil {
-            let recorder = ShortcutRecorder(tool: self)
-            let controller = ToolWindowController(
-                title: title,
-                content: AnyView(PortkeyWindowView(tool: self, recorder: recorder))
-            )
-            recorder.window = controller.window
-            windowController = controller
-        }
-        windowController?.show()
+        makeWindowController().show()
+    }
+
+    private func makeWindowController() -> ToolWindowController {
+        if let windowController { return windowController }
+        let recorder = ShortcutRecorder(tool: self)
+        let controller = ToolWindowController(
+            title: title,
+            content: AnyView(PortkeyWindowView(tool: self, recorder: recorder))
+        )
+        recorder.window = controller.window
+        windowController = controller
+        return controller
     }
 
     /// Refused when the app is in the list already. A new app has no shortcut until the person records one.
@@ -233,11 +240,17 @@ public final class PortkeyTool: Tool {
     }
 
     private func appsChanged() {
+        #if DEBUG
+        if showsSamples { return }
+        #endif
         settings.set(PortkeyApp.encodeList(apps), for: Key.apps)
         reregister()
     }
 
     private func reregister() {
+        #if DEBUG
+        if showsSamples { return }
+        #endif
         guard started, !shortcutsPaused else { return }
         unregisterAll()
         var failed = Set<UUID>()
@@ -283,3 +296,21 @@ public final class PortkeyTool: Tool {
         workspaceObservers = []
     }
 }
+
+#if DEBUG
+extension PortkeyTool {
+    /// Lets go of every shortcut and shows `samples` in place of the person's apps. From then on nothing is saved and
+    /// no shortcut is set up.
+    func showSamplesForDebug(_ samples: [PortkeyApp]) {
+        unregisterAll()
+        failedAppIDs = []
+        showsSamples = true
+        apps = samples
+    }
+
+    /// The window without showing it: showing it would make Prism the active app.
+    var windowForDebug: NSWindow {
+        makeWindowController().window
+    }
+}
+#endif

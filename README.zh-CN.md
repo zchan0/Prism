@@ -14,7 +14,7 @@
 
 <br>
 
-<img src="docs/images/hub-zh.png" width="340" alt="Prism 主面板停在 Lumos 页：顶部是 Lumos、Vitals 和 Prism 自身设置三个 tab，下面是开启 Lumos、把它显示在菜单栏的两个开关，然后是会话控件和 Lumos 的设置">
+<img src="docs/images/hub-zh.png" width="340" alt="Prism 主面板停在 Lumos 页：顶部是 Lumos、Vitals、Portkey 和 Prism 自身设置四个 tab，下面是开启 Lumos、把它显示在菜单栏的两个开关，然后是会话控件和 Lumos 的设置">
 
 </div>
 
@@ -51,6 +51,10 @@ Prism 装着几个小工具。每个工具都能单独开启或关闭，也能�
 **每项读数一个图标。** 打开想放进菜单栏的读数，每项各有一个图标，可以各自按住 ⌘ 拖到想要的位置。默认只开磁盘，至少保留一项。可以选择要不要在图标旁边显示数字。所有读数每 20 秒刷新一次，打开面板时也会刷新。
 
 ### Portkey
+
+<p align="center">
+  <img src="docs/images/portkey-zh.png" width="460" alt="Portkey 窗口：顶部是标题、快捷键的用法和添加 app 的 + 按钮，下面每个 app 一行，共四行：Safari浏览器、邮件、备忘录的快捷键以键帽显示，分别是 ⌥⇧S、⌥⇧M、⌃⌘N，终端还没有录快捷键">
+</p>
 
 **每个 app 一个快捷键。** 把常用的 app 加进来，给每个 app 录一个快捷键。按下快捷键，这个 app 就切到最前面。app 没在运行时，Portkey 会打开它；app 已经在最前面时，同一个快捷键会把它隐藏。
 
@@ -140,7 +144,7 @@ debug 版本认几个环境变量，`docs/images` 就是这么生成的：
 
 | 变量 | 作用 |
 | --- | --- |
-| `PRISM_CAPTURE=<目录>` | 把主面板的每个 tab 和每个快捷面板截图到这个目录，然后退出。 |
+| `PRISM_CAPTURE=<目录>` | 把主面板的每个 tab、每个快捷面板和 Portkey 窗口截图到这个目录，然后退出。Portkey 显示示例 app，不用你自己的列表，快捷键也不生效。 |
 | `PRISM_STATUS_CAPTURE=<文件>` | 把所有菜单栏图标画在浅色、深色、蓝色三种菜单栏上，然后退出。 |
 | `PRISM_START_LUMOS=1` | 启动时开始一个 30 分钟的 Lumos 会话。 |
 | `PRISM_APPEARANCE=light` 或 `dark` | 强制外观。 |
