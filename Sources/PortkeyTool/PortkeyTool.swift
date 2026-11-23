@@ -204,7 +204,8 @@ public final class PortkeyTool: Tool {
     func icon(atPath path: String) -> NSImage {
         if let icon = icons[path] { return icon }
         guard FileManager.default.fileExists(atPath: path) else { return Self.genericIcon }
-        let icon = NSWorkspace.shared.icon(forFile: path)
+        // A symbolic link, such as /Applications/Safari.app, gets an icon with an alias arrow.
+        let icon = NSWorkspace.shared.icon(forFile: URL(fileURLWithPath: path).resolvingSymlinksInPath().path)
         icons[path] = icon
         return icon
     }
