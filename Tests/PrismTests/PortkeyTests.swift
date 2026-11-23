@@ -157,12 +157,7 @@ struct ShortcutTests {
 
 @MainActor
 struct PortkeyToolTests {
-    private let defaults: UserDefaults = {
-        let name = "portkey." + UUID().uuidString
-        let defaults = UserDefaults(suiteName: name)!
-        defaults.removePersistentDomain(forName: name)
-        return defaults
-    }()
+    private let defaults = MemoryDefaults()
 
     private func tool() -> PortkeyTool {
         PortkeyTool(settings: ToolSettings(tool: PortkeyTool.id, defaults: defaults))

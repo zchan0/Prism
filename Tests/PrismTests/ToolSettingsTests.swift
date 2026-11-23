@@ -5,15 +5,8 @@ import Testing
 /// Two tools sharing one defaults database must not be able to read or clobber each other's keys.
 @MainActor
 struct ToolSettingsTests {
-    private func freshDefaults() -> UserDefaults {
-        let name = "toolsettings." + UUID().uuidString
-        let defaults = UserDefaults(suiteName: name)!
-        defaults.removePersistentDomain(forName: name)
-        return defaults
-    }
-
     @Test func twoToolsWithTheSameKeyNameDoNotCollide() {
-        let defaults = freshDefaults()
+        let defaults = MemoryDefaults()
         let lumos = ToolSettings(tool: ToolID("lumos"), defaults: defaults)
         let disk = ToolSettings(tool: ToolID("disk"), defaults: defaults)
 
@@ -25,13 +18,13 @@ struct ToolSettingsTests {
     }
 
     @Test func valuesSurviveANewInstance() {
-        let defaults = freshDefaults()
+        let defaults = MemoryDefaults()
         ToolSettings(tool: ToolID("disk"), defaults: defaults).set("Volumes/Backup", for: "volumePath")
         #expect(ToolSettings(tool: ToolID("disk"), defaults: defaults).string("volumePath", default: "/") == "Volumes/Backup")
     }
 
     @Test func aToolOnlySeesItsOwnKeys() {
-        let defaults = freshDefaults()
+        let defaults = MemoryDefaults()
         let lumos = ToolSettings(tool: ToolID("lumos"), defaults: defaults)
         let disk = ToolSettings(tool: ToolID("disk"), defaults: defaults)
         lumos.set(true, for: "showsTimeInMenuBar")

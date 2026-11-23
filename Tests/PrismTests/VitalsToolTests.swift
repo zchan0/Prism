@@ -136,10 +136,7 @@ struct ToolIdentityTests {
 @MainActor
 struct VitalsMenuBarTests {
     private func freshSettings() -> ToolSettings {
-        let name = "vitals." + UUID().uuidString
-        let defaults = UserDefaults(suiteName: name)!
-        defaults.removePersistentDomain(forName: name)
-        return ToolSettings(tool: VitalsTool.id, defaults: defaults)
+        ToolSettings(tool: VitalsTool.id, defaults: MemoryDefaults())
     }
 
     @Test func diskAloneIsInTheMenuBarByDefault() {

@@ -5,13 +5,6 @@ import Testing
 
 @MainActor
 struct ShellSettingsTests {
-    private func fresh() -> UserDefaults {
-        let name = "shell." + UUID().uuidString
-        let defaults = UserDefaults(suiteName: name)!
-        defaults.removePersistentDomain(forName: name)
-        return defaults
-    }
-
     private func registrations() -> [ToolRegistration] {
         // Two stand-ins with the same shape as real tools, so this does not depend on a tool module.
         [ToolRegistration(StubToolA(), defaultPlacement: .ownIcon),
@@ -19,13 +12,13 @@ struct ShellSettingsTests {
     }
 
     @Test func aNewToolStartsOn() {
-        let shell = ShellSettings(registrations: registrations(), defaults: fresh())
+        let shell = ShellSettings(registrations: registrations(), defaults: MemoryDefaults())
         #expect(shell.isEnabled(ToolID("a")))
         #expect(shell.isEnabled(ToolID("b")))
     }
 
     @Test func aToolAddedInALaterVersionStartsOn() {
-        let defaults = fresh()
+        let defaults = MemoryDefaults()
         let first = ShellSettings(registrations: registrations(), defaults: defaults)
         first.setEnabled(false, for: ToolID("b"))
 
@@ -42,7 +35,7 @@ struct ShellSettingsTests {
     }
 
     @Test func placementIsRememberedPerTool() {
-        let defaults = fresh()
+        let defaults = MemoryDefaults()
         let shell = ShellSettings(registrations: registrations(), defaults: defaults)
         shell.setPlacement(.hubOnly, for: ToolID("a"))
         shell.setPlacement(.ownIcon, for: ToolID("b"))
@@ -53,13 +46,13 @@ struct ShellSettingsTests {
     }
 
     @Test func theDefaultPlacementComesFromTheRegistration() {
-        let shell = ShellSettings(registrations: registrations(), defaults: fresh())
+        let shell = ShellSettings(registrations: registrations(), defaults: MemoryDefaults())
         #expect(shell.placement(of: ToolID("a")) == .ownIcon)
         #expect(shell.placement(of: ToolID("b")) == .hubOnly)
     }
 
     @Test func turningAToolOffKeepsItsPlacement() {
-        let defaults = fresh()
+        let defaults = MemoryDefaults()
         let shell = ShellSettings(registrations: registrations(), defaults: defaults)
         shell.setPlacement(.hubOnly, for: ToolID("a"))
         shell.setEnabled(false, for: ToolID("a"))
