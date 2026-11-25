@@ -300,7 +300,7 @@ struct PortkeyToolTests {
     @Test func theSymbolsAreThere() {
         // Without one, turning on Show in the menu bar would leave the tool without an icon.
         #expect(tool().statusIcons().map(\.id) == ["door"])
-        for symbol in ["door.left.hand.open", "minus.circle.fill", "plus"] {
+        for symbol in ["door.left.hand.open", "minus", "plus"] {
             #expect(NSImage(systemSymbolName: symbol, accessibilityDescription: nil) != nil, "\(symbol)")
         }
     }
@@ -332,7 +332,7 @@ extension PortkeyToolTests {
         #expect(portkey.registrations.isEmpty)
         #expect(isFree(f17))
 
-        // Nothing the window or the hub can do afterwards sets up a shortcut or saves the list.
+        // Nothing the Prism window can do afterwards sets up a shortcut or saves the list.
         let terminal = try #require(portkey.apps.last)
         #expect(portkey.setShortcut(f18, for: terminal.id) == nil)
         portkey.setShortcutsPaused(true)
@@ -345,6 +345,20 @@ extension PortkeyToolTests {
         portkey.remove(terminal.id)
         #expect(portkey.add(candidate(2)))
         #expect(stored.string("apps", default: "") == saved)
+    }
+
+    @Test func samplesShownBeforeTheStartSetUpNoShortcut() throws {
+        let portkey = tool()
+        portkey.add(candidate(1))
+        let app = try #require(portkey.apps.first)
+        #expect(portkey.setShortcut(f17, for: app.id) == nil)
+
+        let relaunched = tool()
+        PortkeyDebug.showSamples(relaunched)
+        relaunched.start()
+        defer { relaunched.stop() }
+        #expect(relaunched.registrations.isEmpty)
+        #expect(isFree(f17))
     }
 }
 #endif

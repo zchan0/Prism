@@ -66,6 +66,17 @@ public enum GlobalHotKey {
         }
     }
 
+    /// Whether macOS takes the combination now; it says no when this process holds it already.
+    public static func canRegister(_ shortcut: Shortcut) -> Bool {
+        switch register(keyCode: shortcut.keyCode, modifiers: shortcut.modifiers, action: {}) {
+        case .success(let registration):
+            unregister(registration)
+            return true
+        case .failure:
+            return false
+        }
+    }
+
     fileprivate static func fire(_ id: UInt32) -> Bool {
         guard let action = entries[id]?.action else { return false }
         action()

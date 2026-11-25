@@ -1,4 +1,5 @@
 import AppKit
+import Carbon.HIToolbox
 import Observation
 import PrismKit
 import SwiftUI
@@ -12,23 +13,31 @@ final class QuickPanelModel {
     var revision = 0
 }
 
-/// The panel a click on a tool's menu bar icon opens: the tool's controls, and a way into the hub.
+/// The panel a click on a tool's menu bar icon opens: only that tool's controls, and under them the tool's name and
+/// the gear that opens its page in the Prism window.
 @MainActor
 final class QuickPanelController {
     static let width: CGFloat = 320
 
-    var onOpenHub: ((ToolID) -> Void)?
+    var onOpenSettings: ((ToolID) -> Void)?
+    /// Whether ⌘, opens the shown tool's page while the panel is open. Off for screenshots, so the key still reaches
+    /// the app in front.
+    var opensSettingsWithCommandComma = true
 
     private let model = QuickPanelModel()
     private let panel: FloatingPanelController
+    private(set) var settingsKey: GlobalHotKey.Registration?
 
     init() {
-        panel = FloatingPanelController(width: Self.width, content: AnyView(EmptyView()))
+        panel = FloatingPanelController(width: Self.width, cornerRadius: 24, content: AnyView(EmptyView()))
         panel.setContent(AnyView(QuickPanelView(
             model: model,
-            openHub: { [weak self] id in self?.onOpenHub?(id) },
+            close: { [weak self] in self?.hide() },
+            openSettings: { [weak self] id in self?.onOpenSettings?(id) },
             onHeight: { [weak self] height in self?.panel.setContentHeight(height) }
         )))
+        // Every way the panel closes goes through the controller's `hide()`, which reports it here.
+        panel.onVisibilityChange = { [weak self] isShown in self?.visibilityChanged(isShown) }
     }
 
     var isShown: Bool { panel.isShown }
@@ -54,6 +63,33 @@ final class QuickPanelController {
         model.revision += 1
     }
 
+    func visibilityChanged(_ isShown: Bool) {
+        if isShown, opensSettingsWithCommandComma {
+            registerSettingsKey()
+        } else {
+            unregisterSettingsKey()
+        }
+    }
+
+    /// The panel never takes the keyboard, so ⌘, reaches it only as a hot key, held only while the panel is open.
+    /// When macOS refuses it, `GlobalHotKey` logs why and the panel works without it.
+    private func registerSettingsKey() {
+        guard settingsKey == nil else { return }
+        let result = GlobalHotKey.register(keyCode: UInt32(kVK_ANSI_Comma), modifiers: UInt32(cmdKey)) { [weak self] in
+            guard let self, let id = shownTool else { return }
+            onOpenSettings?(id)
+        }
+        if case .success(let registration) = result {
+            settingsKey = registration
+        }
+    }
+
+    private func unregisterSettingsKey() {
+        guard let settingsKey else { return }
+        GlobalHotKey.unregister(settingsKey)
+        self.settingsKey = nil
+    }
+
     #if DEBUG
     var window: NSWindow { panel.window }
     #endif
@@ -66,43 +102,39 @@ final class QuickPanelController {
 
 struct QuickPanelView: View {
     let model: QuickPanelModel
-    let openHub: @MainActor (ToolID) -> Void
+    let close: @MainActor () -> Void
+    let openSettings: @MainActor (ToolID) -> Void
     let onHeight: @MainActor (CGFloat) -> Void
 
     var body: some View {
         let _ = model.revision
-        VStack(spacing: 0) {
+        VStack(spacing: 4) {
             if let registration = model.registration {
-                registration.tool.controlsView()
+                let id = registration.id
+                let tool = registration.tool
+                tool.controlsView()
                     .id(model.opening)
-                    .padding(.horizontal, 14)
-                    .padding(.top, 14)
-                    .padding(.bottom, 12)
-                PanelDivider()
-                footer(registration)
+                    .environment(\.toolPanel, ToolPanelActions(close: close, openSettings: { openSettings(id) }))
+                HStack(spacing: 8) {
+                    Text(tool.title)
+                        .font(PanelFont.section)
+                        .foregroundStyle(Color(nsColor: Palette.ink3))
+                    Spacer(minLength: 8)
+                    PanelIconButton(symbol: "gearshape", title: Strings.toolSettings(tool.title)) {
+                        openSettings(id)
+                    }
+                }
+                .padding(.leading, 8)
+                .frame(height: 32)
             }
         }
+        .padding(.horizontal, 10)
+        .padding(.top, 10)
+        .padding(.bottom, 4)
         .frame(width: QuickPanelController.width)
         .fixedSize(horizontal: false, vertical: true)
         .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { onHeight($0) }
-    }
-
-    private func footer(_ registration: ToolRegistration) -> some View {
-        HStack(spacing: 6) {
-            Image(systemName: registration.tool.symbolName)
-                .font(.system(size: 11))
-                .symbolPrimaryLayerOnly(registration.tool.symbolPrimaryLayerOnly, color: Color(nsColor: Palette.ink3))
-                .frame(width: 16)
-            Text(registration.tool.title)
-                .font(.system(size: 11.5, weight: .semibold, design: .rounded))
-            Spacer(minLength: 0)
-            PanelIconButton(symbol: "triangle", title: Strings.openHub) {
-                openHub(registration.id)
-            }
-        }
-        .foregroundStyle(Color(nsColor: Palette.ink3))
-        .padding(.leading, 14)
-        .padding(.trailing, 7)
-        .frame(height: 36)
+        // While the panel animates to a new height, the content stays on its top edge.
+        .frame(maxHeight: .infinity, alignment: .top)
     }
 }

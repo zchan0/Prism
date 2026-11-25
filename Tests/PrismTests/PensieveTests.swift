@@ -1,0 +1,1045 @@
+import AppKit
+import Carbon.HIToolbox
+import Foundation
+import PrismKit
+import Testing
+@testable import PensieveTool
+
+/// Fires only when the test says so, so a test decides exactly when the clipboard is checked.
+@MainActor
+private final class ManualTicker: Ticking {
+    private var action: (@MainActor () -> Void)?
+
+    func start(every interval: TimeInterval, _ action: @escaping @MainActor () -> Void) {
+        self.action = action
+    }
+
+    func stop() {
+        action = nil
+    }
+
+    func fire() {
+        action?()
+    }
+}
+
+/// A clipboard of its own and a temporary folder, so a test never reads or writes the person's.
+@MainActor
+private final class Bench {
+    let pasteboard = NSPasteboard.withUniqueName()
+    let directory = FileManager.default.temporaryDirectory
+        .appending(path: "PensieveTests-\(UUID().uuidString)", directoryHint: .isDirectory)
+    let defaults = MemoryDefaults()
+    /// What the tools take for now; a test moves it on.
+    var date = Date(timeIntervalSinceReferenceDate: 800_000_000)
+    /// The bundle id of the app in front while something is copied.
+    var frontmostBundleID: String?
+    private var tools: [PensieveTool] = []
+    private var tickers: [ManualTicker] = []
+
+    var settings: ToolSettings { ToolSettings(tool: PensieveTool.id, defaults: defaults) }
+
+    func advance(days: Double) {
+        date = date.addingTimeInterval(days * 24 * 60 * 60)
+    }
+
+    /// Without a shortcut unless `keepsShortcut`, since a started tool registers its shortcut for real.
+    func tool(keepsShortcut: Bool = false) -> PensieveTool {
+        if !keepsShortcut, !settings.allKeys.contains("shortcut") {
+            settings.set("", for: "shortcut")
+        }
+        let ticker = ManualTicker()
+        let tool = PensieveTool(
+            settings: settings,
+            pasteboard: pasteboard,
+            directory: directory,
+            ticker: ticker,
+            now: { [weak self] in self?.date ?? Date() },
+            frontmostBundleID: { [weak self] in self?.frontmostBundleID }
+        )
+        tools.append(tool)
+        tickers.append(ticker)
+        return tool
+    }
+
+    func startedTool() -> PensieveTool {
+        let tool = tool()
+        tool.start()
+        return tool
+    }
+
+    func tick() {
+        for ticker in tickers {
+            ticker.fire()
+        }
+    }
+
+    func copy(_ string: String) {
+        pasteboard.clearContents()
+        pasteboard.setString(string, forType: .string)
+        tick()
+    }
+
+    func copy(_ data: Data, as type: NSPasteboard.PasteboardType) {
+        pasteboard.clearContents()
+        pasteboard.setData(data, forType: type)
+        tick()
+    }
+
+    func copy(_ items: [NSPasteboardItem]) {
+        pasteboard.clearContents()
+        pasteboard.writeObjects(items)
+        tick()
+    }
+
+    func waitUntilSaved() {
+        for tool in tools {
+            tool.store.waitUntilSaved()
+        }
+    }
+
+    var dataFiles: [String] {
+        ((try? FileManager.default.contentsOfDirectory(atPath: directory.path)) ?? []).filter { $0.hasSuffix(".plist") }.sorted()
+    }
+
+    func tearDown() {
+        for tool in tools {
+            tool.stop()
+        }
+        waitUntilSaved()
+        pasteboard.releaseGlobally()
+        try? FileManager.default.removeItem(at: directory)
+    }
+}
+
+private func shortcut(_ keyCode: Int, _ modifiers: Int, _ keyName: String) -> Shortcut {
+    Shortcut(keyCode: UInt32(keyCode), modifiers: UInt32(modifiers), keyName: keyName)
+}
+
+// Combinations nobody uses, because a started tool registers them for real. Portkey's tests use F17 to F19.
+private let f15 = shortcut(kVK_F15, controlKey | optionKey | cmdKey | shiftKey, "F15")
+private let f16 = shortcut(kVK_F16, controlKey | optionKey | cmdKey | shiftKey, "F16")
+
+@MainActor
+private func isFree(_ shortcut: Shortcut) -> Bool {
+    GlobalHotKey.canRegister(shortcut)
+}
+
+private func pngData(width: Int, height: Int) throws -> Data {
+    let bitmap = try #require(NSBitmapImageRep(
+        bitmapDataPlanes: nil,
+        pixelsWide: width,
+        pixelsHigh: height,
+        bitsPerSample: 8,
+        samplesPerPixel: 4,
+        hasAlpha: true,
+        isPlanar: false,
+        colorSpaceName: .deviceRGB,
+        bytesPerRow: 0,
+        bitsPerPixel: 0
+    ))
+    return try #require(bitmap.representation(using: .png, properties: [:]))
+}
+
+@MainActor
+@Suite(.serialized)
+struct PensieveRecordingTests {
+    @Test func aCopiedTextIsAdded() throws {
+        let bench = Bench()
+        defer { bench.tearDown() }
+        let tool = bench.startedTool()
+        #expect(tool.items.isEmpty)
+
+        bench.copy("Hello from the clipboard")
+        let item = try #require(tool.items.first)
+        #expect(tool.items.count == 1)
+        #expect(item.kind == .text)
+        #expect(item.text == "Hello from the clipboard")
+        #expect(tool.summary == "1 item")
+    }
+
+    @Test(arguments: ["org.nspasteboard.ConcealedType", "org.nspasteboard.TransientType", "org.nspasteboard.AutoGeneratedType"])
+    func aMarkedCopyIsSkipped(marker: String) {
+        let bench = Bench()
+        defer { bench.tearDown() }
+        let tool = bench.startedTool()
+
+        let item = NSPasteboardItem()
+        item.setString("hunter2", forType: .string)
+        item.setData(Data(), forType: NSPasteboard.PasteboardType(marker))
+        bench.copy([item])
+        #expect(tool.items.isEmpty)
+
+        bench.copy("Not a secret")
+        #expect(tool.items.map(\.text) == ["Not a secret"])
+    }
+
+    @Test func copyingTheSameAgainMovesItToTheTop() {
+        let bench = Bench()
+        defer { bench.tearDown() }
+        let tool = bench.startedTool()
+
+        bench.copy("first")
+        bench.copy("second")
+        let first = tool.items.last
+        bench.copy("first")
+        #expect(tool.items.map(\.text) == ["first", "second"])
+        #expect(tool.items.first?.id == first?.id)
+    }
+
+    @Test func theOldestGoesPastTwoHundred() {
+        let bench = Bench()
+        defer { bench.tearDown() }
+        let tool = bench.startedTool()
+        #expect(tool.itemLimit == 200)
+
+        for number in 0...PensieveTool.defaultItemLimit {
+            bench.copy("item \(number)")
+        }
+        #expect(tool.items.count == 200)
+        #expect(tool.items.first?.text == "item 200")
+        #expect(tool.items.last?.text == "item 1")
+        #expect(!tool.items.contains { $0.text == "item 0" })
+        bench.waitUntilSaved()
+        #expect(bench.dataFiles.count == 200)
+    }
+
+    @Test func aCopyOverTwentyMegabytesIsSkipped() throws {
+        let bench = Bench()
+        defer { bench.tearDown() }
+        let tool = bench.startedTool()
+
+        let item = NSPasteboardItem()
+        item.setString("A huge picture", forType: .string)
+        item.setData(Data(count: PensieveTool.maxBytes), forType: .tiff)
+        bench.copy([item])
+        #expect(tool.items.isEmpty)
+
+        bench.copy(try pngData(width: 4, height: 3), as: .png)
+        #expect(tool.items.map(\.kind) == [.image])
+    }
+
+    @Test func pausedCopiesAreNotRecorded() {
+        let bench = Bench()
+        defer { bench.tearDown() }
+        let tool = bench.startedTool()
+
+        tool.setPaused(true)
+        bench.copy("copied while paused")
+        #expect(tool.items.isEmpty)
+        #expect(tool.summary == "Paused")
+        #expect(bench.tool().isPaused)
+
+        tool.setPaused(false)
+        bench.tick()
+        #expect(tool.items.isEmpty)
+        bench.copy("copied after")
+        #expect(tool.items.map(\.text) == ["copied after"])
+    }
+
+    @Test func onlyCopiesMadeWhileRunningAreRecorded() {
+        let bench = Bench()
+        defer { bench.tearDown() }
+        bench.pasteboard.clearContents()
+        bench.pasteboard.setString("on the clipboard before", forType: .string)
+        let tool = bench.startedTool()
+        bench.tick()
+        #expect(tool.items.isEmpty)
+
+        bench.copy("while running")
+        #expect(tool.items.map(\.text) == ["while running"])
+
+        tool.stop()
+        bench.copy("while stopped")
+        tool.start()
+        bench.tick()
+        #expect(tool.items.map(\.text) == ["while running"])
+    }
+}
+
+@MainActor
+@Suite(.serialized)
+struct PensieveKindTests {
+    @Test func eachCopyShowsAsItsKind() throws {
+        let bench = Bench()
+        defer { bench.tearDown() }
+        let tool = bench.startedTool()
+
+        let file = NSPasteboardItem()
+        file.setString(URL(fileURLWithPath: "/tmp/Notes.txt").absoluteString, forType: .fileURL)
+        file.setString("Notes.txt", forType: .string)
+        bench.copy([file])
+        #expect(tool.items.first?.kind == .file)
+        #expect(tool.items.first?.fileNames == ["Notes.txt"])
+
+        bench.copy(try pngData(width: 4, height: 3), as: .png)
+        #expect(tool.items.first?.kind == .image)
+        #expect(tool.items.first?.pixelWidth == 4)
+        #expect(tool.items.first?.pixelHeight == 3)
+
+        for color in ["#F05138", "rgb(240, 81, 56)", "  rgba(240,81,56,0.5)\n", "#abc", "#F05138CC"] {
+            bench.copy(color)
+            #expect(tool.items.first?.kind == .color, "\(color)")
+        }
+        for text in ["#F0513", "rgb(240, 81)", "rgb(300, 81, 56)", "Call me at #F05138 later.", "A plain sentence."] {
+            bench.copy(text)
+            #expect(tool.items.first?.kind == .text, "\(text)")
+        }
+    }
+
+    @Test func colorsReadAsTheirComponents() throws {
+        let hex = try #require(ColorValue.parse("#F05138"))
+        let rgb = try #require(ColorValue.parse("rgb(240, 81, 56)"))
+        #expect(hex == rgb)
+        #expect(hex == [240.0 / 255, 81.0 / 255, 56.0 / 255, 1])
+        #expect(ColorValue.parse("rgba(0, 0, 0, 0.25)")?.last == 0.25)
+        #expect(ColorValue.hex(hex) == "#F05138")
+    }
+
+    @Test func aFileWinsOverItsPicture() {
+        let fileURL = NSPasteboard.PasteboardType.fileURL.rawValue
+        let png = NSPasteboard.PasteboardType.png.rawValue
+        let color = NSPasteboard.PasteboardType.color.rawValue
+        #expect(ClipItem.kind(types: [fileURL, png], text: nil) == .file)
+        #expect(ClipItem.kind(types: [png, color], text: "#F05138") == .image)
+        #expect(ClipItem.kind(types: [color], text: nil) == .color)
+    }
+}
+
+@MainActor
+@Suite(.serialized)
+struct PensieveCopyBackTests {
+    @Test func copyingBackKeepsEveryRepresentation() throws {
+        let bench = Bench()
+        defer { bench.tearDown() }
+        let tool = bench.startedTool()
+
+        let styled = NSAttributedString(string: "Bold move", attributes: [.font: NSFont.boldSystemFont(ofSize: 13)])
+        let rtf = try #require(styled.rtf(from: NSRange(location: 0, length: styled.length), documentAttributes: [:]))
+        let item = NSPasteboardItem()
+        item.setString("Bold move", forType: .string)
+        item.setData(rtf, forType: .rtf)
+        bench.copy([item])
+        bench.copy("something else")
+        let styledItem = try #require(tool.items.last)
+        #expect(styledItem.text == "Bold move")
+
+        #expect(tool.copyToPasteboard(styledItem.id))
+        let types = bench.pasteboard.types ?? []
+        #expect(types.contains(.string))
+        #expect(types.contains(.rtf))
+        #expect(bench.pasteboard.string(forType: .string) == "Bold move")
+        #expect(bench.pasteboard.data(forType: .rtf) == rtf)
+
+        bench.tick()
+        #expect(tool.items.count == 2)
+        #expect(tool.items.first?.id == styledItem.id)
+    }
+
+    @Test func copyingBackSeveralFilesKeepsEachOne() throws {
+        let bench = Bench()
+        defer { bench.tearDown() }
+        let tool = bench.startedTool()
+
+        let urls = ["/tmp/One.txt", "/tmp/Two.txt", "/tmp/Three.txt"].map { URL(fileURLWithPath: $0) }
+        bench.copy(urls.map { url in
+            let item = NSPasteboardItem()
+            item.setString(url.absoluteString, forType: .fileURL)
+            return item
+        })
+        let files = try #require(tool.items.first)
+        #expect(files.fileNames == ["One.txt", "Two.txt", "Three.txt"])
+
+        bench.copy("something else")
+        #expect(tool.copyToPasteboard(files.id))
+        let written = bench.pasteboard.pasteboardItems?.compactMap { $0.string(forType: .fileURL) }
+        #expect(written == urls.map(\.absoluteString))
+    }
+}
+
+@MainActor
+@Suite(.serialized)
+struct PensieveStorageTests {
+    @Test func theHistorySurvivesARelaunch() throws {
+        let bench = Bench()
+        defer { bench.tearDown() }
+        let first = bench.startedTool()
+        bench.copy("one")
+        bench.copy(try pngData(width: 8, height: 6), as: .png)
+        bench.copy("#F05138")
+        first.stop()
+        bench.waitUntilSaved()
+
+        let relaunched = bench.startedTool()
+        #expect(relaunched.items.count == 3)
+        #expect(relaunched.items == first.items)
+        #expect(relaunched.items.map(\.kind) == [.color, .image, .text])
+    }
+
+    @Test func removingAnItemDeletesItsData() throws {
+        let bench = Bench()
+        defer { bench.tearDown() }
+        let tool = bench.startedTool()
+        bench.copy("keep")
+        bench.copy("remove")
+        let removed = try #require(tool.items.first)
+        bench.waitUntilSaved()
+        #expect(bench.dataFiles.contains("\(removed.id.uuidString).plist"))
+
+        tool.remove(removed.id)
+        bench.waitUntilSaved()
+        #expect(tool.items.map(\.text) == ["keep"])
+        #expect(!bench.dataFiles.contains("\(removed.id.uuidString).plist"))
+        #expect(bench.dataFiles.count == 1)
+    }
+
+    @Test func clearingLeavesNoData() {
+        let bench = Bench()
+        defer { bench.tearDown() }
+        let tool = bench.startedTool()
+        bench.copy("one")
+        bench.copy("two")
+        bench.copy("three")
+        bench.waitUntilSaved()
+        #expect(bench.dataFiles.count == 3)
+
+        tool.clear()
+        bench.waitUntilSaved()
+        #expect(tool.items.isEmpty)
+        #expect(bench.dataFiles.isEmpty)
+        #expect(bench.startedTool().items.isEmpty)
+    }
+
+    @Test func aBrokenIndexReadsAsNoHistory() throws {
+        let bench = Bench()
+        defer { bench.tearDown() }
+        try FileManager.default.createDirectory(at: bench.directory, withIntermediateDirectories: true)
+        try Data("{\"version\": 1, \"items\": [{\"id\": 7".utf8).write(to: bench.directory.appending(path: "index.json"))
+
+        let tool = bench.startedTool()
+        #expect(tool.items.isEmpty)
+        bench.copy("still works")
+        bench.waitUntilSaved()
+        #expect(bench.startedTool().items.map(\.text) == ["still works"])
+    }
+
+    @Test func onlyThePersonCanOpenTheFolder() throws {
+        let bench = Bench()
+        defer { bench.tearDown() }
+        _ = bench.startedTool()
+        bench.copy("private")
+        bench.waitUntilSaved()
+        let attributes = try FileManager.default.attributesOfItem(atPath: bench.directory.path)
+        #expect((attributes[.posixPermissions] as? NSNumber)?.intValue == 0o700)
+    }
+}
+
+@MainActor
+@Suite(.serialized)
+struct PensieveShortcutTests {
+    @Test func theShortcutIsShiftCommandVByDefault() {
+        let bench = Bench()
+        defer { bench.tearDown() }
+        let tool = bench.tool(keepsShortcut: true)
+        #expect(PensieveTool.defaultShortcut == shortcut(kVK_ANSI_V, shiftKey | cmdKey, "V"))
+        #expect(tool.shortcut == shortcut(kVK_ANSI_V, shiftKey | cmdKey, "V"))
+        #expect(tool.shortcut?.text == "⇧⌘V")
+    }
+
+    @Test func aNewShortcutSurvivesARelaunch() {
+        let bench = Bench()
+        defer { bench.tearDown() }
+        let tool = bench.tool(keepsShortcut: true)
+        #expect(tool.setShortcut(shortcut(kVK_ANSI_H, optionKey | cmdKey, "H")) == nil)
+        #expect(bench.tool(keepsShortcut: true).shortcut?.text == "⌥⌘H")
+    }
+
+    @Test func aClearedShortcutStaysCleared() {
+        let bench = Bench()
+        defer { bench.tearDown() }
+        let tool = bench.tool(keepsShortcut: true)
+        #expect(tool.setShortcut(nil) == nil)
+        #expect(tool.shortcut == nil)
+        #expect(bench.tool(keepsShortcut: true).shortcut == nil)
+    }
+
+    @Test func aShortcutNeedsCommandControlOrOption() {
+        let bench = Bench()
+        defer { bench.tearDown() }
+        let tool = bench.tool(keepsShortcut: true)
+        #expect(tool.setShortcut(shortcut(kVK_ANSI_V, shiftKey, "V")) == .needsModifier)
+        #expect(tool.setShortcut(shortcut(kVK_ANSI_V, 0, "V")) == .needsModifier)
+        #expect(tool.shortcut?.text == "⇧⌘V")
+    }
+
+    @Test func aShortcutTakenElsewhereIsRefused() throws {
+        let taken = try GlobalHotKey.register(keyCode: f16.keyCode, modifiers: f16.modifiers) {}.get()
+        defer { GlobalHotKey.unregister(taken) }
+        let bench = Bench()
+        defer { bench.tearDown() }
+        let tool = bench.startedTool()
+        #expect(tool.setShortcut(f15) == nil)
+        #expect(!isFree(f15))
+
+        #expect(tool.setShortcut(f16) == .refusedBySystem)
+        #expect(tool.shortcut == f15)
+        #expect(!isFree(f15))
+        #expect(!tool.shortcutFailed)
+    }
+
+    @Test func aSavedShortcutMacOSRefusesIsFlagged() throws {
+        let taken = try GlobalHotKey.register(keyCode: f16.keyCode, modifiers: f16.modifiers) {}.get()
+        defer { GlobalHotKey.unregister(taken) }
+        let bench = Bench()
+        defer { bench.tearDown() }
+        bench.tool().setShortcut(f16)
+
+        let relaunched = bench.startedTool()
+        #expect(relaunched.shortcut == f16)
+        #expect(relaunched.shortcutFailed)
+        relaunched.stop()
+        #expect(!relaunched.shortcutFailed)
+    }
+
+    @Test func thePausedShortcutIsFreeUntilItResumes() {
+        let bench = Bench()
+        defer { bench.tearDown() }
+        let tool = bench.startedTool()
+        tool.setShortcut(f15)
+        #expect(!isFree(f15))
+
+        tool.setShortcutsPaused(true)
+        #expect(isFree(f15))
+        tool.setShortcutsPaused(false)
+        #expect(!isFree(f15))
+        tool.stop()
+        #expect(isFree(f15))
+    }
+}
+
+@MainActor
+@Suite(.serialized)
+struct HistoryBrowserTests {
+    @Test func searchIgnoresCase() throws {
+        let bench = Bench()
+        defer { bench.tearDown() }
+        let tool = bench.startedTool()
+        bench.copy("Apple pie")
+        bench.copy("banana")
+        bench.copy(try pngData(width: 2, height: 2), as: .png)
+        let item = NSPasteboardItem()
+        item.setString(URL(fileURLWithPath: "/tmp/APPLE Report.pdf").absoluteString, forType: .fileURL)
+        bench.copy([item])
+        bench.copy("Pineapple")
+        bench.copy("#ABCDEF")
+
+        let browser = HistoryBrowser(tool: tool)
+        browser.reset()
+        #expect(browser.results.count == 6)
+        browser.query = "aPPle"
+        #expect(browser.results.map { $0.text ?? $0.fileNames.first } == ["Pineapple", "APPLE Report.pdf", "Apple pie"])
+        #expect(browser.selection?.text == "Pineapple")
+        browser.query = "abcdef"
+        #expect(browser.results.map(\.kind) == [.color])
+        browser.query = "nothing like this"
+        #expect(browser.results.isEmpty)
+        #expect(browser.selection == nil)
+
+        #expect(!browser.escape())
+        #expect(browser.query.isEmpty)
+        #expect(browser.escape())
+    }
+
+    @Test func theSelectionStopsAtTheEnds() {
+        let bench = Bench()
+        defer { bench.tearDown() }
+        let tool = bench.startedTool()
+        for text in ["one", "two", "three"] {
+            bench.copy(text)
+        }
+        let browser = HistoryBrowser(tool: tool)
+        browser.reset()
+        #expect(browser.selection?.text == "three")
+        browser.move(by: -1)
+        #expect(browser.selection?.text == "three")
+        for _ in 0..<5 {
+            browser.move(by: 1)
+        }
+        #expect(browser.selection?.text == "one")
+        browser.move(by: -1)
+        #expect(browser.selection?.text == "two")
+
+        browser.reset()
+        #expect(browser.selection?.text == "three")
+    }
+
+    @Test func removingTheSelectionKeepsAValidSelection() {
+        let bench = Bench()
+        defer { bench.tearDown() }
+        let tool = bench.startedTool()
+        for text in ["one", "two", "three", "four"] {
+            bench.copy(text)
+        }
+        let browser = HistoryBrowser(tool: tool)
+        browser.reset()
+        browser.move(by: 1)
+        #expect(browser.selection?.text == "three")
+        browser.removeSelection()
+        #expect(tool.items.map(\.text) == ["four", "two", "one"])
+        #expect(browser.selection?.text == "two")
+
+        browser.move(by: 1)
+        browser.removeSelection()
+        #expect(browser.selection?.text == "two")
+
+        browser.removeSelection()
+        browser.removeSelection()
+        #expect(tool.items.isEmpty)
+        #expect(browser.selection == nil)
+        browser.removeSelection()
+        browser.move(by: 1)
+        #expect(browser.selection == nil)
+    }
+
+    @Test func theKeysTheWindowAnswersTo() throws {
+        func key(_ keyCode: Int, _ modifiers: NSEvent.ModifierFlags = [], _ characters: String = "") throws -> HistoryKey? {
+            HistoryKey(try #require(NSEvent.keyEvent(
+                with: .keyDown,
+                location: .zero,
+                modifierFlags: modifiers,
+                timestamp: 0,
+                windowNumber: 0,
+                context: nil,
+                characters: characters,
+                charactersIgnoringModifiers: characters,
+                isARepeat: false,
+                keyCode: UInt16(keyCode)
+            )))
+        }
+        #expect(try key(kVK_UpArrow, [.numericPad, .function]) == .up)
+        #expect(try key(kVK_DownArrow, [.numericPad, .function]) == .down)
+        #expect(try key(kVK_Return) == .copy)
+        #expect(try key(kVK_Delete, .command) == .remove)
+        #expect(try key(kVK_Escape) == .escape)
+        #expect(try key(kVK_Tab) == .nextFilter)
+        #expect(try key(kVK_Tab, .shift) == .previousFilter)
+        #expect(try key(kVK_ANSI_Comma, .command, ",") == .settings)
+        #expect(try key(kVK_ANSI_Comma, [], ",") == nil)
+        #expect(try key(kVK_Delete) == nil)
+        #expect(try key(kVK_ANSI_A, [], "a") == nil)
+        #expect(try key(kVK_UpArrow, .shift) == nil)
+    }
+}
+
+@MainActor
+@Suite(.serialized)
+struct PensieveLimitTests {
+    @Test func aLowerLimitDropsTheOldestAndTheirData() {
+        let bench = Bench()
+        defer { bench.tearDown() }
+        let tool = bench.startedTool()
+        for number in 1...120 {
+            bench.copy("item \(number)")
+        }
+        bench.waitUntilSaved()
+        #expect(bench.dataFiles.count == 120)
+
+        tool.setItemLimit(100)
+        bench.waitUntilSaved()
+        #expect(tool.items.count == 100)
+        #expect(tool.items.first?.text == "item 120")
+        #expect(tool.items.last?.text == "item 21")
+        #expect(bench.dataFiles.count == 100)
+
+        tool.stop()
+        let relaunched = bench.startedTool()
+        #expect(relaunched.itemLimit == 100)
+        #expect(relaunched.items.count == 100)
+        bench.copy("item 121")
+        #expect(relaunched.items.count == 100)
+        #expect(relaunched.items.last?.text == "item 22")
+    }
+
+    @Test func aLimitThatIsNotAChoiceIsTheDefault() {
+        let bench = Bench()
+        defer { bench.tearDown() }
+        #expect(PensieveTool.itemLimits == [50, 100, 200, 500, 1000])
+        bench.settings.setPlainInt(7, for: "maxItems")
+        #expect(bench.tool().itemLimit == 200)
+        bench.settings.setPlainInt(500, for: "maxItems")
+        #expect(bench.tool().itemLimit == 500)
+    }
+
+    @Test func thePanelListsTheLatestTen() {
+        let bench = Bench()
+        defer { bench.tearDown() }
+        let tool = bench.startedTool()
+        for number in 1...4 {
+            bench.copy("item \(number)")
+        }
+        #expect(tool.panelItems.count == 4)
+        for number in 5...15 {
+            bench.copy("item \(number)")
+        }
+        #expect(tool.items.count == 15)
+        #expect(tool.panelItems.count == 10)
+        #expect(tool.panelItems.map(\.text) == (6...15).reversed().map { "item \($0)" })
+    }
+}
+
+@MainActor
+@Suite(.serialized)
+struct PensieveExpiryTests {
+    @Test func anItemExpiresAMonthAfterItWasLastCopied() throws {
+        let bench = Bench()
+        defer { bench.tearDown() }
+        let tool = bench.startedTool()
+        #expect(tool.historyAge == .month)
+        bench.copy("old")
+        let old = try #require(tool.items.first)
+        #expect(old.copiedAt == bench.date)
+        bench.advance(days: 20)
+        bench.copy("recent")
+        bench.advance(days: 10.5)
+
+        // The check runs once an hour, not on every look at the clipboard.
+        bench.tick()
+        #expect(tool.items.map(\.text) == ["recent"])
+        bench.waitUntilSaved()
+        #expect(!bench.dataFiles.contains("\(old.id.uuidString).plist"))
+        #expect(bench.dataFiles.count == 1)
+    }
+
+    @Test func theCheckRunsHourly() {
+        let bench = Bench()
+        defer { bench.tearDown() }
+        let tool = bench.startedTool()
+        bench.copy("one")
+        bench.date = bench.date.addingTimeInterval(24 * 60 * 60 - 10 * 60)
+        tool.setHistoryAge(.day)
+        #expect(tool.items.count == 1)
+
+        // A day old now, but the last check, when the age changed, was 20 minutes ago.
+        bench.date = bench.date.addingTimeInterval(20 * 60)
+        bench.tick()
+        #expect(tool.items.count == 1)
+        bench.date = bench.date.addingTimeInterval(41 * 60)
+        bench.tick()
+        #expect(tool.items.isEmpty)
+    }
+
+    @Test func copyingAgainOrPickingStartsTheClockAgain() throws {
+        let bench = Bench()
+        defer { bench.tearDown() }
+        let tool = bench.startedTool()
+        bench.copy("again")
+        bench.copy("picked")
+        bench.copy("other")
+        bench.advance(days: 29)
+        bench.copy("again")
+        #expect(tool.items.first?.copiedAt == bench.date)
+        let picked = try #require(tool.items.first { $0.text == "picked" })
+        #expect(tool.copyToPasteboard(picked.id))
+        #expect(tool.items.first?.copiedAt == bench.date)
+
+        bench.advance(days: 2)
+        bench.tick()
+        #expect(tool.items.map(\.text) == ["picked", "again"])
+    }
+
+    @Test func aShorterAgeTakesEffectAtOnceAndNeverKeepsEverything() {
+        let bench = Bench()
+        defer { bench.tearDown() }
+        let tool = bench.startedTool()
+        bench.copy("ten days old")
+        bench.advance(days: 8)
+        bench.copy("two days old")
+        bench.advance(days: 2)
+
+        tool.setHistoryAge(.never)
+        bench.advance(days: 400)
+        bench.tick()
+        #expect(tool.items.count == 2)
+        bench.advance(days: -400)
+        tool.setHistoryAge(.week)
+        #expect(tool.items.map(\.text) == ["two days old"])
+        tool.setHistoryAge(.day)
+        #expect(tool.items.isEmpty)
+        #expect(bench.tool().historyAge == .day)
+    }
+
+    @Test func expiredItemsGoWhenTheToolStarts() {
+        let bench = Bench()
+        defer { bench.tearDown() }
+        let first = bench.startedTool()
+        bench.copy("old")
+        first.stop()
+        bench.waitUntilSaved()
+
+        bench.advance(days: 31)
+        #expect(bench.startedTool().items.isEmpty)
+    }
+
+    @Test func anIndexFromBeforeDatesLoadsAndIsDatedNow() throws {
+        let bench = Bench()
+        defer { bench.tearDown() }
+        let id = UUID()
+        try FileManager.default.createDirectory(at: bench.directory, withIntermediateDirectories: true)
+        let index = """
+        {"version": 1, "items": [{"id": "\(id.uuidString)", "kind": "text", "digest": "abc", "byteCount": 5, "text": "hello"}]}
+        """
+        try Data(index.utf8).write(to: bench.directory.appending(path: "index.json"))
+        bench.settings.set(HistoryAge.day.rawValue, for: "clearAfter")
+
+        let tool = bench.startedTool()
+        #expect(tool.items.map(\.id) == [id])
+        #expect(tool.items.first?.copiedAt == bench.date)
+        bench.waitUntilSaved()
+        let saved = try String(contentsOf: bench.directory.appending(path: "index.json"), encoding: .utf8)
+        #expect(saved.contains("copiedAt"))
+        tool.stop()
+
+        bench.advance(days: 0.5)
+        #expect(bench.startedTool().items.first?.copiedAt == bench.date.addingTimeInterval(-12 * 60 * 60))
+    }
+}
+
+@MainActor
+@Suite(.serialized)
+struct PensieveIgnoredAppTests {
+    @Test func aCopyInAnIgnoredAppIsNotRecorded() {
+        let bench = Bench()
+        defer { bench.tearDown() }
+        let tool = bench.startedTool()
+        bench.frontmostBundleID = "com.apple.Passwords"
+        bench.copy("hunter2")
+        #expect(tool.items.isEmpty)
+
+        // Seen already: the copy is skipped for good, not recorded once another app comes to the front.
+        bench.frontmostBundleID = "com.apple.TextEdit"
+        bench.tick()
+        #expect(tool.items.isEmpty)
+        bench.copy("Not a secret")
+        #expect(tool.items.map(\.text) == ["Not a secret"])
+    }
+
+    @Test func passwordsAndKeychainAccessAreIgnoredUntilTheListChanges() {
+        let bench = Bench()
+        defer { bench.tearDown() }
+        let tool = bench.tool()
+        #expect(tool.ignoredApps.map(\.bundleID) == ["com.apple.Passwords", "com.apple.keychainaccess"])
+        #expect(tool.ignoredApps.map(\.name) == ["Passwords", "Keychain Access"])
+        #expect(!bench.settings.allKeys.contains("ignoredApps"))
+
+        for app in tool.ignoredApps {
+            tool.stopIgnoring(app)
+        }
+        #expect(tool.ignoredApps.isEmpty)
+        #expect(bench.settings.string("ignoredApps", default: "") == "[]")
+        #expect(bench.tool().ignoredApps.isEmpty)
+    }
+
+    @Test func anAddedAppIsKeptAndListedOnce() {
+        let bench = Bench()
+        defer { bench.tearDown() }
+        let tool = bench.startedTool()
+        let app = AppCandidate(bundleID: "com.example.vault", path: "/Applications/Vault.app", name: "Vault")
+        #expect(tool.ignore(app))
+        #expect(!tool.ignore(AppCandidate(bundleID: "com.example.vault", path: "/Applications/Vault Beta.app", name: "Vault Beta")))
+        #expect(bench.tool().ignoredApps.last == app)
+
+        bench.frontmostBundleID = "com.example.vault"
+        bench.copy("from the vault")
+        #expect(tool.items.isEmpty)
+        tool.stopIgnoring(app)
+        bench.copy("from the vault, again")
+        #expect(tool.items.count == 1)
+    }
+
+    @Test func anAppThatIsNotInstalledShowsItsName() {
+        #expect(AppCatalog.displayName(path: "/Applications/Not Installed \(UUID().uuidString).app", savedName: "Passwords") == "Passwords")
+        #expect(AppCatalog.displayName(path: "/System/Applications/Calculator.app", savedName: "Saved") != "Saved")
+    }
+
+    @Test func aBrokenListIsTheDefaultOne() {
+        let bench = Bench()
+        defer { bench.tearDown() }
+        bench.settings.set("[{\"bundleID\": 1", for: "ignoredApps")
+        #expect(bench.tool().ignoredApps.map(\.bundleID) == ["com.apple.Passwords", "com.apple.keychainaccess"])
+    }
+}
+
+@MainActor
+@Suite(.serialized)
+struct HistoryFilterTests {
+    /// From the top: a file, a picture, a color, a link and a line of text.
+    private func filledBench() throws -> (Bench, PensieveTool) {
+        let bench = Bench()
+        let tool = bench.startedTool()
+        bench.copy("A line of text")
+        bench.copy("https://www.swift.org/documentation/")
+        bench.copy("#F05138")
+        bench.copy(try pngData(width: 2, height: 2), as: .png)
+        let file = NSPasteboardItem()
+        file.setString(URL(fileURLWithPath: "/tmp/Swift Notes.pdf").absoluteString, forType: .fileURL)
+        bench.copy([file])
+        return (bench, tool)
+    }
+
+    @Test func eachFilterListsItsKinds() throws {
+        let (bench, tool) = try filledBench()
+        defer { bench.tearDown() }
+        let browser = HistoryBrowser(tool: tool)
+        browser.reset()
+        #expect(browser.filter == .all)
+        #expect(browser.results.map(\.kind) == [.file, .image, .color, .text, .text])
+
+        browser.filter = .text
+        #expect(browser.results.map(\.kind) == [.color, .text, .text])
+        #expect(browser.selection?.kind == .color)
+        browser.filter = .links
+        #expect(browser.results.map(\.text) == ["https://www.swift.org/documentation/"])
+        browser.filter = .images
+        #expect(browser.results.map(\.kind) == [.image])
+        browser.filter = .files
+        #expect(browser.results.map(\.fileNames) == [["Swift Notes.pdf"]])
+    }
+
+    @Test func theFilterAndTheSearchBothApply() throws {
+        let (bench, tool) = try filledBench()
+        defer { bench.tearDown() }
+        let browser = HistoryBrowser(tool: tool)
+        browser.reset()
+        browser.query = "swift"
+        #expect(browser.results.count == 2)
+        browser.filter = .text
+        #expect(browser.results.map(\.text) == ["https://www.swift.org/documentation/"])
+        browser.filter = .images
+        #expect(browser.results.isEmpty)
+        #expect(browser.selection == nil)
+        #expect(browser.hasHistory)
+
+        browser.reset()
+        #expect(browser.filter == .all)
+        #expect(browser.query.isEmpty)
+    }
+
+    @Test func tabGoesRoundTheFilters() {
+        #expect(ClipFilter.allCases == [.all, .text, .links, .images, .files])
+        let bench = Bench()
+        defer { bench.tearDown() }
+        let browser = HistoryBrowser(tool: bench.startedTool())
+        browser.reset()
+        var forward: [ClipFilter] = []
+        for _ in 0..<5 {
+            browser.cycleFilter(by: 1)
+            forward.append(browser.filter)
+        }
+        #expect(forward == [.text, .links, .images, .files, .all])
+        browser.cycleFilter(by: -1)
+        #expect(browser.filter == .files)
+        browser.cycleFilter(by: -1)
+        #expect(browser.filter == .images)
+    }
+
+    @Test func onlyAWholeWebAddressIsALink() throws {
+        func item(_ text: String) throws -> ClipItem {
+            try #require(ClipItem(id: UUID(), payload: [[Representation(type: NSPasteboard.PasteboardType.string.rawValue, data: Data(text.utf8))]]))
+        }
+        #expect(try item("https://www.swift.org").isLink)
+        #expect(try item("  http://example.com/a?b=c\n").isLink)
+        #expect(try !item("See https://www.swift.org").isLink)
+        #expect(try !item("https://example.com and more").isLink)
+        #expect(try !item("ftp://example.com").isLink)
+        #expect(try !item("#F05138").isLink)
+    }
+}
+
+@MainActor
+struct ImagePreviewTests {
+    @Test func aPictureFitsWithoutGrowing() {
+        #expect(PensieveTool.previewSize(pixelWidth: 1280, pixelHeight: 720, scale: 2) == CGSize(width: 360, height: 203))
+        #expect(PensieveTool.previewSize(pixelWidth: 600, pixelHeight: 800, scale: 1) == CGSize(width: 270, height: 360))
+        #expect(PensieveTool.previewSize(pixelWidth: 100, pixelHeight: 80, scale: 2) == CGSize(width: 50, height: 40))
+        #expect(PensieveTool.previewSize(pixelWidth: 0, pixelHeight: 80, scale: 2) == nil)
+    }
+
+    @Test func thePreviewSitsBesideTheWindowWhereThereIsRoom() {
+        let screen = NSRect(x: 0, y: 0, width: 1440, height: 900)
+        let size = CGSize(width: 384, height: 250)
+        let middle = NSRect(x: 480, y: 300, width: 480, height: 400)
+        #expect(SidePanelController.frame(size: size, beside: middle, preferring: .right, in: screen)
+            == NSRect(x: 968, y: 450, width: 384, height: 250))
+        #expect(SidePanelController.frame(size: size, beside: middle, preferring: .left, in: screen)
+            == NSRect(x: 88, y: 450, width: 384, height: 250))
+
+        let atTheRight = NSRect(x: 1000, y: 300, width: 400, height: 400)
+        #expect(SidePanelController.frame(size: size, beside: atTheRight, preferring: .right, in: screen).minX == 608)
+        let atTheLeft = NSRect(x: 100, y: 300, width: 320, height: 400)
+        #expect(SidePanelController.frame(size: size, beside: atTheLeft, preferring: .left, in: screen).minX == 428)
+    }
+}
+
+@MainActor
+struct PensieveToolTests {
+    @Test func theSymbolsAreThere() {
+        let bench = Bench()
+        defer { bench.tearDown() }
+        // Without one, turning on Show in the menu bar would leave the tool without an icon.
+        #expect(bench.tool().statusIcons().map(\.id) == ["clipboard"])
+        for symbol in ["list.clipboard", "magnifyingglass", "text.alignleft", "link", "photo"] {
+            #expect(NSImage(systemSymbolName: symbol, accessibilityDescription: nil) != nil, "\(symbol)")
+        }
+    }
+
+    @Test func theSummaryCountsTheItems() {
+        let bench = Bench()
+        defer { bench.tearDown() }
+        let tool = bench.startedTool()
+        #expect(tool.summary == "No items")
+        bench.copy("one")
+        bench.copy("two")
+        #expect(tool.summary == "2 items")
+    }
+}
+
+#if DEBUG
+extension PensieveToolTests {
+    @Test func theSamplesAreOneOfEachKind() {
+        let samples = PensieveDebug.samples().map(\.item)
+        #expect(samples.map(\.kind) == [.color, .file, .image, .text, .text, .image])
+        #expect(samples.first?.colorValue == "#F05138")
+        #expect(samples[2].pixelWidth == 1280 && samples[2].pixelHeight == 720)
+        #expect(samples[5].pixelWidth == 600 && samples[5].pixelHeight == 800)
+        #expect((samples[3].text ?? "").contains("\n"))
+        #expect(samples[4].isLink)
+        #expect(samples.allSatisfy { $0.copiedAt != nil })
+    }
+
+    @Test func samplesNeitherReadNorSaveNorSetUpTheShortcut() {
+        let bench = Bench()
+        defer { bench.tearDown() }
+        let tool = bench.tool()
+        tool.setShortcut(f15)
+        PensieveDebug.showSamples(tool)
+        tool.start()
+        #expect(tool.items.count == 6)
+        #expect(isFree(f15))
+
+        bench.copy("not recorded")
+        tool.setPaused(true)
+        tool.setShortcut(f16)
+        tool.setItemLimit(50)
+        tool.setHistoryAge(.day)
+        tool.stopIgnoring(tool.ignoredApps[0])
+        tool.ignore(AppCandidate(bundleID: "com.example.app", path: "/Applications/Example.app", name: "Example"))
+        tool.remove(tool.items[0].id)
+        tool.clear()
+        bench.waitUntilSaved()
+        #expect(!FileManager.default.fileExists(atPath: bench.directory.path))
+        #expect(isFree(f16))
+        #expect(bench.settings.allKeys == ["shortcut"])
+        #expect(bench.tool().shortcut == f15)
+    }
+}
+#endif

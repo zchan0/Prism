@@ -5,19 +5,6 @@ import PrismKit
 
 @MainActor
 struct TimeTextTests {
-    @Test func countdownShowsMinutesUnderAnHour() {
-        #expect(TimeText.countdown(249) == "4:09")
-        #expect(TimeText.countdown(0) == "0:00")
-    }
-
-    @Test func countdownAddsHours() {
-        #expect(TimeText.countdown(3849) == "1:04:09")
-    }
-
-    @Test func countdownRoundsUpSoZeroIsOnlyShownAtTheEnd() {
-        #expect(TimeText.countdown(0.4) == "0:01")
-    }
-
     @Test func compactFitsTheMenuBar() {
         #expect(TimeText.compact(42) == "42s")
         #expect(TimeText.compact(42 * 60) == "42m")

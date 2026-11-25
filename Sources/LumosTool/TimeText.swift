@@ -18,17 +18,6 @@ public enum SessionLength: Int, CaseIterable, Identifiable, Sendable {
 
 // Pure formatting so the menu bar and the panel read the same clock.
 enum TimeText {
-    /// "4:09" or "1:04:09" for the countdown shown inside the app.
-    static func countdown(_ remaining: TimeInterval) -> String {
-        let seconds = max(0, Int(remaining.rounded(.up)))
-        let hours = seconds / 3600
-        let minutes = (seconds % 3600) / 60
-        let rest = seconds % 60
-        return hours > 0
-            ? String(format: "%d:%02d:%02d", hours, minutes, rest)
-            : String(format: "%d:%02d", minutes, rest)
-    }
-
     /// "42m", "1:02" or "42s" next to the menu bar sun, where every point of width counts.
     static func compact(_ remaining: TimeInterval) -> String {
         let seconds = max(0, Int(remaining.rounded(.up)))

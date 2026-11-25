@@ -6,45 +6,45 @@ import Carbon.HIToolbox
 ///
 /// Two shortcuts are the same when their key code and modifiers are: the key name only says what the key typed on the
 /// layout it was recorded with.
-struct Shortcut: Codable, Hashable, Sendable {
-    let keyCode: UInt32
+public struct Shortcut: Codable, Hashable, Sendable {
+    public let keyCode: UInt32
     /// A Carbon mask of `controlKey`, `optionKey`, `shiftKey` and `cmdKey`.
-    let modifiers: UInt32
-    let keyName: String
+    public let modifiers: UInt32
+    public let keyName: String
 
-    static let modifierMask = UInt32(controlKey | optionKey | shiftKey | cmdKey)
+    public static let modifierMask = UInt32(controlKey | optionKey | shiftKey | cmdKey)
 
-    init(keyCode: UInt32, modifiers: UInt32, keyName: String) {
+    public init(keyCode: UInt32, modifiers: UInt32, keyName: String) {
         self.keyCode = keyCode
         self.modifiers = modifiers & Self.modifierMask
         self.keyName = keyName
     }
 
     /// One symbol for each modifier, in the order macOS writes them, then the key: ⌥, ⇧, C.
-    var keys: [String] {
+    public var keys: [String] {
         let symbols: [(mask: Int, symbol: String)] = [(controlKey, "⌃"), (optionKey, "⌥"), (shiftKey, "⇧"), (cmdKey, "⌘")]
         return symbols.filter { modifiers & UInt32($0.mask) != 0 }.map(\.symbol) + [keyName]
     }
 
     /// Modifiers in the order macOS writes them, such as ⌥⇧C.
-    var text: String { keys.joined() }
+    public var text: String { keys.joined() }
 
     /// ⇧ alone types capitals, and no modifier at all types plain text.
-    var hasRequiredModifier: Bool {
+    public var hasRequiredModifier: Bool {
         modifiers & UInt32(controlKey | optionKey | cmdKey) != 0
     }
 
-    static func == (lhs: Shortcut, rhs: Shortcut) -> Bool {
+    public static func == (lhs: Shortcut, rhs: Shortcut) -> Bool {
         lhs.keyCode == rhs.keyCode && lhs.modifiers == rhs.modifiers
     }
 
-    func hash(into hasher: inout Hasher) {
+    public func hash(into hasher: inout Hasher) {
         hasher.combine(keyCode)
         hasher.combine(modifiers)
     }
 }
 
-extension Shortcut {
+public extension Shortcut {
     init(event: NSEvent) {
         let flags = event.modifierFlags
         var modifiers: UInt32 = 0

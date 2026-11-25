@@ -22,6 +22,28 @@ enum DebugCapture {
         return capture.terminationStatus == 0
     }
 
+    /// Screenshots what is on screen around `frame`, at once, such as a window with a menu open on it.
+    static func screen(around frame: NSRect, to path: String) -> Bool {
+        guard let mainHeight = NSScreen.screens.first?.frame.height else { return false }
+        let rect = frame.insetBy(dx: -24, dy: -24)
+        // screencapture measures from the top left of the main display.
+        let region = [rect.minX, mainHeight - rect.maxY, rect.width, rect.height].map { String(Int($0.rounded())) }
+        let capture = Process()
+        capture.executableURL = URL(fileURLWithPath: "/usr/sbin/screencapture")
+        capture.arguments = ["-x", "-R", region.joined(separator: ","), path]
+        // Not waitUntilExit, which would run the run loop from inside the menu's tracking.
+        let exited = DispatchSemaphore(value: 0)
+        capture.terminationHandler = { _ in exited.signal() }
+        do {
+            try capture.run()
+        } catch {
+            print("capture: \(error.localizedDescription)")
+            return false
+        }
+        exited.wait()
+        return capture.terminationStatus == 0
+    }
+
     /// Every menu bar icon state, one 94x26 point cell each, on a light, a dark and a tinted menu bar, at 4x.
     static func statusIcons(to path: String) -> Bool {
         let icons: [NSImage] = [

@@ -33,6 +33,12 @@ struct DiskReadingTests {
         #expect(reading.usedFraction == 0)
     }
 
+    @Test func theShortSummaryIsTheFreeSpace() {
+        let reading = disk(total: 494_380_000_000, available: 70_000_000_000, important: 78_950_000_000).reading
+        #expect(reading.shortSummary == "78.95 GB free")
+        #expect(reading.summary == "78.95 GB free of 494.38 GB")
+    }
+
     @Test func readsTheRealBootVolume() throws {
         let real = try #require(DiskReading.read(volumeAt: "/"))
         #expect(real.total > 0)
@@ -137,6 +143,12 @@ struct ToolIdentityTests {
 struct VitalsMenuBarTests {
     private func freshSettings() -> ToolSettings {
         ToolSettings(tool: VitalsTool.id, defaults: MemoryDefaults())
+    }
+
+    @Test func theSummaryIsTheFirstReadingInTheMenuBar() {
+        let tool = VitalsTool(settings: freshSettings())
+        #expect(tool.summary.hasSuffix(" free"))
+        #expect(!tool.summary.contains("·"))
     }
 
     @Test func diskAloneIsInTheMenuBarByDefault() {

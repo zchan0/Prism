@@ -1,38 +1,42 @@
 import PrismKit
 import SwiftUI
 
-/// The awake tool's settings, shown under its controls on its tab in the hub.
+/// The awake tool's settings, shown under its controls on its page in the Prism window.
 struct LumosSettingsView: View {
     @Bindable var preferences: Preferences
 
     var body: some View {
-        VStack(spacing: 0) {
-            PanelRow(LumosStrings.menuBarTime) {
-                PanelSwitch(isOn: $preferences.showsTimeInMenuBar)
-            }
+        PanelSection(LumosStrings.sessions) {
             PanelRow(LumosStrings.lengthPicker) {
-                Picker("", selection: $preferences.lastLength) {
-                    ForEach(SessionLength.displayOrder) { length in
-                        Text(LumosStrings.lengthName(length)).tag(length)
-                    }
+                PanelPopUp(selection: $preferences.lastLength, options: SessionLength.displayOrder) { length in
+                    LumosStrings.lengthName(length)
                 }
-                .panelMenu()
             }
+            PanelDivider.inCard
             PanelRow(LumosStrings.lowBatteryStops) {
-                Picker("", selection: $preferences.lowBatteryThreshold) {
-                    ForEach(LowBatteryThreshold.allCases) { threshold in
-                        Text(threshold == .off ? LumosStrings.lowBatteryOff : LumosStrings.percent(threshold.rawValue))
-                            .tag(threshold)
-                    }
+                PanelPopUp(selection: $preferences.lowBatteryThreshold, options: LowBatteryThreshold.allCases) { threshold in
+                    threshold == .off ? LumosStrings.lowBatteryOff : LumosStrings.percent(threshold.rawValue)
                 }
-                .panelMenu()
             }
+            PanelDivider.inCard
             PanelRow(LumosStrings.notifiesWhenTimerEnds) {
                 PanelSwitch(isOn: $preferences.notifiesWhenTimerEnds)
             }
+            PanelDivider.inCard
             PanelRow(LumosStrings.notifiesWhenBatteryLow) {
                 PanelSwitch(isOn: $preferences.notifiesWhenBatteryLow)
             }
+        }
+    }
+}
+
+/// The row the Prism window's Menu Bar card adds for Lumos.
+struct LumosMenuBarSettingsView: View {
+    @Bindable var preferences: Preferences
+
+    var body: some View {
+        PanelRow(LumosStrings.menuBarTime) {
+            PanelSwitch(isOn: $preferences.showsTimeInMenuBar)
         }
     }
 }

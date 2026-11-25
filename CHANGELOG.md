@@ -2,6 +2,44 @@
 
 All notable changes to Prism are listed here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+- Pensieve, a new tool: a history of the last 200 things you copied, whether text, pictures, files or colors. ⇧⌘V
+  opens it in the middle of the screen, and the app you were in stays in front. Return puts an item back on the
+  clipboard with all its formats, for you to paste.
+- Pensieve searches text, file names and colors, and leaves out what apps mark as private, such as passwords. It
+  saves the history in ~/Library/Application Support/Prism/Pensieve, a folder only you can open, without encryption.
+  Recording can be paused, and the history cleared.
+- Pensieve's panel lists the latest 10 items: a click copies one and closes the panel, and *Search* opens the history.
+  Its shortcut, recorded with the same field as Portkey's, the pause switch and Clear history are on its page in the
+  Prism window.
+- The Prism window replaces the hub. It is a regular window with every tool in a list on the left, each with what it
+  is doing now, and the chosen tool's page on the right: the switch that turns the tool on or off, its controls, its
+  settings, and its Menu Bar card last. *General* holds Appearance, Open at login, the version and Quit Prism.
+- The Prism window opens from the gear at the bottom of a tool's panel and from *Prism Settings…* when you
+  right-click a tool's icon, both on that tool's page; from the Prism icon when no tool is in the menu bar; when you
+  open Prism again while it runs; and by itself the first time Prism runs after a new install.
+- A click on a tool's icon opens a panel with that tool alone, and its name and the gear at the bottom.
+- Lumos's panel is one card with the time left, a switch and the lengths ∞, 30m, 1h and 2h, which turns amber while
+  the Mac is kept awake, and two buttons, Screen and Lid closed, in place of the two switches.
+- Portkey's panel lists every app with its shortcut, and a click goes to the app. The apps and their shortcuts are
+  edited on Portkey's page in the Prism window, which replaces the Portkey window.
+- The Pensieve window shows one line per item, a filter for All, Text, Links, Images or Files at the right of the
+  search field, and the keys at the bottom; on macOS 26 it sits on glass. Tab and ⇧Tab go through the filters, and the
+  window opens on All. Text includes colors and links.
+- A selected picture in the Pensieve window, or a picture the pointer rests on in Pensieve's panel, shows larger next
+  to it, with its size in pixels.
+- Pensieve keeps 50, 100, 200, 500 or 1000 items, 200 by default; a lower number deletes the oldest at once. Items
+  are deleted a day, a week, a month or three months after they were last copied, or never; a month by default.
+- Pensieve does not record what is copied while an app on its *Don't record from* list is in front. Passwords and
+  Keychain Access are on it until the list is changed.
+- ⌘, opens the Prism window on the tool's page while a tool's panel is open, and on Pensieve's page while the
+  Pensieve window is.
+- *Appearance* on *General* keeps Prism light or dark, or lets it follow the system.
+- Lumos's battery note and its errors sit in a card under the Screen and Lid closed buttons, and the battery note is
+  shorter: "Stops at 20% battery". *Lid closed* says *Stays awake* while it is on.
+- Each tool's line in the Prism window is short: "29 min left", "78.95 GB free", "4 apps", "5 items".
+
 ## [0.2.0] - 2026-11-23
 
 - Portkey, a new tool: a global shortcut for each app you add. The shortcut brings the app to the front, opens it if
@@ -34,5 +72,6 @@ First version. It runs on macOS 14 or later, on Apple silicon and Intel.
   system's own.
 - English and Chinese.
 
+[Unreleased]: https://github.com/zchan0/Prism/compare/v0.2.0...HEAD
 [0.2.0]: https://github.com/zchan0/Prism/releases/tag/v0.2.0
 [0.1.0]: https://github.com/zchan0/Prism/releases/tag/v0.1.0

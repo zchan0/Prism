@@ -67,21 +67,38 @@ public final class ToolSettings {
 @MainActor
 @Observable
 public final class ShellSettings {
+    /// How Prism's panels and windows look.
+    public enum Appearance: String, CaseIterable, Sendable {
+        /// Light or dark as the system is.
+        case system
+        case light
+        case dark
+    }
+
     private enum Key {
         static let enabled = "shell.enabledTools"
         static let disabledTools = "shell.disabledTools"
         static let placements = "shell.placements"
+        static let launched = "shell.launched"
+        static let appearance = "shell.appearance"
     }
 
     /// Turning a tool off stops it and hides it; its settings are kept for when it comes back.
     public private(set) var enabled: Set<ToolID>
     /// Every tool's placement, whether or not it is enabled, so turning it back on restores the choice.
     public private(set) var placements: [ToolID: MenuBarPlacement]
+    public private(set) var appearance: Appearance
+    /// Nothing was saved yet, by the shell or by any tool: this is a new install's first launch. Somebody updating
+    /// from a version before this flag existed has saved something already, so it is false for them.
+    @ObservationIgnored public let isFirstLaunch: Bool
 
     @ObservationIgnored private let defaults: UserDefaults
 
     public init(registrations: [ToolRegistration], defaults: UserDefaults = .standard) {
         self.defaults = defaults
+        isFirstLaunch = !defaults.dictionaryRepresentation().keys.contains {
+            $0.hasPrefix("shell.") || $0.hasPrefix("tools.")
+        }
         let storedEnabled = defaults.stringArray(forKey: Key.enabled).map { $0.map(ToolID.init(rawValue:)) }
         let initialEnabled: Set<ToolID>
         if let storedEnabled {
@@ -104,9 +121,15 @@ public final class ShellSettings {
             guard let placement = MenuBarPlacement(rawValue: pair.value) else { return }
             result[ToolID(rawValue: pair.key)] = placement
         }
+        appearance = defaults.string(forKey: Key.appearance).flatMap(Appearance.init(rawValue:)) ?? .system
     }
 
     public func isEnabled(_ id: ToolID) -> Bool { enabled.contains(id) }
+
+    /// Remembers that Prism has run, so the next launch is not a first one even if nothing else was saved.
+    public func markLaunched() {
+        defaults.set(true, forKey: Key.launched)
+    }
 
     public func placement(of id: ToolID) -> MenuBarPlacement {
         placements[id] ?? .hubOnly
@@ -134,5 +157,10 @@ public final class ShellSettings {
         var stored = (defaults.dictionary(forKey: Key.placements) as? [String: String]) ?? [:]
         stored[id.rawValue] = placement.rawValue
         defaults.set(stored, forKey: Key.placements)
+    }
+
+    public func setAppearance(_ appearance: Appearance) {
+        self.appearance = appearance
+        defaults.set(appearance.rawValue, forKey: Key.appearance)
     }
 }

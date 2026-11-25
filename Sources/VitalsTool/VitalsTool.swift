@@ -37,11 +37,13 @@ public final class VitalsTool: Tool {
     }
 
     public var title: String { "Vitals" }
+    public var tagline: String { VitalsStrings.tagline }
     public var symbolName: String { menuBarReadings.first?.symbolName ?? Reading.Kind.disk.symbolName }
+    public var tint: ToolTint { Palette.vitals }
 
+    /// The first reading in the menu bar, the way the Prism window's list has room for: "78.95 GB free".
     public var summary: String {
-        guard !menuBarReadings.isEmpty else { return VitalsStrings.unavailable }
-        return menuBarReadings.map(\.summary).joined(separator: " · ")
+        menuBarReadings.first?.shortSummary ?? VitalsStrings.unavailable
     }
 
     /// Every reading that has something to say, fastest-moving first.
@@ -136,14 +138,19 @@ public final class VitalsTool: Tool {
         AnyView(VitalsPanelView(tool: self))
     }
 
-    public func settingsView() -> AnyView? {
-        AnyView(VitalsSettingsView(tool: self))
+    public func menuBarSettings() -> MenuBarSettings? {
+        MenuBarSettings(rows: AnyView(VitalsMenuBarSettingsView(tool: self)), note: VitalsStrings.menuBarNote)
     }
 }
 
 internal enum VitalsStrings {
+    static let tagline = String(localized: "CPU, memory, disk and battery at a glance.")
     static let unavailable = String(localized: "No reading")
     static func freeOfTotal(_ total: String) -> String { String(localized: "free of \(total)") }
+    static func free(_ amount: String) -> String { String(localized: "\(amount) free") }
+    static func used(_ amount: String) -> String { String(localized: "\(amount) used") }
+    static func cpuLoad(_ load: String) -> String { String(localized: "CPU \(load)") }
+    static func batteryLevel(_ level: String) -> String { String(localized: "Battery \(level)") }
     static func ofTotal(_ total: String) -> String { String(localized: "of \(total)") }
     static func percent(_ level: Int) -> String { String(localized: "\(level)%") }
     static let charging = String(localized: "charging")
@@ -156,9 +163,6 @@ internal enum VitalsStrings {
     static let diskName = String(localized: "Disk")
     static let memoryName = String(localized: "Memory")
     static let batteryName = String(localized: "Battery")
-    static let menuBarIcons = String(localized: "Icons in the menu bar")
-    static let menuBarIconsNote = String(localized: "Each reading that is on gets its own icon. To take Vitals out of the menu bar, turn off Show in the menu bar.")
     static let showValue = String(localized: "Show the number next to the icon")
-    static let refreshNote = String(localized: "Every reading refreshes every 20 seconds, and whenever the panel opens. CPU shows the average load since the last refresh.")
-    static let includesReclaimable = String(localized: "Available includes space macOS can reclaim, which is the number Finder shows.")
+    static let menuBarNote = String(localized: "Readings refresh every 20 seconds. Free disk space includes what macOS can reclaim, which is the number Finder shows.")
 }

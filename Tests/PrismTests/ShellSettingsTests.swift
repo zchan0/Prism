@@ -51,6 +51,45 @@ struct ShellSettingsTests {
         #expect(shell.placement(of: ToolID("b")) == .hubOnly)
     }
 
+    @Test func aNewInstallIsAFirstLaunch() {
+        #expect(ShellSettings(registrations: registrations(), defaults: MemoryDefaults()).isFirstLaunch)
+    }
+
+    @Test func aLaunchIsRememberedEvenWhenNothingElseIsSaved() {
+        let defaults = MemoryDefaults()
+        ShellSettings(registrations: registrations(), defaults: defaults).markLaunched()
+        #expect(!ShellSettings(registrations: registrations(), defaults: defaults).isFirstLaunch)
+    }
+
+    @Test func anyShellOrToolSettingMeansPrismHasRunBefore() {
+        // A version before the launch flag saved settings like these; somebody updating from it is not new.
+        for key in ["shell.enabledTools", "tools.lumos.keepsAwakeWithLidClosed"] {
+            let defaults = MemoryDefaults()
+            defaults.set(["lumos"], forKey: key)
+            #expect(!ShellSettings(registrations: registrations(), defaults: defaults).isFirstLaunch, "\(key)")
+        }
+        let defaults = MemoryDefaults()
+        defaults.set(true, forKey: "AppleSomething")
+        #expect(ShellSettings(registrations: registrations(), defaults: defaults).isFirstLaunch)
+    }
+
+    @Test func theAppearanceFollowsTheSystemUntilChanged() {
+        let defaults = MemoryDefaults()
+        let shell = ShellSettings(registrations: registrations(), defaults: defaults)
+        #expect(shell.appearance == .system)
+        #expect(ShellSettings.Appearance.allCases == [.system, .light, .dark])
+
+        shell.setAppearance(.dark)
+        #expect(shell.appearance == .dark)
+        #expect(defaults.string(forKey: "shell.appearance") == "dark")
+        #expect(ShellSettings(registrations: registrations(), defaults: defaults).appearance == .dark)
+        shell.setAppearance(.light)
+        #expect(ShellSettings(registrations: registrations(), defaults: defaults).appearance == .light)
+
+        defaults.set("sepia", forKey: "shell.appearance")
+        #expect(ShellSettings(registrations: registrations(), defaults: defaults).appearance == .system)
+    }
+
     @Test func turningAToolOffKeepsItsPlacement() {
         let defaults = MemoryDefaults()
         let shell = ShellSettings(registrations: registrations(), defaults: defaults)
@@ -68,6 +107,7 @@ private final class StubTool: Tool {
     private let name: String
     init(id: String) { name = id }
     var title: String { name }
+    var tagline: String { "" }
     var symbolName: String { "circle" }
     var summary: String { "" }
     func start() {}
@@ -82,6 +122,7 @@ private final class StubTool: Tool {
 private final class StubToolA: Tool {
     static let id = ToolID("a")
     var title: String { "a" }
+    var tagline: String { "" }
     var symbolName: String { "circle" }
     var summary: String { "" }
     func start() {}
@@ -93,6 +134,7 @@ private final class StubToolA: Tool {
 private final class StubToolB: Tool {
     static let id = ToolID("b")
     var title: String { "b" }
+    var tagline: String { "" }
     var symbolName: String { "circle" }
     var summary: String { "" }
     func start() {}
@@ -104,6 +146,7 @@ private final class StubToolB: Tool {
 private final class StubToolC: Tool {
     static let id = ToolID("c")
     var title: String { "c" }
+    var tagline: String { "" }
     var symbolName: String { "circle" }
     var summary: String { "" }
     func start() {}

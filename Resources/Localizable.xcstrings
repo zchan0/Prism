@@ -1,6 +1,16 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "%@ free" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "可用 %@"
+          }
+        }
+      }
+    },
     "%@ is used by %@" : {
       "localizations" : {
         "zh-Hans" : {
@@ -17,6 +27,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "还剩 %@"
+          }
+        }
+      }
+    },
+    "%@ settings" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ 设置"
+          }
+        }
+      }
+    },
+    "%@ used" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已用 %@"
           }
         }
       }
@@ -71,6 +101,16 @@
         }
       }
     },
+    "%lld items" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld 条记录"
+          }
+        }
+      }
+    },
     "%lld min" : {
       "localizations" : {
         "zh-Hans" : {
@@ -111,6 +151,56 @@
         }
       }
     },
+    "1 day" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 天"
+          }
+        }
+      }
+    },
+    "1 item" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 条记录"
+          }
+        }
+      }
+    },
+    "1 month" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 个月"
+          }
+        }
+      }
+    },
+    "1 week" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 周"
+          }
+        }
+      }
+    },
+    "3 months" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "3 个月"
+          }
+        }
+      }
+    },
     "A shortcut needs ⌘, ⌃ or ⌥" : {
       "localizations" : {
         "zh-Hans" : {
@@ -121,12 +211,32 @@
         }
       }
     },
-    "Add app" : {
+    "Add App…" : {
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "添加 app"
+            "value" : "添加 app…"
+          }
+        }
+      }
+    },
+    "Add Shortcut" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "添加快捷键"
+          }
+        }
+      }
+    },
+    "All" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "全部"
           }
         }
       }
@@ -151,12 +261,22 @@
         }
       }
     },
-    "Apps and shortcuts" : {
+    "Appearance" : {
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "App 与快捷键"
+            "value" : "外观"
+          }
+        }
+      }
+    },
+    "Apps" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "App"
           }
         }
       }
@@ -177,16 +297,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "电量降到 %lld%%，Prism 已停止让 Mac 保持唤醒。"
-          }
-        }
-      }
-    },
-    "Available includes space macOS can reclaim, which is the number Finder shows." : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "「可用」包含 macOS 可回收的空间，也就是「访达」显示的数字。"
           }
         }
       }
@@ -221,12 +331,62 @@
         }
       }
     },
+    "Battery %@" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "电池 %@"
+          }
+        }
+      }
+    },
     "Battery is low" : {
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "电量偏低"
+          }
+        }
+      }
+    },
+    "CPU" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CPU"
+          }
+        }
+      }
+    },
+    "CPU %@" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CPU %@"
+          }
+        }
+      }
+    },
+    "CPU, memory, disk and battery at a glance." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CPU、内存、磁盘和电池，一眼看清。"
+          }
+        }
+      }
+    },
+    "Can turn off" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "可以熄灭"
           }
         }
       }
@@ -251,12 +411,42 @@
         }
       }
     },
-    "charging" : {
+    "Clear %lld items?" : {
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "充电中"
+            "value" : "清空 %lld 条记录？"
+          }
+        }
+      }
+    },
+    "Clear 1 item?" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "清空 1 条记录？"
+          }
+        }
+      }
+    },
+    "Clear after" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "自动清理"
+          }
+        }
+      }
+    },
+    "Clear history" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "清空历史记录"
           }
         }
       }
@@ -271,12 +461,72 @@
         }
       }
     },
+    "Clear…" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "清空…"
+          }
+        }
+      }
+    },
+    "Click a shortcut to change it. Press ⌫ while it records to remove it." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "点快捷键可以修改；录制时按 ⌫ 删除它。"
+          }
+        }
+      }
+    },
+    "Color" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "颜色"
+          }
+        }
+      }
+    },
+    "Content that apps mark as private, such as passwords from a password manager, is not recorded." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "app 标记为私密的内容（比如密码管理器里的密码）不会被记录。"
+          }
+        }
+      }
+    },
     "Continue" : {
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "继续"
+          }
+        }
+      }
+    },
+    "Copied" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已复制"
+          }
+        }
+      }
+    },
+    "Copy" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "复制"
           }
         }
       }
@@ -291,12 +541,22 @@
         }
       }
     },
-    "CPU" : {
+    "Dark" : {
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "CPU"
+            "value" : "深色"
+          }
+        }
+      }
+    },
+    "Decided by the app in front when something is copied." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "按复制时最前面的 app 判断。"
           }
         }
       }
@@ -331,42 +591,32 @@
         }
       }
     },
-    "Each reading that is on gets its own icon. To take Vitals out of the menu bar, turn off Show in the menu bar." : {
+    "Don't record from" : {
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "每项打开的读数各有一个图标。要让 Vitals 离开菜单栏，请关掉「显示在菜单栏」。"
+            "value" : "不记录这些 app"
           }
         }
       }
     },
-    "Edit…" : {
+    "Every tool stops, and the menu bar icons go away." : {
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "编辑…"
+            "value" : "所有工具都会停止，菜单栏图标也会消失。"
           }
         }
       }
     },
-    "Every reading refreshes every 20 seconds, and whenever the panel opens. CPU shows the average load since the last refresh." : {
+    "Files" : {
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "所有读数每 20 秒刷新一次，打开面板时也会刷新。CPU 显示的是上次刷新以来的平均占用率。"
-          }
-        }
-      }
-    },
-    "free of %@" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "可用，共 %@"
+            "value" : "文件"
           }
         }
       }
@@ -381,22 +631,62 @@
         }
       }
     },
-    "Icons in the menu bar" : {
+    "Go to %@" : {
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "菜单栏图标"
+            "value" : "切换到 %@"
           }
         }
       }
     },
-    "Keep Awake" : {
+    "History" : {
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "保持唤醒"
+            "value" : "历史记录"
+          }
+        }
+      }
+    },
+    "How long" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "时长"
+          }
+        }
+      }
+    },
+    "Image · %@ × %@" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "图片 · %@ × %@"
+          }
+        }
+      }
+    },
+    "Images" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "图片"
+          }
+        }
+      }
+    },
+    "Keep" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "保留"
           }
         }
       }
@@ -411,42 +701,62 @@
         }
       }
     },
-    "Keep the screen on too" : {
+    "Keep this Mac awake" : {
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "同时保持屏幕常亮"
+            "value" : "让这台 Mac 保持唤醒"
           }
         }
       }
     },
-    "Keeping awake" : {
+    "Keeping this Mac awake" : {
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "保持唤醒中"
+            "value" : "正在让这台 Mac 保持唤醒"
           }
         }
       }
     },
-    "less than a minute" : {
+    "Keeps this Mac awake, for a while or until you stop it." : {
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "不到一分钟"
+            "value" : "让这台 Mac 保持唤醒，一段时间，或直到你手动停止。"
           }
         }
       }
     },
-    "Let It Sleep" : {
+    "Lid closed" : {
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "让它睡吧"
+            "value" : "合盖"
+          }
+        }
+      }
+    },
+    "Light" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "浅色"
+          }
+        }
+      }
+    },
+    "Links" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "链接"
           }
         }
       }
@@ -467,6 +777,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "内存"
+          }
+        }
+      }
+    },
+    "Menu Bar" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "菜单栏"
           }
         }
       }
@@ -501,6 +821,26 @@
         }
       }
     },
+    "No items" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "没有记录"
+          }
+        }
+      }
+    },
+    "No matches." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "没有匹配的内容。"
+          }
+        }
+      }
+    },
     "No reading" : {
       "localizations" : {
         "zh-Hans" : {
@@ -511,42 +851,42 @@
         }
       }
     },
-    "No timer" : {
+    "No shortcut" : {
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "没有定时"
+            "value" : "没有快捷键"
           }
         }
       }
     },
-    "of %@" : {
+    "Not keeping awake" : {
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "共 %@"
+            "value" : "未保持唤醒"
           }
         }
       }
     },
-    "Off: the Mac stays awake while its screen can turn off." : {
+    "Nothing copied yet." : {
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "关闭时：Mac 保持唤醒，但屏幕可以熄灭。"
+            "value" : "还没有复制过内容。"
           }
         }
       }
     },
-    "on battery" : {
+    "Off" : {
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "使用电池"
+            "value" : "已关闭"
           }
         }
       }
@@ -571,16 +911,6 @@
         }
       }
     },
-    "Open Prism" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "打开 Prism"
-          }
-        }
-      }
-    },
     "Other…" : {
       "localizations" : {
         "zh-Hans" : {
@@ -591,32 +921,52 @@
         }
       }
     },
-    "plugged in" : {
+    "Pause recording" : {
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "已接通电源"
+            "value" : "暂停记录"
           }
         }
       }
     },
-    "pmset refused the change: %@" : {
+    "Paused" : {
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "pmset 拒绝了这次修改：%@"
+            "value" : "已暂停"
           }
         }
       }
     },
-    "Press a shortcut to jump to an app.\nPress it again to hide the app." : {
+    "Press a shortcut to jump to an app. Press it again to hide the app." : {
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "按快捷键切换到 app，再按一次隐藏它。"
+          }
+        }
+      }
+    },
+    "Press the shortcut in any app, pick something you copied, then paste it with ⌘V." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在任何 app 里按快捷键，选中复制过的内容，再按 ⌘V 粘贴。"
+          }
+        }
+      }
+    },
+    "Prism Settings…" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prism 设置…"
           }
         }
       }
@@ -631,6 +981,16 @@
         }
       }
     },
+    "Quit" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "退出"
+          }
+        }
+      }
+    },
     "Quit Prism" : {
       "localizations" : {
         "zh-Hans" : {
@@ -641,12 +1001,32 @@
         }
       }
     },
-    "Record shortcut" : {
+    "Readings refresh every 20 seconds. Free disk space includes what macOS can reclaim, which is the number Finder shows." : {
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "录制快捷键"
+            "value" : "读数每 20 秒刷新一次。可用磁盘空间包含 macOS 可回收的空间，也就是「访达」显示的数字。"
+          }
+        }
+      }
+    },
+    "Recording is paused" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "记录已暂停"
+          }
+        }
+      }
+    },
+    "Remove" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "移除"
           }
         }
       }
@@ -657,6 +1037,66 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "移除 %@"
+          }
+        }
+      }
+    },
+    "Resume" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "继续记录"
+          }
+        }
+      }
+    },
+    "Screen" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "屏幕"
+          }
+        }
+      }
+    },
+    "Search" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "搜索"
+          }
+        }
+      }
+    },
+    "Search the clipboard history" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "搜索剪贴板历史"
+          }
+        }
+      }
+    },
+    "Sessions" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "会话"
+          }
+        }
+      }
+    },
+    "Shortcut" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "快捷键"
           }
         }
       }
@@ -681,12 +1121,12 @@
         }
       }
     },
-    "Show the time left in the menu bar" : {
+    "Show the time left" : {
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "在菜单栏显示剩余时间"
+            "value" : "显示剩余时间"
           }
         }
       }
@@ -701,42 +1141,92 @@
         }
       }
     },
-    "Stop keeping awake when the battery falls to" : {
+    "Sleeps" : {
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "电量降到以下时停止保持唤醒"
+            "value" : "会睡眠"
           }
         }
       }
     },
-    "Stops keeping awake at %lld%% to save the battery" : {
+    "Stays awake" : {
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "电量降到 %lld%% 时停止保持唤醒"
+            "value" : "保持唤醒"
           }
         }
       }
     },
-    "Tell me when the battery stops the session" : {
+    "Stays on" : {
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "电量让会话结束时通知我"
+            "value" : "保持常亮"
           }
         }
       }
     },
-    "Tell me when the session ends" : {
+    "Stop when the battery falls to" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "电量降到以下时停止"
+          }
+        }
+      }
+    },
+    "Stops at %lld%% battery" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "电量降到 %lld%% 时停止"
+          }
+        }
+      }
+    },
+    "System" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "跟随系统"
+          }
+        }
+      }
+    },
+    "Tell me when a session ends" : {
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "会话结束时通知我"
+          }
+        }
+      }
+    },
+    "Tell me when the battery stops it" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "低电量结束会话时通知我"
+          }
+        }
+      }
+    },
+    "Text" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "文字"
           }
         }
       }
@@ -761,6 +1251,16 @@
         }
       }
     },
+    "This Mac sleeps as usual" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "这台 Mac 照常睡眠"
+          }
+        }
+      }
+    },
     "This shortcut could not be set up." : {
       "localizations" : {
         "zh-Hans" : {
@@ -771,32 +1271,22 @@
         }
       }
     },
+    "Tools" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "工具"
+          }
+        }
+      }
+    },
     "Turned off. Its settings are kept." : {
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "已关闭，设置会保留。"
-          }
-        }
-      }
-    },
-    "Turned on" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "已开启"
-          }
-        }
-      }
-    },
-    "Type shortcut, or ⌫ to clear" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "按快捷键，或按 ⌫ 清除"
           }
         }
       }
@@ -821,12 +1311,12 @@
         }
       }
     },
-    "user %lld%% · system %lld%%" : {
+    "Until you turn it off" : {
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "用户 %lld%% · 系统 %lld%%"
+            "value" : "直到你关掉"
           }
         }
       }
@@ -841,12 +1331,126 @@
         }
       }
     },
-    "Your Mac may sleep" : {
+    "and %lld more" : {
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mac 可以睡眠"
+            "value" : "及另外 %lld 个"
+          }
+        }
+      }
+    },
+    "charging" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "充电中"
+          }
+        }
+      }
+    },
+    "free of %@" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "可用，共 %@"
+          }
+        }
+      }
+    },
+    "less than a minute" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "不到一分钟"
+          }
+        }
+      }
+    },
+    "of %@" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "共 %@"
+          }
+        }
+      }
+    },
+    "on battery" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "使用电池"
+          }
+        }
+      }
+    },
+    "pensieve.clearAfter.never" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Never"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "不清理"
+          }
+        }
+      }
+    },
+    "pensieve.keep.items" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld items"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld 条"
+          }
+        }
+      }
+    },
+    "plugged in" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已接通电源"
+          }
+        }
+      }
+    },
+    "pmset refused the change: %@" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "pmset 拒绝了这次修改：%@"
+          }
+        }
+      }
+    },
+    "user %lld%% · system %lld%%" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "用户 %lld%% · 系统 %lld%%"
           }
         }
       }

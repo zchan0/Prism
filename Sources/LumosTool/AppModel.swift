@@ -13,6 +13,13 @@ final class AppModel {
 
     private(set) var lastError: String?
     private(set) var lastStop: StopReason?
+    #if DEBUG
+    /// For screenshots: the controls show the battery note and an error, whatever the power source.
+    var showsNotesForDebug = false
+    /// For screenshots: the lid flag, and in a packaged build the settings, are shared with the installed Prism,
+    /// whose lid session the clean-up at launch would end.
+    var leavesLidAloneForDebug = false
+    #endif
 
     var onStopCompleted: (@MainActor (StopReason) -> Void)?
 
@@ -52,6 +59,12 @@ final class AppModel {
     func launch() {
         battery.start()
         notifier.requestAuthorization()
+        #if DEBUG
+        if leavesLidAloneForDebug {
+            Task { await lid.refresh() }
+            return
+        }
+        #endif
         // A session never survives a relaunch, so a lid override left over from the last run has nothing to cover.
         preferences.keepsAwakeWithLidClosed = false
         Task {

@@ -4,7 +4,8 @@ import Observation
 /// Owns the status items of every enabled tool: one for each icon the tool asks for.
 ///
 /// There is deliberately no icon for the app itself: a Prism icon competing with the tools' own icons would be a
-/// second door to the same room. Every tool icon carries the way back to Prism instead, in its right-click menu.
+/// second door to the same room. Every tool icon carries the way to the Prism window instead: its panel's gear, and
+/// its right-click menu.
 ///
 /// AppKit persists each item's position and visibility against its `autosaveName`, so an icon keeps its spot in the
 /// menu bar across launches, and macOS's own ⌘-drag reordering works per icon.
@@ -18,8 +19,8 @@ public final class StatusItemHost: NSObject {
     private let settings: ShellSettings
     private var items: [Key: NSStatusItem] = [:]
     private var images: [Key: NSImage] = [:]
-    /// Shown only when no tool has its own icon. Without it, "only in the panel" for every tool would leave no way
-    /// into the panel at all.
+    /// Shown only when no tool has its own icon. Without it, taking every tool out of the menu bar would leave no way
+    /// into the Prism window at all.
     private var fallbackItem: NSStatusItem?
 
     public var onFallbackClick: ((NSStatusBarButton) -> Void)?
@@ -98,13 +99,6 @@ public final class StatusItemHost: NSObject {
 
     @objc private func fallbackClicked(_ sender: NSStatusBarButton) {
         onFallbackClick?(sender)
-    }
-
-    /// The leftmost icon of a tool, for opening the hub from somewhere that is not one of its icons.
-    public func firstButton(of id: ToolID) -> NSStatusBarButton? {
-        items.filter { $0.key.tool == id }
-            .compactMap(\.value.button)
-            .min { ($0.window?.frame.minX ?? 0) < ($1.window?.frame.minX ?? 0) }
     }
 
     @objc private func toolItemClicked(_ sender: NSStatusBarButton) {

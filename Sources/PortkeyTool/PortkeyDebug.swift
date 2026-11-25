@@ -1,6 +1,7 @@
 #if DEBUG
 import AppKit
 import Carbon.HIToolbox
+import PrismKit
 
 public enum PortkeyDebug {
     @MainActor
@@ -8,22 +9,11 @@ public enum PortkeyDebug {
         AppSwitcher.switchTo(AppSwitcher.Target(bundleID: bundleID, savedURL: nil))
     }
 
-    @MainActor
-    public static func openWindow(_ tool: PortkeyTool) {
-        tool.openWindow()
-    }
-
     /// For screenshots: puts sample apps in place of the person's apps, in memory only. Neither the person's shortcuts
     /// nor the samples' are set up, since another Prism may hold the same ones.
     @MainActor
     public static func showSamples(_ tool: PortkeyTool) {
         tool.showSamplesForDebug(samples)
-    }
-
-    /// The Portkey window, built but not shown, and not centred yet.
-    @MainActor
-    public static func window(_ tool: PortkeyTool) -> NSWindow {
-        tool.windowForDebug
     }
 
     /// Apps that every Mac has, the last one without a shortcut.

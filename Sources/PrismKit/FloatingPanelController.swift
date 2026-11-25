@@ -3,8 +3,8 @@ import SwiftUI
 
 /// A borderless panel that hangs off an anchor and closes when the person clicks elsewhere.
 ///
-/// The quick panel and the hub both use this, so they share the glass background, the placement arithmetic and
-/// the outside click handling instead of each reimplementing them slightly differently.
+/// Each tool's panel uses this. When the content changes height while the panel is open, the panel follows it
+/// smoothly and keeps its top edge in place; the content should hug the top edge of the panel for that to look right.
 @MainActor
 public final class FloatingPanelController {
     public enum Placement: Equatable, Sendable {
@@ -28,6 +28,8 @@ public final class FloatingPanelController {
     private var placement = Placement.below
     private var visibleFrame: NSRect?
     private var contentHeight: CGFloat = 0
+    /// A panel that just opened takes its content's height at once; only later changes are animated.
+    private var shownAt: TimeInterval = 0
     private var outsideClickMonitor: Any?
     private let hosting: NSHostingView<AnyView>
 
@@ -35,6 +37,8 @@ public final class FloatingPanelController {
         self.width = width
         self.cornerRadius = cornerRadius
         hosting = NSHostingView(rootView: content)
+        // The panel's height follows `setContentHeight`, not the hosting view's own idea of its size.
+        hosting.sizingOptions = []
         panel = Self.makePanel(width: width, cornerRadius: cornerRadius, host: hosting)
         Self.instances.add(self)
     }
@@ -66,6 +70,7 @@ public final class FloatingPanelController {
         anchor = rect
         self.placement = placement
         visibleFrame = screen.visibleFrame
+        shownAt = ProcessInfo.processInfo.systemUptime
         panel.contentView?.layoutSubtreeIfNeeded()
         // Never made key: with Liquid Glass a key borderless panel draws a dark rectangle around its rounded corners.
         panel.orderFrontRegardless()
@@ -96,10 +101,18 @@ public final class FloatingPanelController {
 
     private func reposition() {
         guard panel.isVisible, let anchor, let visibleFrame, contentHeight > 0 else { return }
-        panel.setFrame(
-            Self.frame(height: contentHeight, from: anchor, placement: placement, in: visibleFrame, width: width),
-            display: true
-        )
+        let frame = Self.frame(height: contentHeight, from: anchor, placement: placement, in: visibleFrame, width: width)
+        guard frame != panel.frame else { return }
+        let settled = ProcessInfo.processInfo.systemUptime - shownAt > 0.2
+        guard settled, !NSWorkspace.shared.accessibilityDisplayShouldReduceMotion else {
+            panel.setFrame(frame, display: true)
+            return
+        }
+        NSAnimationContext.runAnimationGroup { context in
+            context.duration = 0.2
+            context.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+            panel.animator().setFrame(frame, display: true)
+        }
     }
 
     /// The panel hangs off one edge of its anchor, aligns with the anchor's left edge, and stays inside the screen.
@@ -152,7 +165,12 @@ public final class FloatingPanelController {
         panel.isOpaque = false
         panel.backgroundColor = .clear
         panel.hasShadow = true
+        setBackground(of: panel, cornerRadius: cornerRadius, host: host)
+        return panel
+    }
 
+    /// Glass on macOS 26, the popover material before, with `host` on it.
+    static func setBackground(of panel: NSPanel, cornerRadius: CGFloat, host: NSView) {
         host.autoresizingMask = [.width, .height]
         if #available(macOS 26, *) {
             let glass = NSGlassEffectView()
@@ -169,7 +187,6 @@ public final class FloatingPanelController {
             panel.contentView = background
             host.frame = background.bounds
         }
-        return panel
     }
 
     private static func roundedMask(radius: CGFloat) -> NSImage {

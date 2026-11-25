@@ -13,14 +13,15 @@ let package = Package(
         .target(name: "LumosTool", dependencies: ["PrismKit"]),
         .target(name: "VitalsTool", dependencies: ["PrismKit"]),
         .target(name: "PortkeyTool", dependencies: ["PrismKit"]),
+        .target(name: "PensieveTool", dependencies: ["PrismKit"]),
 
         .executableTarget(
             name: "Prism",
-            dependencies: ["PrismKit", "LumosTool", "VitalsTool", "PortkeyTool"]
+            dependencies: ["PrismKit", "LumosTool", "VitalsTool", "PortkeyTool", "PensieveTool"]
         ),
         .testTarget(
             name: "PrismTests",
-            dependencies: ["PrismKit", "LumosTool", "VitalsTool", "PortkeyTool"]
+            dependencies: ["Prism", "PrismKit", "LumosTool", "VitalsTool", "PortkeyTool", "PensieveTool"]
         ),
     ]
 )

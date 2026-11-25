@@ -24,8 +24,8 @@ struct LiveControlsView: View {
 /// What the controls need from the model, flattened so the view can be previewed without a live engine.
 struct ControlsContent: Equatable {
     var isAwake: Bool = false
-    var remaining: TimeInterval?
     var length: SessionLength = .forever
+    var remaining: TimeInterval?
     var keepsDisplayAwake = true
     var keepsAwakeWithLidClosed = false
     var lidBusy = false
@@ -39,8 +39,8 @@ extension ControlsContent {
     init(model: AppModel) {
         self.init(
             isAwake: model.isAwake,
-            remaining: model.remaining,
             length: model.engine.length,
+            remaining: model.remaining,
             keepsDisplayAwake: model.preferences.keepsDisplayAwake,
             keepsAwakeWithLidClosed: model.preferences.keepsAwakeWithLidClosed,
             lidBusy: model.lid.isBusy,
@@ -48,129 +48,127 @@ extension ControlsContent {
             lowBatteryThreshold: model.preferences.lowBatteryThreshold.rawValue,
             errorMessage: model.lastError
         )
+        #if DEBUG
+        if model.showsNotesForDebug {
+            battery = BatterySnapshot(hasBattery: true, level: 64)
+            lowBatteryThreshold = 20
+            errorMessage = LumosStrings.adminPasswordRequired
+        }
+        #endif
+    }
+
+    /// "29 min left" while counting down, "Awake" until stopped, "Off" otherwise.
+    var title: String {
+        guard isAwake else { return Strings.off }
+        return remaining.map { LumosStrings.inTime(TimeText.remaining($0)) } ?? LumosStrings.awake
+    }
+
+    var subtitle: String {
+        guard isAwake else { return LumosStrings.sleepsAsUsual }
+        return remaining == nil ? LumosStrings.untilTurnedOff : LumosStrings.keepingThisMacAwake
     }
 }
 
-/// The awake tool's controls: the whole quick panel, and the top of its tab in the hub.
+/// The awake tool's controls: the body of its panel, and the top of its page in the Prism window.
 struct ControlsView: View {
     let content: ControlsContent
     let actions: ControlsActions
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            status
-            durations
-                .padding(.top, 12)
-                .padding(.bottom, 6)
-            if let batteryNote {
-                HStack(spacing: 6) {
-                    Image(systemName: "battery.25percent")
-                        .font(.system(size: 10.5))
-                    Text(batteryNote)
-                        .font(.system(size: 11))
-                        .fixedSize(horizontal: false, vertical: true)
+        VStack(alignment: .leading, spacing: 10) {
+            session
+            HStack(spacing: 10) {
+                PanelOption(
+                    LumosStrings.screen,
+                    note: content.keepsDisplayAwake ? LumosStrings.screenStaysOn : LumosStrings.screenCanTurnOff,
+                    symbol: "display",
+                    isOn: content.keepsDisplayAwake
+                ) {
+                    actions.setKeepsDisplayAwake(!content.keepsDisplayAwake)
                 }
-                .foregroundStyle(Color(nsColor: Palette.ink3))
-                .padding(.bottom, 4)
+                PanelOption(
+                    LumosStrings.lidClosedOption,
+                    note: lidNote,
+                    symbol: "laptopcomputer",
+                    isOn: content.keepsAwakeWithLidClosed
+                ) {
+                    if content.keepsAwakeWithLidClosed {
+                        actions.setKeepsAwakeWithLidClosed(false)
+                    } else {
+                        actions.confirmLidChange()
+                    }
+                }
+                .disabled(content.lidBusy)
             }
-            details
-            if let errorMessage = content.errorMessage {
-                banner(errorMessage)
-                    .padding(.top, 6)
+            if batteryNote != nil || content.errorMessage != nil {
+                PanelCard {
+                    if let batteryNote {
+                        note(batteryNote, symbol: "battery.25percent")
+                    }
+                    if let errorMessage = content.errorMessage {
+                        if batteryNote != nil {
+                            PanelDivider.inCard
+                        }
+                        note(errorMessage, symbol: "exclamationmark.triangle.fill")
+                    }
+                }
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 
-    private var status: some View {
-        HStack(spacing: 8) {
-            Image(systemName: "wand.and.stars")
-                .font(.system(size: 15, weight: .medium))
-                .symbolPrimaryLayerOnly(
-                    !content.isAwake,
-                    color: Color(nsColor: content.isAwake ? Palette.sun : Palette.ink3)
-                )
-                .frame(width: 20)
-            HStack(spacing: 5) {
-                Text(content.isAwake ? LumosStrings.keepingAwake : LumosStrings.sleeping)
-                    .font(.system(size: 13, weight: .semibold))
-                    .foregroundStyle(Color(nsColor: Palette.ink))
-                Text(verbatim: "·")
-                Text(statusDetail)
-                    .monospacedDigit()
-            }
-            .font(.system(size: 12))
-            .foregroundStyle(Color(nsColor: Palette.ink3))
-            .lineLimit(1)
-            Spacer(minLength: 0)
-        }
-    }
-
-    private var statusDetail: String {
-        guard content.isAwake else { return LumosStrings.maySleep }
-        guard let remaining = content.remaining else { return LumosStrings.noTimer }
-        return LumosStrings.inTime(TimeText.remaining(remaining))
-    }
-
-    private var durations: some View {
-        HStack(spacing: 6) {
-            ForEach(SessionLength.displayOrder) { length in
-                DurationButton(
-                    title: LumosStrings.lengthCompact(length),
-                    isSelected: content.length == length && content.isAwake
-                ) {
+    private var session: some View {
+        PanelCard(tint: .lumos, isTinted: content.isAwake) {
+            VStack(alignment: .leading, spacing: 12) {
+                HStack(spacing: 12) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(content.title)
+                            .font(PanelFont.hero)
+                            .monospacedDigit()
+                            .foregroundStyle(Color(nsColor: Palette.ink))
+                            .contentTransition(reduceMotion ? .opacity : .numericText())
+                            .animation(.default, value: content.title)
+                        Text(content.subtitle)
+                            .font(PanelFont.note)
+                            .foregroundStyle(Color(nsColor: Palette.ink2))
+                    }
+                    .lineLimit(1)
+                    Spacer(minLength: 8)
+                    PanelSwitch(
+                        isOn: Binding(
+                            get: { content.isAwake },
+                            set: { isOn in
+                                if isOn != content.isAwake { actions.toggle() }
+                            }
+                        ),
+                        size: .large
+                    )
+                    .accessibilityLabel(LumosStrings.keepThisMacAwake)
+                }
+                PanelSegmented(
+                    SessionLength.displayOrder.map { length in
+                        PanelSegmented.Item(
+                            length,
+                            title: LumosStrings.lengthCompact(length),
+                            accessibilityLabel: LumosStrings.lengthName(length),
+                            help: LumosStrings.lengthName(length)
+                        )
+                    },
+                    selection: content.isAwake ? content.length : nil
+                ) { length in
                     actions.setLength(length)
                 }
-                .help(LumosStrings.lengthName(length))
+                .accessibilityElement(children: .contain)
+                .accessibilityLabel(LumosStrings.howLong)
             }
-            Button(action: actions.toggle) {
-                Image(systemName: content.isAwake ? "moon.zzz.fill" : "wand.and.stars")
-                    .font(.system(size: 12, weight: .semibold))
-                    .foregroundStyle(Color(nsColor: content.isAwake ? Palette.onWarm : Palette.ink2))
-                    .frame(width: 28, height: 26)
-                    .background(
-                        RoundedRectangle(cornerRadius: 8)
-                            .fill(Color(nsColor: content.isAwake ? Palette.sun : Palette.chip))
-                    )
-                    .contentShape(Rectangle())
-            }
-            .buttonStyle(.plain)
-            .help(content.isAwake ? LumosStrings.stop : LumosStrings.keepAwake)
-            .accessibilityLabel(content.isAwake ? LumosStrings.stop : LumosStrings.keepAwake)
+            .padding(14)
         }
     }
 
-    private var details: some View {
-        VStack(spacing: 0) {
-            PanelRow(
-                LumosStrings.keepsDisplayAwake,
-                symbol: "display",
-                note: LumosStrings.keepsDisplayAwakeNote
-            ) {
-                PanelSwitch(isOn: Binding(
-                    get: { content.keepsDisplayAwake },
-                    set: { actions.setKeepsDisplayAwake($0) }
-                ))
-            }
-            PanelDivider().padding(.leading, 28)
-            PanelRow(
-                LumosStrings.lidClosed,
-                symbol: "laptopcomputer",
-                note: content.lidBusy ? LumosStrings.lidChanging : LumosStrings.lidClosedNote
-            ) {
-                PanelSwitch(isOn: Binding(
-                    get: { content.keepsAwakeWithLidClosed },
-                    set: { newValue in
-                        if newValue {
-                            actions.confirmLidChange()
-                        } else {
-                            actions.setKeepsAwakeWithLidClosed(false)
-                        }
-                    }
-                ))
-                .disabled(content.lidBusy)
-            }
-        }
+    private var lidNote: String {
+        if content.lidBusy { return LumosStrings.lidChanging }
+        return content.keepsAwakeWithLidClosed ? LumosStrings.lidStaysAwake : LumosStrings.lidSleeps
     }
 
     /// Only what the low battery rule means for this session; the charge itself is in Vitals.
@@ -179,51 +177,20 @@ struct ControlsView: View {
         return LumosStrings.lowBatteryStopsAt(content.lowBatteryThreshold)
     }
 
-    private func banner(_ message: String) -> some View {
-        HStack(alignment: .top, spacing: 6) {
-            Image(systemName: "exclamationmark.triangle.fill")
-                .font(.system(size: 10))
-            Text(message)
+    private func note(_ text: String, symbol: String) -> some View {
+        HStack(alignment: .firstTextBaseline, spacing: 10) {
+            Image(systemName: symbol)
                 .font(.system(size: 11))
+                .foregroundStyle(Color(nsColor: Palette.ink3))
+                .frame(width: 16)
+            Text(text)
+                .font(PanelFont.note)
+                .foregroundStyle(Color(nsColor: Palette.ink2))
                 .fixedSize(horizontal: false, vertical: true)
-            Spacer(minLength: 0)
         }
-        .foregroundStyle(Color(nsColor: Palette.ink2))
-        .padding(.horizontal, 10)
+        .frame(maxWidth: .infinity, minHeight: PanelRowMetrics.minHeight - 16, alignment: .leading)
+        .padding(.horizontal, 12)
         .padding(.vertical, 8)
-        .background(RoundedRectangle(cornerRadius: 8).fill(Color(nsColor: Palette.chip)))
-    }
-}
-
-private struct DurationButton: View {
-    let title: String
-    let isSelected: Bool
-    let action: @MainActor () -> Void
-    @State private var hovered = false
-
-    var body: some View {
-        Button(action: action) {
-            Text(title)
-                .font(.system(size: 11, weight: .semibold, design: .rounded))
-                .foregroundStyle(ink)
-                .frame(maxWidth: .infinity)
-                .frame(height: 26)
-                .background(
-                    RoundedRectangle(cornerRadius: 8)
-                        .fill(fill)
-                )
-                .contentShape(Rectangle())
-        }
-        .buttonStyle(.plain)
-        .onHover { hovered = $0 }
-    }
-
-    private var fill: Color {
-        if isSelected { return Color(nsColor: Palette.sun) }
-        return Color(nsColor: hovered ? Palette.rowHover : Palette.chip)
-    }
-
-    private var ink: Color {
-        isSelected ? Color(nsColor: Palette.onWarm) : Color(nsColor: Palette.chipInk)
+        .accessibilityElement(children: .combine)
     }
 }

@@ -2,7 +2,6 @@ import AppKit
 import Observation
 import PrismKit
 import SwiftUI
-import UniformTypeIdentifiers
 
 /// Why a shortcut was not given to an app. The app keeps the shortcut it had.
 enum ShortcutRefusal: Equatable, Sendable {
@@ -11,7 +10,9 @@ enum ShortcutRefusal: Equatable, Sendable {
     case refusedBySystem
 }
 
-/// A global shortcut for each app the person adds, recorded in the tool's window.
+typealias AppShortcutRecorder = ShortcutRecorder<UUID, ShortcutRefusal>
+
+/// A global shortcut for each app the person adds, recorded on the tool's page in the Prism window.
 ///
 /// The shortcut brings the app to the front, opens it when it is not running, and hides it when it is in front already.
 @MainActor
@@ -31,14 +32,10 @@ public final class PortkeyTool: Tool {
     /// While a shortcut is being recorded: otherwise pressing a combination that is already set switches apps, and
     /// the window never sees the key.
     private var shortcutsPaused = false
-    /// Bumped when an app opens or quits, so the add menu lists the apps that are open now.
-    private var runningAppsChanges = 0
-    @ObservationIgnored private var workspaceObservers: [NSObjectProtocol] = []
     @ObservationIgnored private(set) var registrations: [UUID: GlobalHotKey.Registration] = [:]
-    @ObservationIgnored private var icons: [String: NSImage] = [:]
-    @ObservationIgnored private var menuIcons: [String: NSImage] = [:]
+    @ObservationIgnored let catalog = AppCatalog()
     @ObservationIgnored private let glyph = MenuBarGlyph.Cache()
-    @ObservationIgnored private var windowController: ToolWindowController?
+    @ObservationIgnored private var shortcutRecorder: AppShortcutRecorder?
     #if DEBUG
     /// The apps are samples for screenshots: they are never saved, and their shortcuts are never set up.
     @ObservationIgnored private var showsSamples = false
@@ -50,21 +47,25 @@ public final class PortkeyTool: Tool {
     }
 
     public var title: String { "Portkey" }
+    public var tagline: String { PortkeyStrings.tagline }
     public var symbolName: String { "door.left.hand.open" }
+    public var tint: ToolTint { Palette.portkey }
     public var summary: String { PortkeyStrings.appCount(apps.count) }
+    /// The Apps card holds every app and shortcut the panel lists, and lets the person change them.
+    public var showsControlsInWindow: Bool { false }
 
     public func start() {
         guard !started else { return }
         started = true
         reregister()
-        watchRunningApps()
+        catalog.startWatching()
     }
 
     public func stop() {
         started = false
         unregisterAll()
         failedAppIDs = []
-        stopWatchingRunningApps()
+        catalog.stopWatching()
     }
 
     public func statusIcons() -> [StatusIcon] {
@@ -81,22 +82,23 @@ public final class PortkeyTool: Tool {
         AnyView(PortkeyPanelView(tool: self))
     }
 
-    public func settingsView() -> AnyView? { nil }
-
-    func openWindow() {
-        makeWindowController().show()
+    public func settingsView() -> AnyView? {
+        AnyView(PortkeyAppsView(tool: self, recorder: recorder))
     }
 
-    private func makeWindowController() -> ToolWindowController {
-        if let windowController { return windowController }
-        let recorder = ShortcutRecorder(tool: self)
-        let controller = ToolWindowController(
-            title: title,
-            content: AnyView(PortkeyWindowView(tool: self, recorder: recorder))
+    private var recorder: AppShortcutRecorder {
+        if let shortcutRecorder { return shortcutRecorder }
+        let recorder = AppShortcutRecorder(
+            setShortcut: { [weak self] shortcut, id in self?.setShortcut(shortcut, for: id) },
+            pauseShortcuts: { [weak self] paused in self?.setShortcutsPaused(paused) }
         )
-        recorder.window = controller.window
-        windowController = controller
-        return controller
+        shortcutRecorder = recorder
+        return recorder
+    }
+
+    /// What the app's shortcut does.
+    func switchTo(_ app: PortkeyApp) {
+        AppSwitcher.switchTo(app.target)
     }
 
     /// Refused when the app is in the list already. A new app has no shortcut until the person records one.
@@ -123,7 +125,7 @@ public final class PortkeyTool: Tool {
             if let owner = apps.first(where: { $0.id != id && $0.shortcut == shortcut }) {
                 return .usedBy(owner)
             }
-            if started, apps[index].shortcut != shortcut, !Self.canRegister(shortcut) {
+            if started, apps[index].shortcut != shortcut, !GlobalHotKey.canRegister(shortcut) {
                 return .refusedBySystem
             }
         }
@@ -143,101 +145,16 @@ public final class PortkeyTool: Tool {
         }
     }
 
-    /// The open apps that are not in the list yet, by name.
-    var openCandidates: [AppCandidate] {
-        _ = runningAppsChanges
-        var seenPaths = Set<String>()
-        return NSWorkspace.shared.runningApplications
-            .compactMap { running -> AppCandidate? in
-                guard running.activationPolicy == .regular, !running.isTerminated,
-                      let bundleID = running.bundleIdentifier, let url = running.bundleURL else { return nil }
-                let candidate = AppCandidate(
-                    bundleID: bundleID,
-                    path: url.path,
-                    name: running.localizedName ?? Self.fileName(atPath: url.path)
-                )
-                guard seenPaths.insert(candidate.path).inserted,
-                      !apps.contains(where: { $0.isSameApp(as: candidate) }) else { return nil }
-                return candidate
-            }
-            .sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
-    }
-
-    /// The Dock's apps that are neither in the list nor open, in Dock order.
-    func dockCandidates(excluding open: [AppCandidate]) -> [AppCandidate] {
-        let persistentApps = UserDefaults(suiteName: "com.apple.dock")?.array(forKey: "persistent-apps") ?? []
-        return AppCandidate.dockApps(persistentApps: persistentApps) { FileManager.default.fileExists(atPath: $0) }
-            .filter { candidate in
-                !open.contains { $0.bundleID == candidate.bundleID && $0.path == candidate.path }
-                    && !apps.contains { $0.isSameApp(as: candidate) }
-            }
-    }
-
-    /// The person picks apps in Applications, in a sheet on the tool's window.
-    func chooseApps() {
-        guard let window = windowController?.window else { return }
-        let panel = NSOpenPanel()
-        panel.allowedContentTypes = [.applicationBundle]
-        panel.directoryURL = URL(fileURLWithPath: "/Applications", isDirectory: true)
-        panel.allowsMultipleSelection = true
-        panel.canChooseDirectories = false
-        panel.beginSheetModal(for: window) { [weak self] response in
-            guard response == .OK else { return }
-            let urls = panel.urls
-            MainActor.assumeIsolated {
-                for url in urls {
-                    guard let bundleID = Bundle(url: url)?.bundleIdentifier else { continue }
-                    self?.add(AppCandidate(bundleID: bundleID, path: url.path, name: Self.fileName(atPath: url.path)))
-                }
-            }
-        }
-    }
-
     func displayName(of app: PortkeyApp) -> String {
-        FileManager.default.fileExists(atPath: app.path) ? Self.fileName(atPath: app.path) : app.name
+        AppCatalog.displayName(path: app.path, savedName: app.name)
     }
 
     func icon(of app: PortkeyApp) -> NSImage {
-        icon(atPath: app.path)
+        catalog.icon(atPath: app.path)
     }
 
-    func icon(atPath path: String) -> NSImage {
-        if let icon = icons[path] { return icon }
-        guard FileManager.default.fileExists(atPath: path) else { return Self.genericIcon }
-        // A symbolic link, such as /Applications/Safari.app, gets an icon with an alias arrow.
-        let icon = NSWorkspace.shared.icon(forFile: URL(fileURLWithPath: path).resolvingSymlinksInPath().path)
-        icons[path] = icon
-        return icon
-    }
-
-    /// A menu item draws its image at the image's own size.
-    func menuIcon(atPath path: String) -> NSImage {
-        if let icon = menuIcons[path] { return icon }
-        let full = icon(atPath: path)
-        let icon = NSImage(size: NSSize(width: 16, height: 16), flipped: false) { rect in
-            full.draw(in: rect)
-            return true
-        }
-        menuIcons[path] = icon
-        return icon
-    }
-
-    private static let genericIcon = NSWorkspace.shared.icon(for: .application)
-
-    private static func fileName(atPath path: String) -> String {
-        let name = FileManager.default.displayName(atPath: path)
-        return name.hasSuffix(".app") ? String(name.dropLast(4)) : name
-    }
-
-    /// Whether macOS takes the combination now; it says no when this process holds it already.
-    private static func canRegister(_ shortcut: Shortcut) -> Bool {
-        switch GlobalHotKey.register(keyCode: shortcut.keyCode, modifiers: shortcut.modifiers, action: {}) {
-        case .success(let registration):
-            GlobalHotKey.unregister(registration)
-            return true
-        case .failure:
-            return false
-        }
+    func isListed(_ candidate: AppCandidate) -> Bool {
+        apps.contains { $0.isSameApp(as: candidate) }
     }
 
     private func appsChanged() {
@@ -277,25 +194,6 @@ public final class PortkeyTool: Tool {
         }
         registrations = [:]
     }
-
-    // The hub's once-a-second redraw does not reach this tool's views: SwiftUI sees the same tool and skips them.
-    private func watchRunningApps() {
-        guard workspaceObservers.isEmpty else { return }
-        let center = NSWorkspace.shared.notificationCenter
-        workspaceObservers = [NSWorkspace.didLaunchApplicationNotification, NSWorkspace.didTerminateApplicationNotification]
-            .map { name in
-                center.addObserver(forName: name, object: nil, queue: .main) { [weak self] _ in
-                    MainActor.assumeIsolated { self?.runningAppsChanges += 1 }
-                }
-            }
-    }
-
-    private func stopWatchingRunningApps() {
-        for observer in workspaceObservers {
-            NSWorkspace.shared.notificationCenter.removeObserver(observer)
-        }
-        workspaceObservers = []
-    }
 }
 
 #if DEBUG
@@ -307,11 +205,6 @@ extension PortkeyTool {
         failedAppIDs = []
         showsSamples = true
         apps = samples
-    }
-
-    /// The window without showing it: showing it would make Prism the active app.
-    var windowForDebug: NSWindow {
-        makeWindowController().window
     }
 }
 #endif

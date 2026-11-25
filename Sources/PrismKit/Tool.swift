@@ -3,9 +3,10 @@ import SwiftUI
 
 /// One tool in the toolbox.
 ///
-/// A tool owns its state and tells the shell what to draw. The shell draws the panels: a click on the tool's icon
-/// opens a quick panel with `controlsView()`, and the tool's tab in the hub shows the same controls above
-/// `settingsView()`. A tool that needs more room opens its own window with `ToolWindowController`.
+/// A tool owns its state and tells the shell what to draw. A click on the tool's icon opens a panel with only
+/// `controlsView()`. The tool's page in the Prism window starts with its name, `tagline` and switch, then shows
+/// `controlsView()` when `showsControlsInWindow`, then `settingsView()`, and last its Menu Bar card with
+/// `menuBarSettings()`.
 @MainActor
 public protocol Tool: AnyObject {
     /// Stable and used for every name the tool persists: preferences, the status item's autosave name.
@@ -13,11 +14,18 @@ public protocol Tool: AnyObject {
     static var id: ToolID { get }
 
     var title: String { get }
+    /// What the tool does, in one sentence, under its name at the top of its page.
+    var tagline: String { get }
     var symbolName: String { get }
     /// Draws only the symbol's primary layer, such as Lumos's wand without its stars while the Mac may sleep.
     var symbolPrimaryLayerOnly: Bool { get }
-    /// One line, such as "24:12 left" or "119 GB free".
+    /// The color of the tool's tile, while the tool is on.
+    var tint: ToolTint { get }
+    /// What the tool is doing now, short enough for one line in the Prism window's list, such as "29 min left".
     var summary: String { get }
+    /// Whether the tool's page in the Prism window starts with `controlsView()`. A tool whose settings already hold
+    /// everything its controls offer says no.
+    var showsControlsInWindow: Bool { get }
 
     /// Called once, when the app is ready. Not called for tools the person has turned off.
     func start()
@@ -27,16 +35,48 @@ public protocol Tool: AnyObject {
     /// The tool's icons in the menu bar, left to right; most tools have one. Asked once a second while the tool is
     /// on. Returning the same image instance as last time skips the repaint.
     func statusIcons() -> [StatusIcon]
-    /// What the tool does: all of its quick panel, and the top of its tab in the hub.
+    /// What the tool does: the body of its panel. `ToolPanelActions` in the environment closes the panel or opens
+    /// the tool's page in the Prism window.
     func controlsView() -> AnyView
-    /// How the tool is configured: only on its tab in the hub. Nil when there is nothing to configure.
+    /// How the tool is configured: only on its page in the Prism window, each group in a `PanelSection`. Nil when
+    /// there is nothing to configure.
     func settingsView() -> AnyView?
+    /// The tool's own menu bar settings, which the Prism window puts in its Menu Bar card after Show in the menu bar.
+    func menuBarSettings() -> MenuBarSettings?
 }
 
 public extension Tool {
     var symbolPrimaryLayerOnly: Bool { false }
+    var tint: ToolTint { Palette.neutral }
+    var showsControlsInWindow: Bool { true }
     func statusIcons() -> [StatusIcon] { [] }
     func settingsView() -> AnyView? { nil }
+    func menuBarSettings() -> MenuBarSettings? { nil }
+
+    /// Opens the tool's page in the Prism window, from a window of the tool's own such as Pensieve's history.
+    func openPageInPrismWindow() {
+        ToolPageRoute.open(type(of: self).id)
+    }
+}
+
+/// How a tool reaches its page in the Prism window. The app sets it when it starts.
+@MainActor
+public enum ToolPageRoute {
+    public static var open: (ToolID) -> Void = { _ in }
+}
+
+/// Rows for the Prism window's Menu Bar card. The shell draws the line above them; the rows draw the lines between
+/// themselves, with `PanelDivider.inCard`.
+@MainActor
+public struct MenuBarSettings {
+    public let rows: AnyView
+    /// Under the card.
+    public let note: String?
+
+    public init(rows: AnyView, note: String? = nil) {
+        self.rows = rows
+        self.note = note
+    }
 }
 
 /// One of a tool's icons in the menu bar.
@@ -70,7 +110,7 @@ public struct ToolID: Hashable, Sendable, RawRepresentable, CustomStringConverti
 /// Whether a tool has its own icon in the menu bar.
 public enum MenuBarPlacement: String, CaseIterable, Sendable {
     case ownIcon
-    /// Reachable only from the hub.
+    /// Reachable only from the Prism window. The raw value is saved, so it keeps its old name.
     case hubOnly
 
     public var id: String { rawValue }
@@ -89,4 +129,30 @@ public struct ToolRegistration {
     }
 
     public var id: ToolID { type(of: tool).id }
+}
+
+/// What a tool's controls can ask of the panel they are in. In the Prism window both do nothing.
+public struct ToolPanelActions: Sendable {
+    /// Closes the panel.
+    public var close: @MainActor () -> Void
+    /// Closes the panel and opens the tool's page in the Prism window.
+    public var openSettings: @MainActor () -> Void
+
+    public init(close: @escaping @MainActor () -> Void, openSettings: @escaping @MainActor () -> Void) {
+        self.close = close
+        self.openSettings = openSettings
+    }
+
+    public static let none = ToolPanelActions(close: {}, openSettings: {})
+}
+
+private struct ToolPanelActionsKey: EnvironmentKey {
+    static let defaultValue = ToolPanelActions.none
+}
+
+public extension EnvironmentValues {
+    var toolPanel: ToolPanelActions {
+        get { self[ToolPanelActionsKey.self] }
+        set { self[ToolPanelActionsKey.self] = newValue }
+    }
 }

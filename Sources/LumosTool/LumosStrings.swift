@@ -4,14 +4,16 @@ import Foundation
 // scripts/package.sh compiles the catalog into the app; `swift run` and `swift test` have no catalog,
 // so every string falls back to English there.
 public enum LumosStrings {
+    public static let tagline = String(localized: "Keeps this Mac awake, for a while or until you stop it.")
     public static let awake = String(localized: "Awake")
     public static let sleeping = String(localized: "Sleeping")
-    public static let keepAwake = String(localized: "Keep Awake")
-    public static let keepingAwake = String(localized: "Keeping awake")
-    public static let stop = String(localized: "Let It Sleep")
+    public static let notKeepingAwake = String(localized: "Not keeping awake")
+    public static let keepingThisMacAwake = String(localized: "Keeping this Mac awake")
+    public static let untilTurnedOff = String(localized: "Until you turn it off")
+    public static let sleepsAsUsual = String(localized: "This Mac sleeps as usual")
+    public static let keepThisMacAwake = String(localized: "Keep this Mac awake")
+    public static let howLong = String(localized: "How long")
     public static let untilStopped = String(localized: "Until I stop it")
-    public static let noTimer = String(localized: "No timer")
-    public static let maySleep = String(localized: "Your Mac may sleep")
     public static let cannotStart = String(localized: "Could not keep this Mac awake")
     public static func inTime(_ text: String) -> String { String(localized: "\(text) left") }
     public static let lessThanAMinute = String(localized: "less than a minute")
@@ -37,22 +39,27 @@ public enum LumosStrings {
         }
     }
     public static func lowBatteryStopsAt(_ level: Int) -> String {
-        String(localized: "Stops keeping awake at \(level)% to save the battery")
+        String(localized: "Stops at \(level)% battery")
     }
+    public static let screen = String(localized: "Screen")
+    public static let screenStaysOn = String(localized: "Stays on")
+    public static let screenCanTurnOff = String(localized: "Can turn off")
+    public static let lidClosedOption = String(localized: "Lid closed")
+    public static let lidStaysAwake = String(localized: "Stays awake")
+    public static let lidSleeps = String(localized: "Sleeps")
     public static let lidClosed = String(localized: "Keep running with the lid closed")
     public static let lidClosedNote = String(localized: "Asks for your password once, then disables lid sleep until the session ends.")
     public static let lidChanging = String(localized: "Changing…")
     public static let cancel = String(localized: "Cancel")
     public static let continueButton = String(localized: "Continue")
-    public static let keepsDisplayAwake = String(localized: "Keep the screen on too")
-    public static let keepsDisplayAwakeNote = String(localized: "Off: the Mac stays awake while its screen can turn off.")
     public static let lengthPicker = String(localized: "Default length")
-    public static let lowBatteryStops = String(localized: "Stop keeping awake when the battery falls to")
+    public static let sessions = String(localized: "Sessions")
+    public static let lowBatteryStops = String(localized: "Stop when the battery falls to")
     public static let lowBatteryOff = String(localized: "Never")
     public static func percent(_ value: Int) -> String { String(localized: "\(value)%") }
-    public static let notifiesWhenTimerEnds = String(localized: "Tell me when the session ends")
-    public static let notifiesWhenBatteryLow = String(localized: "Tell me when the battery stops the session")
-    public static let menuBarTime = String(localized: "Show the time left in the menu bar")
+    public static let notifiesWhenTimerEnds = String(localized: "Tell me when a session ends")
+    public static let notifiesWhenBatteryLow = String(localized: "Tell me when the battery stops it")
+    public static let menuBarTime = String(localized: "Show the time left")
     public static let notificationTimerTitle = String(localized: "Awake time is up")
     public static let notificationTimerBody = String(localized: "Prism let your Mac sleep again.")
     public static let notificationBatteryTitle = String(localized: "Battery is low")

@@ -62,6 +62,16 @@ public struct Reading: Equatable, Sendable, Identifiable {
 
     public var summary: String { "\(value) \(detail)" }
 
+    /// The value with one word that says what it is, for a line too narrow for `summary`.
+    public var shortSummary: String {
+        switch kind {
+        case .cpu: VitalsStrings.cpuLoad(value)
+        case .memory: VitalsStrings.used(value)
+        case .disk: VitalsStrings.free(value)
+        case .battery: VitalsStrings.batteryLevel(value)
+        }
+    }
+
     /// The value as the menu bar shows it. The CPU load is padded to three digits with figure spaces, which are as
     /// wide as a digit, so the icon keeps its width as the load moves between 5% and 100%.
     public var menuBarText: String {
