@@ -291,7 +291,8 @@ struct PensieveKindTests {
         let hex = try #require(ColorValue.parse("#F05138"))
         let rgb = try #require(ColorValue.parse("rgb(240, 81, 56)"))
         #expect(hex == rgb)
-        #expect(hex == [240.0 / 255, 81.0 / 255, 56.0 / 255, 1])
+        let expected: [Double] = [240.0 / 255, 81.0 / 255, 56.0 / 255, 1]
+        #expect(hex == expected)
         #expect(ColorValue.parse("rgba(0, 0, 0, 0.25)")?.last == 0.25)
         #expect(ColorValue.hex(hex) == "#F05138")
     }
