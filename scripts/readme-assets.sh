@@ -1,7 +1,8 @@
 #!/bin/zsh
 # Usage: scripts/readme-assets.sh
 # Regenerates docs/images from a packaged debug build: the icon, the menu bar icons, and in English and Chinese the
-# hub and the quick panels, with Lumos counting down, and the Portkey window, with sample apps.
+# Prism window on Lumos's page and on Portkey's page, each tool's panel, and the Pensieve window, with Lumos counting
+# down, sample apps in Portkey and sample items in Pensieve.
 set -euo pipefail
 
 cd "${0:A:h}/.."
@@ -25,10 +26,12 @@ capture() {
   local dir=$work/$1
   mkdir -p $dir
   PRISM_APPEARANCE=light PRISM_START_LUMOS=1 PRISM_CAPTURE=$dir $bin -AppleLanguages "($1)"
-  cp $dir/hub-lumos.png $out/hub$2.png
-  cp $dir/quick-lumos.png $out/quick-lumos$2.png
-  cp $dir/quick-vitals.png $out/quick-vitals$2.png
-  cp $dir/portkey-window.png $out/portkey$2.png
+  cp $dir/window-lumos.png $out/window$2.png
+  cp $dir/window-portkey.png $out/window-portkey$2.png
+  for tool in lumos vitals portkey pensieve; do
+    cp $dir/popover-$tool.png $out/popover-$tool$2.png
+  done
+  cp $dir/pensieve-window.png $out/pensieve$2.png
 }
 capture en ""
 capture zh-Hans -zh

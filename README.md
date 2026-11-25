@@ -14,30 +14,30 @@ English · [简体中文](README.zh-CN.md)
 
 <br>
 
-<img src="docs/images/hub.png" width="340" alt="The Prism hub on the Lumos tab: tabs for Lumos, Vitals, Portkey and Prism's own settings, the switches that turn Lumos on and put it in the menu bar, the session controls, and the settings of Lumos">
+<img src="docs/images/window.png" width="640" alt="The Prism window: on the left, a list of Lumos, Vitals, Portkey and Pensieve, each with its colored icon and what it is doing now, and General at the bottom; on the right, Lumos's page with its switch, its card with 29 minutes left and the four lengths, the Screen and Lid closed buttons, a Sessions card and a Menu Bar card">
 
 </div>
 
-Prism holds a few small tools. You can turn each tool on or off, and give each one its own menu bar icon or keep it only in the hub. Today there are three tools: **Lumos** keeps the Mac awake, **Vitals** shows how it is doing, and **Portkey** gives each of your apps a shortcut. The name comes from the portkeys of Harry Potter, objects that take you somewhere else at a touch: press an app's shortcut, and you are in that app.
+Prism holds a few small tools. You can turn each tool on or off, and give each one its own menu bar icon or keep it only in the Prism window. Today there are four tools: **Lumos** keeps the Mac awake, **Vitals** shows how it is doing, **Portkey** gives each of your apps a shortcut, and **Pensieve** keeps what you copy. Portkey's name comes from the portkeys of Harry Potter, objects that take you somewhere else at a touch: press an app's shortcut, and you are in that app. Pensieve's comes from the stone basin in the same books that keeps memories to look at again.
 
 ## Tools
 
 <p align="center">
-  <img src="docs/images/quick-lumos.png" width="320" alt="The quick panel of Lumos: keeping awake with 29 minutes left, the four lengths and the stop button, and switches for the screen and the lid">
-  <img src="docs/images/quick-vitals.png" width="320" alt="Vitals' quick panel: CPU, memory, disk and battery, each with a bar, and the battery's maximum capacity and cycle count">
+  <img src="docs/images/popover-lumos.png" width="320" alt="Lumos's panel: an amber card that says 29 min left and Keeping this Mac awake, with its switch on and 30m picked of ∞, 30m, 1h and 2h, then the Screen and Lid closed buttons, and at the bottom the name Lumos and a gear">
+  <img src="docs/images/popover-vitals.png" width="320" alt="Vitals' panel: CPU, memory, disk and battery, each with a green bar, the battery's maximum capacity and cycle count, and at the bottom the name Vitals and a gear">
 </p>
 
 ### Lumos
 
-**One click, no sleep.** Pick 30 minutes, 1 hour, 2 hours, or until you stop it, which is the default. A length picked while the Mac may sleep starts the session at once, so it is always one click. A kernel power assertion holds the Mac awake. The assertion goes away on its own if the app crashes, so nothing can leave the Mac stuck awake.
+**One click, no sleep.** Turn on the switch on Lumos's card to keep the Mac awake for the default length, which is until you stop it. Or pick ∞, 30m, 1h or 2h under it: a length starts a session at once, or restarts the one that is running, so it is always one click. The card turns amber and counts down while the Mac is kept awake. A kernel power assertion holds the Mac awake. The assertion goes away on its own if the app crashes, so nothing can leave the Mac stuck awake.
 
-**Choose what stays on.** Keep the screen on too, or let it turn off while the Mac keeps working.
+**Choose what stays on.** Click *Screen* to keep the screen on too, or to let it turn off while the Mac keeps working.
 
-**The lid, without the guesswork.** Turn on *Keep running with the lid closed*, and Prism installs a tiny root helper once, with one administrator prompt. After that the switch is instant and asks for no password, and your normal sleep setting comes back when the session ends. See [Lid sleep](#lid-sleep).
+**The lid, without the guesswork.** Click *Lid closed* to keep running with the lid closed, and Prism installs a tiny root helper once, with one administrator prompt. After that the change is instant and asks for no password, and your normal sleep setting comes back when the session ends. See [Lid sleep](#lid-sleep).
 
-**Battery guard.** On battery, the session ends itself at the percentage you choose, 20% by default, and tells you why. While the Mac runs on battery, the panel shows that percentage under the lengths.
+**Battery guard.** On battery, the session ends itself at the percentage you choose, 20% by default, and tells you why. While the Mac runs on battery, a card under the Screen and Lid closed buttons says so: "Stops at 20% battery". Errors, such as a lid change that did not take, show in the same card.
 
-**Notifications** when the time is up or the battery ends the session, and the time left in the menu bar if you want it.
+**Notifications** when the time is up or the battery ends the session, and the time left in the menu bar if you want it. The default length, the battery level and the notifications are on Lumos's page in the Prism window.
 
 ### Vitals
 
@@ -53,18 +53,46 @@ Prism holds a few small tools. You can turn each tool on or off, and give each o
 ### Portkey
 
 <p align="center">
-  <img src="docs/images/portkey.png" width="460" alt="The Portkey window: the title, what a shortcut does and the + button that adds apps, then a row for each of four apps: Safari, Mail and Notes with their shortcuts as keycaps, ⌥⇧S, ⌥⇧M and ⌃⌘N, and Terminal, which has no shortcut yet">
+  <img src="docs/images/window-portkey.png" width="640" alt="Portkey's page in the Prism window: its switch, then an Apps card with a row for each of four apps, Safari, Mail and Notes with their shortcuts as keycaps, ⌥⇧S, ⌥⇧M and ⌃⌘N, and Terminal with an Add Shortcut button, and Add App… at the end, then a Menu Bar card">
 </p>
 
 **One shortcut for each app.** Add the apps you use most, and record a shortcut for each one. Press it to bring the app to the front. If the app is not running, Portkey opens it. If the app is in front already, the same shortcut hides it.
 
-**Record the keys you want.** Click *Edit…* on the Portkey tab or in its panel to open the Portkey window. Click an app's shortcut field and press the keys, such as ⌥⇧C or ⌃⌘F5. A shortcut needs ⌘, ⌃ or ⌥. Press Esc to stop recording, or Delete to clear the shortcut. A shortcut belongs to one app at a time: if another app has it already, or macOS refuses it, the window says so under the app, and the app keeps its old shortcut.
+**Record the keys you want.** On Portkey's page in the Prism window, click an app's shortcut, or *Add Shortcut*, and press the keys, such as ⌥⇧C or ⌃⌘F5. A shortcut needs ⌘, ⌃ or ⌥. Press Esc to stop recording, or Delete to clear the shortcut. A shortcut belongs to one app at a time: if another app has it already, or macOS refuses it, the page says so under the app, and the app keeps its old shortcut.
 
-**Add apps from anywhere.** The + button at the top of the window lists the apps that are open and the apps in the Dock, and *Other…* picks any app in Applications. A new app has no shortcut until you record one. Portkey has no menu bar icon by default, and its shortcuts work without one. To give it an icon, turn on *Show in the menu bar*.
+**Go to an app from the panel, too.** Portkey's panel lists every app with its shortcut. Click one to do what its shortcut does.
+
+**Add apps from anywhere.** *Add App…* at the end of the list shows the apps that are open and the apps in the Dock, and *Other…* picks any app in Applications. Hover over an app to remove it. A new app has no shortcut until you record one. Portkey has no menu bar icon by default, and its shortcuts work without one. To give it an icon, turn on *Show in the menu bar*.
 
 **A shortcut stays on its key.** Portkey remembers the key you pressed, not the letter on it. If you switch to another keyboard layout later, the shortcut stays on the same key and keeps the name it had when you recorded it.
 
-**No permission needed.** Portkey uses the system's hot key API, `RegisterEventHotKey`, so it needs no Accessibility permission. Recording reads only the keys you type into the Portkey window.
+**No permission needed.** Portkey uses the system's hot key API, `RegisterEventHotKey`, so it needs no Accessibility permission. Recording reads only the keys you type into the Prism window.
+
+### Pensieve
+
+<p align="center">
+  <img src="docs/images/pensieve.png" width="480" alt="The Pensieve window: a search field with the filter All at its right end, then six items, the first one selected with a Return keycap: the color #F05138 with its swatch, a zip file with its icon, a 1280 × 720 picture with a thumbnail, a line of text, a link and a 600 × 800 picture, and at the bottom the keys for copy and remove">
+</p>
+
+**What you copied, in one list.** Pensieve keeps the last 200 things you copied: text, pictures, files and colors. If you copy the same thing again, it moves to the top instead of showing up twice. *Keep* on Pensieve's page sets how many it keeps, from 50 to 1000; a lower number deletes the oldest items at once.
+
+**Old items go on their own.** An item is deleted a month after you last copied it, or picked it from the list. *Clear after* on Pensieve's page makes that a day, a week or three months, or never. Pensieve checks when it starts and every hour.
+
+**Open it from any app.** Press ⇧⌘V, or click *Search* in Pensieve's panel. The list opens in the middle of the screen with the pointer, and the app you were in stays in front. Type to search text, file names and colors. The filter at the right of the search field shows all items, or only text, links, pictures or files; Tab and ⇧Tab go through the filters, and the list starts at All each time it opens. Text includes colors and links. Press ↑ and ↓ to pick an item and Return to put it back on the clipboard, then press ⌘V to paste it. Pensieve never pastes for you. Press ⌘⌫ to remove an item, Esc to close the list, and ⌘, to open Pensieve's page in the Prism window.
+
+**See a picture up close.** When a picture is selected, a larger copy of it, with its size in pixels, appears next to the list. In the panel, rest the pointer on a picture for a moment.
+
+**Or pick from the panel.** Pensieve's panel shows the latest 10 items. Click one to put it back on the clipboard; the panel says *Copied* and closes.
+
+**Pick your own shortcut.** On Pensieve's page in the Prism window, click the keys next to *Shortcut* and press new ones, as on Portkey's page. A shortcut needs ⌘, ⌃ or ⌥. Press Delete while recording to clear it; then the history opens only from the panel.
+
+**What it keeps, and what it leaves out.** Pensieve keeps plain text, rich text, HTML, PNG and TIFF pictures, files and colors, and puts all of them back, so a paste keeps its formatting. It leaves out what an app marks as private, such as a password from a password manager, and what an app puts on the clipboard only for a moment or on its own. It also leaves out anything over 20 MB. While *Pause recording* is on, on Pensieve's page, it keeps nothing, and the panel offers *Resume*.
+
+**Apps it does not listen to.** Under *Don't record from* on Pensieve's page, list the apps whose copies Pensieve should skip. It goes by the app in front when something is copied. Passwords and Keychain Access are on the list until you change it; add apps from the ones that are open, the ones in the Dock, or any other, as on Portkey's page.
+
+**Your history stays on this Mac.** Pensieve saves it in `~/Library/Application Support/Prism/Pensieve/`, a folder that only your user can open. The files are not encrypted. *Clear…* next to *Clear history* on Pensieve's page deletes them all.
+
+**No permission needed.** Any app can read the clipboard, and the shortcut uses `RegisterEventHotKey`, as Portkey's do. Pensieve never types or pastes for you, so it needs no Accessibility permission.
 
 ## Menu bar and panels
 
@@ -72,15 +100,21 @@ Prism holds a few small tools. You can turn each tool on or off, and give each o
 
 Every icon is an SF Symbol template with an optional number in monospaced digits, so the menu bar tints it like the system's own icons. Lumos shows a wand, `wand.and.stars`: a bare wand while the Mac may sleep, and the wand with its stars while it is kept awake. Each Vitals icon shows the symbol of its reading: `cpu`, `memorychip`, `internaldrive`, or a battery that empties with the charge.
 
-Prism has no icon of its own. A tool's icon appears when its *Show in the menu bar* switch is on. When no tool is in the menu bar, a small Prism icon (`triangle`) appears instead, so the hub stays reachable.
+Prism has no icon of its own. A tool's icon appears when its *Show in the menu bar* switch is on. When no tool is in the menu bar, a small Prism icon (`triangle`) appears instead, so the Prism window stays reachable.
 
-- **Click a tool's icon** to open its quick panel: the tool's controls and nothing else. The button at its bottom right opens the hub on that tool's tab.
-- **Right-click a tool's icon** for *Open Prism* and *Quit Prism*.
-- **Click the Prism icon**, when it shows, to open or close the hub.
+<p align="center">
+  <img src="docs/images/popover-portkey.png" width="320" alt="Portkey's panel: Safari, Mail and Notes with their shortcuts as keycaps, and Terminal with No shortcut">
+  <img src="docs/images/popover-pensieve.png" width="320" alt="Pensieve's panel: a Search row with the ⇧⌘V keycaps, then six items: a color, a zip file, a picture, a line of text, a link and another picture">
+</p>
 
-The hub has one tab for each tool and a gear tab for Prism itself. A tool's tab starts with two switches, *Turned on* and *Show in the menu bar*. Below them are the same controls as in the quick panel, then the tool's settings. A tool that is turned off stops all its work and keeps its settings. The gear tab holds *Open at login*, the version and *Quit Prism*.
+- **Click a tool's icon** to open its panel, with that tool alone. The tool's name and a gear sit at the bottom; the gear, or ⌘, while the panel is open, opens the tool's page in the Prism window.
+- **Right-click a tool's icon** for *Prism Settings…*, which opens the tool's page in the Prism window, and *Quit Prism*.
+- **Click the Prism icon**, when it shows, to open the Prism window on the page it showed last.
+- **Open Prism again** from Finder, Spotlight or Launchpad while it runs, and the Prism window opens. It also opens by itself the first time Prism runs.
 
-Only one panel is open at a time, and a click anywhere else closes it. Neither panel takes focus, so a click on it does not interrupt your typing.
+A panel closes when you click anywhere else, and it does not take focus, so a click on it does not interrupt your typing.
+
+The Prism window is the whole toolbox. The list on the left has every tool, each with what it is doing now, and *General* at the bottom. A tool's page starts with its switch, the only place that turns the tool on or off. A tool that is turned off stops all its work and keeps its settings. Below the switch come the tool's controls, for Lumos and Vitals, then its settings, then a *Menu Bar* card with *Show in the menu bar* and the tool's own menu bar settings, such as which readings Vitals shows there. *General* has *Appearance*, which keeps Prism light or dark or lets it follow the system, *Open at login*, the version and *Quit Prism*. ⌘W closes the window.
 
 ## Install
 
@@ -100,7 +134,7 @@ To build it yourself instead, run `scripts/package.sh --install` in a clone of t
 
 A closed lid sleeps a Mac no matter what power assertions it holds. The only way around it is `pmset -a disablesleep 1`, which needs root and stays in effect until it is set back. A crashed app would leave your Mac unable to sleep.
 
-So the first time you turn the switch on, Prism asks for an administrator password and installs one small helper:
+So the first time you click *Lid closed*, Prism asks for an administrator password and installs one small helper:
 
 - `/Library/PrivilegedHelperTools/io.github.zchan0.prism.LumosLid.sh` turns `disablesleep` on while Prism holds a flag file open, and off otherwise.
 - `/Library/LaunchDaemons/io.github.zchan0.prism.LumosLid.plist` runs that script at boot, every minute, and whenever the flag changes.
@@ -128,15 +162,16 @@ scripts/dist.sh <version>      # test, package and zip into .build/dist, as a re
 scripts/release.sh <version>   # push the tag that publishes a release
 ```
 
-Prism is a SwiftPM package. AppKit draws the status items and the panels, and SwiftUI draws everything inside them.
+Prism is a SwiftPM package. AppKit draws the status items, the panels and the windows, and SwiftUI draws everything inside them.
 
 | Module | What it holds |
 | --- | --- |
-| `PrismKit` | The shell's parts: the `Tool` protocol, status items, the floating panel, the menu bar glyph, shared rows and switches, per-tool settings. |
+| `PrismKit` | The shell's parts: the `Tool` protocol, status items, the floating panel and the panel beside a window, the menu bar glyph, the palette and every shared part (cards, rows, switches, segmented controls, buttons, menus, keycaps, tiles, lists of apps), global shortcuts and the field that records them, per-tool settings. |
 | `LumosTool` | The session engine and its power assertion, the lid helper, the battery guard, notifications. |
 | `VitalsTool` | The CPU, memory, disk and battery readings. |
 | `PortkeyTool` | The apps and their shortcuts, and the switch to an app: bring it to the front, open it, or hide it. |
-| `Prism` | The app: it registers the tools and owns the menu bar items, the hub and the quick panel. |
+| `PensieveTool` | The clipboard history: what it keeps, the files it saves, and the history window. |
+| `Prism` | The app: it registers the tools and owns the menu bar items, the tools' panels and the Prism window. |
 
 A tool depends only on `PrismKit`, never on another tool. To add one, write a module with a type that conforms to `Tool`, and add one line to `AppDelegate.registrations()`.
 
@@ -144,14 +179,12 @@ Debug builds read a few environment variables, which is how `docs/images` is mad
 
 | Variable | What it does |
 | --- | --- |
-| `PRISM_CAPTURE=<dir>` | Screenshots every hub tab, every quick panel and the Portkey window into the folder, then quits. Portkey shows sample apps instead of yours, and its shortcuts are off. |
-| `PRISM_STATUS_CAPTURE=<file>` | Draws every menu bar icon on a light, a dark and a blue menu bar, then quits. |
+| `PRISM_CAPTURE=<dir>` | Screenshots each tool's panel (`popover-<tool>.png`), every page of the Prism window (`window-<tool>.png`, `window-general.png`), Lumos's panel and page with its battery note and an error (`popover-lumos-note.png`, `window-lumos-note.png`), the Pensieve window (`pensieve-window.png`), its filter menu open over the screen behind it (`pensieve-filter-menu.png`), the window with Images picked in that menu (`pensieve-window-images.png`) and the picture's preview (`pensieve-preview.png`) into the folder, then quits. The panels leave ⌘, to the app in front. Portkey shows sample apps instead of yours, and its shortcuts are off. Pensieve shows sample items instead of your history: it does not watch the clipboard, read or save the history, or set up its shortcut. |
+| `PRISM_STATUS_CAPTURE=<file>` | Draws every menu bar icon on a light, a dark and a blue menu bar, then quits. Pensieve does not watch the clipboard, and Portkey's shortcuts are off. |
 | `PRISM_START_LUMOS=1` | Starts a 30 minute Lumos session at launch. |
-| `PRISM_APPEARANCE=light` or `dark` | Forces the appearance. |
+| `PRISM_APPEARANCE=light` or `dark` | Forces the appearance, over the one picked on *General*. |
 | `PRISM_DUMP=1` | Prints each tool's summary, then quits. |
 | `PRISM_PORTKEY_SWITCH=<bundle id>` | Switches to that app 3 seconds after launch, as a Portkey shortcut does. |
-| `PRISM_SHOW_PANEL=<name>` | Opens one panel at launch and leaves it open. The name is a `PRISM_CAPTURE` file name without `.png`, such as `hub-portkey` or `quick-portkey`. |
-| `PRISM_PORTKEY_WINDOW=1` | Opens the Portkey window at launch. |
 
 ### Releasing
 
