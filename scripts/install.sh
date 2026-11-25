@@ -14,5 +14,7 @@ pkill -x Prism || true
 while pgrep -x Prism > /dev/null; do sleep 0.1; done
 rm -rf $installed
 ditto $app $installed
-open $installed
+# open passes this shell's environment to Prism, and Portkey passes it on to every app it opens.
+# A leaked CLAUDE_CODE_CHILD_SESSION, for example, turns off transcript saving in Claude Code started from those apps.
+env -i HOME=$HOME USER=$USER LOGNAME=$LOGNAME SHELL=$SHELL PATH=/usr/bin:/bin:/usr/sbin:/sbin open $installed
 echo "installed $installed"
