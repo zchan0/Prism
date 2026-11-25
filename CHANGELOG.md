@@ -2,7 +2,7 @@
 
 All notable changes to Prism are listed here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow [Semantic Versioning](https://semver.org/).
 
-## [Unreleased]
+## [0.3.0] - 2026-11-25
 
 - Pensieve, a new tool: a history of the last 200 things you copied, whether text, pictures, files or colors. ⇧⌘V
   opens it in the middle of the screen, and the app you were in stays in front. Return puts an item back on the
@@ -73,5 +73,6 @@ First version. It runs on macOS 14 or later, on Apple silicon and Intel.
 - English and Chinese.
 
 [Unreleased]: https://github.com/zchan0/Prism/compare/v0.2.0...HEAD
+[0.3.0]: https://github.com/zchan0/Prism/releases/tag/v0.3.0
 [0.2.0]: https://github.com/zchan0/Prism/releases/tag/v0.2.0
 [0.1.0]: https://github.com/zchan0/Prism/releases/tag/v0.1.0
