@@ -2,7 +2,14 @@ import Foundation
 import UserNotifications
 
 @MainActor
-final class Notifier {
+protocol Notifying: AnyObject {
+    func requestAuthorization()
+    func postTimerEnded()
+    func postBatteryStopped(level: Int)
+}
+
+@MainActor
+final class Notifier: Notifying {
     private let isAvailable = Bundle.main.bundleIdentifier != nil
     private static let timerIdentifier = "prism.lumos.timer"
     private static let batteryIdentifier = "prism.lumos.battery"

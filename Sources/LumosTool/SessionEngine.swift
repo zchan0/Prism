@@ -104,6 +104,31 @@ final class SessionEngine {
         return true
     }
 
+    /// Picks up a session the previous process started, after a relaunch for an update: the same start, end and
+    /// length. No event, so nothing is announced and no length is remembered as a new pick.
+    @discardableResult
+    func resume(startedAt: Date, endsAt: Date?, length: SessionLength, keepsDisplayAwake: Bool) -> Bool {
+        guard !isAwake else { return false }
+        do {
+            try assertion.acquire(keepsDisplayAwake: keepsDisplayAwake)
+        } catch let failure as SleepAssertionFailure {
+            self.failure = failure
+            return false
+        } catch {
+            failure = SleepAssertionFailure(code: -1)
+            return false
+        }
+        failure = nil
+        isAwake = assertion.isHolding
+        now = clock()
+        self.startedAt = startedAt
+        self.endsAt = endsAt
+        self.length = length
+        holdsDisplay = keepsDisplayAwake
+        ticker.start(every: 1) { [weak self] in self?.tick() }
+        return true
+    }
+
     #if DEBUG
     /// A short countdown for exercising the timer path; release builds only ever use SessionLength.
     func startForDebug(seconds: TimeInterval, keepsDisplayAwake: Bool) {

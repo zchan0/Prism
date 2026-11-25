@@ -50,7 +50,7 @@ private struct ReadingView: View {
                 }
                 .lineLimit(1)
             }
-            LevelBar(fraction: reading.fraction, isTight: reading.isTight)
+            LevelBar(fraction: reading.fraction, color: reading.isTight ? Palette.warning : Palette.meter)
             if let note = reading.note {
                 Text(note)
                     .font(PanelFont.note)
@@ -69,25 +69,6 @@ extension Reading.Kind {
         case .memory: VitalsStrings.memoryName
         case .battery: VitalsStrings.batteryName
         }
-    }
-}
-
-struct LevelBar: View {
-    let fraction: Double
-    let isTight: Bool
-
-    var body: some View {
-        GeometryReader { proxy in
-            ZStack(alignment: .leading) {
-                Capsule()
-                    .fill(Color(nsColor: Palette.well))
-                Capsule()
-                    .fill(Color(nsColor: isTight ? Palette.warning : Palette.meter))
-                    .frame(width: max(4, proxy.size.width * fraction))
-            }
-        }
-        .frame(height: 4)
-        .accessibilityHidden(true)
     }
 }
 

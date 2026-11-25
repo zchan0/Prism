@@ -20,6 +20,7 @@ public final class LumosTool: Tool {
     public var symbolName: String { model.menuBarState.symbolName }
     public var symbolPrimaryLayerOnly: Bool { !model.menuBarState.isLit }
     public var tint: ToolTint { Palette.lumos }
+    public var blocksRelaunch: Bool { model.isAwake }
 
     public var summary: String {
         Self.summary(isAwake: model.isAwake, remaining: model.remaining)
@@ -42,8 +43,15 @@ public final class LumosTool: Tool {
         guard started else { return }
         started = false
         ticker.stop()
-        model.stop()
-        model.repairOnQuit()
+        model.tearDown()
+    }
+
+    public func prepareForRelaunch() -> RelaunchHold? {
+        model.prepareForRelaunch()
+    }
+
+    public func relaunchCancelled() {
+        model.relaunchCancelled()
     }
 
     public func statusIcons() -> [StatusIcon] {
@@ -81,6 +89,22 @@ public final class LumosTool: Tool {
     /// check the power assertion.
     public func startForDebug() {
         model.engine.start(length: .thirtyMinutes, keepsDisplayAwake: model.preferences.keepsDisplayAwake)
+    }
+
+    /// Keeps the Mac awake with the lid closed too, but only with the helper this build carries already installed,
+    /// so it never asks for an administrator password.
+    public func keepAwakeWithLidClosedForDebug() {
+        Task { [model] in
+            // After the clean-up at launch, which would otherwise delete the new flag as a leftover.
+            try? await Task.sleep(for: .seconds(2))
+            await model.lid.refresh()
+            guard model.lid.isHelperInstalled else {
+                print("lid closed: the helper is missing or from another build, so it is left off")
+                return
+            }
+            await model.setKeepsAwakeWithLidClosed(true)
+            print("lid closed: \(model.preferences.keepsAwakeWithLidClosed ? "on" : "off")")
+        }
     }
 
     /// Shows the note under the Screen and Lid closed buttons, on battery, together with an error.

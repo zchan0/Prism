@@ -114,7 +114,7 @@ Prism has no icon of its own. A tool's icon appears when its *Show in the menu b
 
 A panel closes when you click anywhere else, and it does not take focus, so a click on it does not interrupt your typing.
 
-The Prism window is the whole toolbox. The list on the left has every tool, each with what it is doing now, and *General* at the bottom. A tool's page starts with its switch, the only place that turns the tool on or off. A tool that is turned off stops all its work and keeps its settings. Below the switch come the tool's controls, for Lumos and Vitals, then its settings, then a *Menu Bar* card with *Show in the menu bar* and the tool's own menu bar settings, such as which readings Vitals shows there. *General* has *Appearance*, which keeps Prism light or dark or lets it follow the system, *Open at login*, the version and *Quit Prism*. ⌘W closes the window.
+The Prism window is the whole toolbox. The list on the left has every tool, each with what it is doing now, and *General* at the bottom. A tool's page starts with its switch, the only place that turns the tool on or off. A tool that is turned off stops all its work and keeps its settings. Below the switch come the tool's controls, for Lumos and Vitals, then its settings, then a *Menu Bar* card with *Show in the menu bar* and the tool's own menu bar settings, such as which readings Vitals shows there. *General* has *Appearance*, which keeps Prism light or dark or lets it follow the system, *Open at login* and *Quit Prism*, then *About*: the version and its updates, and links to GitHub and the release notes. ⌘W closes the window.
 
 ## Install
 
@@ -124,7 +124,9 @@ The Prism window is the whole toolbox. The list on the left has every tool, each
 
 Instead of steps 2 and 3, you can run `xattr -dr com.apple.quarantine /Applications/Prism.app` once.
 
-To update, quit Prism and replace `Prism.app` with the new one. If macOS blocks the new version, repeat steps 2 and 3.
+Prism updates itself. Once a day it asks GitHub for a newer version, downloads it, and installs it when Prism is idle, then opens again. In the Prism window, *General* → *About* changes how often it checks, or turns installing automatically off. A version from before this feature has to be replaced by hand once: quit Prism and replace `Prism.app` with the new one. If macOS blocks the new version, repeat steps 2 and 3.
+
+This is the only thing Prism does on the network. It asks `api.github.com` for the latest release and downloads it from GitHub, and it sends nothing about you.
 
 Prism needs macOS 14 or later, on Apple silicon or Intel.
 
@@ -181,7 +183,13 @@ Debug builds read a few environment variables, which is how `docs/images` is mad
 | --- | --- |
 | `PRISM_CAPTURE=<dir>` | Screenshots each tool's panel (`popover-<tool>.png`), every page of the Prism window (`window-<tool>.png`, `window-general.png`), Lumos's panel and page with its battery note and an error (`popover-lumos-note.png`, `window-lumos-note.png`), the Pensieve window (`pensieve-window.png`), its filter menu open over the screen behind it (`pensieve-filter-menu.png`), the window with Images picked in that menu (`pensieve-window-images.png`) and the picture's preview (`pensieve-preview.png`) into the folder, then quits. The panels leave ⌘, to the app in front. Portkey shows sample apps instead of yours, and its shortcuts are off. Pensieve shows sample items instead of your history: it does not watch the clipboard, read or save the history, or set up its shortcut. |
 | `PRISM_STATUS_CAPTURE=<file>` | Draws every menu bar icon on a light, a dark and a blue menu bar, then quits. Pensieve does not watch the clipboard, and Portkey's shortcuts are off. |
-| `PRISM_START_LUMOS=1` | Starts a 30 minute Lumos session at launch. |
+| `PRISM_CAPTURE_GENERAL=<file>` | Screenshots the Prism window on *General*, then quits. Lumos, Pensieve and Portkey leave your session, history and shortcuts alone, as with `PRISM_CAPTURE`. |
+| `PRISM_SHOW_WHATS_NEW=1` | With `PRISM_CAPTURE_GENERAL`, opens *What's new* and screenshots the screen around the window instead. |
+| `PRISM_START_LUMOS=1` or `lid` | Starts a 30 minute Lumos session at launch. `lid` also keeps the Mac awake with the lid closed, if the helper this build carries is installed; it never asks for a password. |
+| `PRISM_UPDATE=1` | Lets a debug build update itself: it checks at launch, then on the schedule. |
+| `PRISM_UPDATE_FEED=<url>` | Reads the latest release from this URL instead of GitHub, such as a local `latest.json` with the same fields. |
+| `PRISM_UPDATE_INSTALL_NOW=<seconds>` | Installs a downloaded update that many seconds after launch at the earliest, as *Install and Relaunch* does, even while Lumos keeps the Mac awake. |
+| `PRISM_UPDATE_PHASE=<name>` | Shows a made-up update state on *General*, without checking, downloading or saving anything: `idle`, `never`, `unchecked`, `checking`, `available`, `downloading`, `ready`, `readyBlocked`, `readyManual`, `installing`, `updated`, `checkFailed`, `downloadFailed`, `verifyFailed`, `installFailed`, `cannotInstall` or `unavailable`. |
 | `PRISM_APPEARANCE=light` or `dark` | Forces the appearance, over the one picked on *General*. |
 | `PRISM_DUMP=1` | Prints each tool's summary, then quits. |
 | `PRISM_PORTKEY_SWITCH=<bundle id>` | Switches to that app 3 seconds after launch, as a Portkey shortcut does. |

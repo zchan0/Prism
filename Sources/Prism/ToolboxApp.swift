@@ -12,6 +12,7 @@ import SwiftUI
 final class ToolboxApp {
     let shell: ShellSettings
     let registrations: [ToolRegistration]
+    let updater: Updater
     private let statusItems: StatusItemHost
     private let prismWindow: PrismWindowController
     private let quick = QuickPanelController()
@@ -23,8 +24,10 @@ final class ToolboxApp {
     init(registrations: [ToolRegistration], shell: ShellSettings) {
         self.registrations = registrations
         self.shell = shell
+        let updater = Updater()
+        self.updater = updater
         statusItems = StatusItemHost(settings: shell)
-        prismWindow = PrismWindowController(shell: shell, registrations: registrations)
+        prismWindow = PrismWindowController(shell: shell, registrations: registrations, updater: updater)
         configure()
     }
 
@@ -38,11 +41,33 @@ final class ToolboxApp {
             statusItems.sync(with: registrations)
             prismWindow.refreshIfVisible()
             quick.refreshIfVisible()
+            updater.tick()
         }
         if welcomes, shell.isFirstLaunch {
             shell.markLaunched()
             openWindow(nil)
         }
+        updater.start()
+        if updater.reopensWindow {
+            openWindow(.general)
+        }
+    }
+
+    /// Nothing a relaunch would interrupt: no window or panel of Prism's on screen, and no tool busy.
+    private var isIdle: Bool {
+        !prismWindow.window.isVisible
+            && !quick.isShown
+            // The menu bar icons are windows too.
+            && !NSApp.windows.contains { $0.isVisible && $0.level != .statusBar }
+            && blockingTools.isEmpty
+    }
+
+    private var startedTools: [Tool] {
+        registrations.filter { started.contains($0.id) }.map(\.tool)
+    }
+
+    private var blockingTools: [String] {
+        registrations.filter { shell.isEnabled($0.id) && $0.tool.blocksRelaunch }.map(\.tool.title)
     }
 
     func setToolEnabled(_ id: ToolID, _ isOn: Bool) {
@@ -110,6 +135,23 @@ final class ToolboxApp {
         }
         prismWindow.onSetAppearance = { [weak self] appearance in
             self?.setAppearance(appearance)
+        }
+        updater.isIdle = { [weak self] in
+            self?.isIdle ?? false
+        }
+        updater.blockingTools = { [weak self] in
+            self?.blockingTools ?? []
+        }
+        updater.prepareForRelaunch = { [weak self] in
+            guard let self else { return RelaunchHold() }
+            return RelaunchHold.merged(startedTools.compactMap { $0.prepareForRelaunch() })
+        }
+        updater.relaunchCancelled = { [weak self] in
+            self?.startedTools.forEach { $0.relaunchCancelled() }
+        }
+        quick.updater = updater
+        quick.onOpenGeneral = { [weak self] in
+            self?.openWindow(.general)
         }
     }
 
@@ -198,6 +240,21 @@ final class ToolboxApp {
 
     func hideQuickPanel() {
         quick.hide()
+    }
+
+    func captureGeneralPage(to path: String) async -> Bool {
+        prismWindow.prepareForCapture(.general)
+        if ProcessInfo.processInfo.environment["PRISM_SHOW_WHATS_NEW"] == "1" {
+            // The popover is a window of its own, so the screen around the Prism window is captured instead.
+            prismWindow.window.orderFrontRegardless()
+            try? await Task.sleep(for: .seconds(1.5))
+            let ok = DebugCapture.screen(around: prismWindow.window.frame, to: path)
+            prismWindow.window.orderOut(nil)
+            return ok
+        }
+        let ok = await DebugCapture.window(prismWindow.window, to: path)
+        prismWindow.window.orderOut(nil)
+        return ok
     }
 
     func capturePage(of id: ToolID, to path: String) async -> Bool {

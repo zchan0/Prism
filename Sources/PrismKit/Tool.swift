@@ -26,11 +26,21 @@ public protocol Tool: AnyObject {
     /// Whether the tool's page in the Prism window starts with `controlsView()`. A tool whose settings already hold
     /// everything its controls offer says no.
     var showsControlsInWindow: Bool { get }
+    /// Whether relaunching Prism now would cut short what the tool is doing, so an update waits.
+    var blocksRelaunch: Bool { get }
 
     /// Called once, when the app is ready. Not called for tools the person has turned off.
     func start()
     /// Called when the tool is turned off, and when the app quits.
     func stop()
+
+    /// Prism is about to relaunch for an update. The tool saves what it needs to carry on in the new process, and
+    /// returns what has to be held for it in between; nil when there is nothing to carry on. After this, `stop()`
+    /// must not end what the tool is doing.
+    func prepareForRelaunch() -> RelaunchHold?
+    /// The relaunch after `prepareForRelaunch()` did not happen and this process keeps running: the tool drops what
+    /// it saved and stops as usual again.
+    func relaunchCancelled()
 
     /// The tool's icons in the menu bar, left to right; most tools have one. Asked once a second while the tool is
     /// on. Returning the same image instance as last time skips the repaint.
@@ -49,6 +59,9 @@ public extension Tool {
     var symbolPrimaryLayerOnly: Bool { false }
     var tint: ToolTint { Palette.neutral }
     var showsControlsInWindow: Bool { true }
+    var blocksRelaunch: Bool { false }
+    func prepareForRelaunch() -> RelaunchHold? { nil }
+    func relaunchCancelled() {}
     func statusIcons() -> [StatusIcon] { [] }
     func settingsView() -> AnyView? { nil }
     func menuBarSettings() -> MenuBarSettings? { nil }
@@ -56,6 +69,36 @@ public extension Tool {
     /// Opens the tool's page in the Prism window, from a window of the tool's own such as Pensieve's history.
     func openPageInPrismWindow() {
         ToolPageRoute.open(type(of: self).id)
+    }
+}
+
+/// What has to be kept up while Prism relaunches for an update, between the old process quitting and the new one
+/// taking over.
+public struct RelaunchHold: Sendable, Equatable {
+    public var keepsSystemAwake: Bool
+    public var keepsDisplayAwake: Bool
+    /// Files to keep open, such as Lumos's lid flag, whose helper treats a flag nobody holds as a session that ended.
+    public var heldFiles: [String]
+
+    public init(keepsSystemAwake: Bool = false, keepsDisplayAwake: Bool = false, heldFiles: [String] = []) {
+        self.keepsSystemAwake = keepsSystemAwake
+        self.keepsDisplayAwake = keepsDisplayAwake
+        self.heldFiles = heldFiles
+    }
+
+    public var isEmpty: Bool { !keepsSystemAwake && !keepsDisplayAwake && heldFiles.isEmpty }
+
+    /// One hold that covers every tool's.
+    public static func merged(_ holds: [RelaunchHold]) -> RelaunchHold {
+        var merged = RelaunchHold()
+        for hold in holds {
+            merged.keepsSystemAwake = merged.keepsSystemAwake || hold.keepsSystemAwake
+            merged.keepsDisplayAwake = merged.keepsDisplayAwake || hold.keepsDisplayAwake
+            for file in hold.heldFiles where !merged.heldFiles.contains(file) {
+                merged.heldFiles.append(file)
+            }
+        }
+        return merged
     }
 }
 

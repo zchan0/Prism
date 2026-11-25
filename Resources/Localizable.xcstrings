@@ -211,6 +211,26 @@
         }
       }
     },
+    "A small toolbox in the menu bar" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "菜单栏里的小工具箱"
+          }
+        }
+      }
+    },
+    "About" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "关于"
+          }
+        }
+      }
+    },
     "Add App…" : {
       "localizations" : {
         "zh-Hans" : {
@@ -297,6 +317,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "电量降到 %lld%%，Prism 已停止让 Mac 保持唤醒。"
+          }
+        }
+      }
+    },
+    "Automatic checks are off · Last checked %@" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "自动检查已关闭 · 上次检查：%@"
           }
         }
       }
@@ -407,6 +437,36 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "正在切换…"
+          }
+        }
+      }
+    },
+    "Check Now" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "检查更新"
+          }
+        }
+      }
+    },
+    "Check for updates" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "检查更新"
+          }
+        }
+      }
+    },
+    "Checking for updates…" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "正在检查更新…"
           }
         }
       }
@@ -541,6 +601,46 @@
         }
       }
     },
+    "Couldn't check for updates" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "无法检查更新"
+          }
+        }
+      }
+    },
+    "Couldn't download Prism %@" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prism %@ 下载失败"
+          }
+        }
+      }
+    },
+    "Couldn't install Prism %@" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prism %@ 安装失败"
+          }
+        }
+      }
+    },
+    "Daily" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "每天"
+          }
+        }
+      }
+    },
     "Dark" : {
       "localizations" : {
         "zh-Hans" : {
@@ -567,6 +667,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "默认时长"
+          }
+        }
+      }
+    },
+    "Development builds don't check for updates" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "开发构建不检查更新"
           }
         }
       }
@@ -601,6 +711,46 @@
         }
       }
     },
+    "Download" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "前往下载"
+          }
+        }
+      }
+    },
+    "Download Again" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "重新下载"
+          }
+        }
+      }
+    },
+    "Downloaded and ready to install" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已下载，等你安装"
+          }
+        }
+      }
+    },
+    "Downloading Prism %@" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "正在下载 Prism %@"
+          }
+        }
+      }
+    },
     "Every tool stops, and the menu bar icons go away." : {
       "localizations" : {
         "zh-Hans" : {
@@ -627,6 +777,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "通用"
+          }
+        }
+      }
+    },
+    "GitHub can't be reached." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "连不上 GitHub。"
+          }
+        }
+      }
+    },
+    "GitHub can't be reached. Last checked %@" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "连不上 GitHub。上次检查：%@"
           }
         }
       }
@@ -677,6 +847,86 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "图片"
+          }
+        }
+      }
+    },
+    "Install and Relaunch" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "安装并重新打开"
+          }
+        }
+      }
+    },
+    "Install updates automatically" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "自动安装更新"
+          }
+        }
+      }
+    },
+    "Installing Prism %@…" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "正在安装 Prism %@…"
+          }
+        }
+      }
+    },
+    "Installs and reopens Prism when the download finishes" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "下载完就安装，然后重新打开 Prism"
+          }
+        }
+      }
+    },
+    "Installs when %@ finishes" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ 会话结束后自动安装"
+          }
+        }
+      }
+    },
+    "Installs when Prism is idle" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "下载完会在 Prism 空闲时安装"
+          }
+        }
+      }
+    },
+    "Installs when Prism is idle, then reopens it." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "下载后在 Prism 空闲时安装，并重新打开。"
+          }
+        }
+      }
+    },
+    "Installs when you close this window" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "关闭这个窗口后自动安装"
           }
         }
       }
@@ -791,6 +1041,16 @@
         }
       }
     },
+    "Monthly" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "每月"
+          }
+        }
+      }
+    },
     "Never" : {
       "localizations" : {
         "zh-Hans" : {
@@ -861,6 +1121,16 @@
         }
       }
     },
+    "Not checked yet" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "还没有检查过"
+          }
+        }
+      }
+    },
     "Not keeping awake" : {
       "localizations" : {
         "zh-Hans" : {
@@ -887,6 +1157,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "已关闭"
+          }
+        }
+      }
+    },
+    "Only tells you about a new version. You choose when to install." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "有新版本时只提示，由你决定何时安装。"
           }
         }
       }
@@ -961,6 +1241,36 @@
         }
       }
     },
+    "Prism %@ didn't pass verification" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prism %@ 没有通过校验"
+          }
+        }
+      }
+    },
+    "Prism %@ is available" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prism %@ 可以更新"
+          }
+        }
+      }
+    },
+    "Prism %@ is ready" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prism %@ 已准备好"
+          }
+        }
+      }
+    },
     "Prism Settings…" : {
       "localizations" : {
         "zh-Hans" : {
@@ -971,12 +1281,42 @@
         }
       }
     },
+    "Prism can't replace itself here. Move it to the Applications folder with Finder, or download the new version." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prism 在这个位置没法替换自己。用 Finder 把它移到「应用程序」文件夹，或者下载新版本。"
+          }
+        }
+      }
+    },
     "Prism let your Mac sleep again." : {
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Prism 已让你的 Mac 重新可以睡眠。"
+          }
+        }
+      }
+    },
+    "Prism will reopen" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prism 会重新打开"
+          }
+        }
+      }
+    },
+    "Prism will reopen. %@ keeps running." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prism 会重新打开，%@ 会话继续"
           }
         }
       }
@@ -1017,6 +1357,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "记录已暂停"
+          }
+        }
+      }
+    },
+    "Release notes" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "更新日志"
           }
         }
       }
@@ -1231,6 +1581,26 @@
         }
       }
     },
+    "The download stopped. You can also" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "下载中断了。也可以"
+          }
+        }
+      }
+    },
+    "The download was deleted. Your current version is unchanged." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "下载的文件已删除，现在的版本没有改动。"
+          }
+        }
+      }
+    },
     "The lid helper could not be installed." : {
       "localizations" : {
         "zh-Hans" : {
@@ -1281,6 +1651,16 @@
         }
       }
     },
+    "Try Again" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "重试"
+          }
+        }
+      }
+    },
     "Turned off. Its settings are kept." : {
       "localizations" : {
         "zh-Hans" : {
@@ -1321,12 +1701,102 @@
         }
       }
     },
-    "Version %@" : {
+    "Up to date · Last checked %@" : {
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "版本 %@"
+            "value" : "已是最新版本 · 上次检查：%@"
+          }
+        }
+      }
+    },
+    "Update" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "更新"
+          }
+        }
+      }
+    },
+    "Update available" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "有可用更新"
+          }
+        }
+      }
+    },
+    "Update ready" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "更新已准备好"
+          }
+        }
+      }
+    },
+    "Updated %@" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@更新"
+          }
+        }
+      }
+    },
+    "View on GitHub" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在 GitHub 上查看"
+          }
+        }
+      }
+    },
+    "Weekly" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "每周"
+          }
+        }
+      }
+    },
+    "What's new" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "更新内容"
+          }
+        }
+      }
+    },
+    "You have %@" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "当前版本 %@"
+          }
+        }
+      }
+    },
+    "Your current version is unchanged. You can also" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "现在的版本没有改动。也可以"
           }
         }
       }
@@ -1347,6 +1817,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "充电中"
+          }
+        }
+      }
+    },
+    "download it from GitHub" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "从 GitHub 下载"
           }
         }
       }

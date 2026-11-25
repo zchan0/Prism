@@ -8,6 +8,7 @@ import SwiftUI
 @Observable
 final class QuickPanelModel {
     var registration: ToolRegistration?
+    var updater: Updater?
     /// Bumped on every opening, so the tool's controls are built fresh and their `onAppear` runs again.
     var opening = 0
     var revision = 0
@@ -20,9 +21,16 @@ final class QuickPanelController {
     static let width: CGFloat = 320
 
     var onOpenSettings: ((ToolID) -> Void)?
+    /// The gear while an update waits: it opens General instead of the tool's page.
+    var onOpenGeneral: (() -> Void)?
     /// Whether ⌘, opens the shown tool's page while the panel is open. Off for screenshots, so the key still reaches
     /// the app in front.
     var opensSettingsWithCommandComma = true
+
+    var updater: Updater? {
+        get { model.updater }
+        set { model.updater = newValue }
+    }
 
     private let model = QuickPanelModel()
     private let panel: FloatingPanelController
@@ -34,6 +42,7 @@ final class QuickPanelController {
             model: model,
             close: { [weak self] in self?.hide() },
             openSettings: { [weak self] id in self?.onOpenSettings?(id) },
+            openGeneral: { [weak self] in self?.onOpenGeneral?() },
             onHeight: { [weak self] height in self?.panel.setContentHeight(height) }
         )))
         // Every way the panel closes goes through the controller's `hide()`, which reports it here.
@@ -104,6 +113,7 @@ struct QuickPanelView: View {
     let model: QuickPanelModel
     let close: @MainActor () -> Void
     let openSettings: @MainActor (ToolID) -> Void
+    let openGeneral: @MainActor () -> Void
     let onHeight: @MainActor (CGFloat) -> Void
 
     var body: some View {
@@ -120,8 +130,13 @@ struct QuickPanelView: View {
                         .font(PanelFont.section)
                         .foregroundStyle(Color(nsColor: Palette.ink3))
                     Spacer(minLength: 8)
-                    PanelIconButton(symbol: "gearshape", title: Strings.toolSettings(tool.title)) {
-                        openSettings(id)
+                    let badge = model.updater?.attentionBadge
+                    PanelIconButton(symbol: "gearshape", title: Strings.toolSettings(tool.title), badge: badge) {
+                        if badge != nil {
+                            openGeneral()
+                        } else {
+                            openSettings(id)
+                        }
                     }
                 }
                 .padding(.leading, 8)

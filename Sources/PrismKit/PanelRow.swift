@@ -9,6 +9,7 @@ public struct PanelRow<Accessory: View>: View {
     private let symbol: String?
     private let note: String?
     private let accessory: Accessory
+    @Environment(\.isEnabled) private var isEnabled
 
     public init(_ title: String, symbol: String? = nil, note: String? = nil, @ViewBuilder accessory: () -> Accessory) {
         self.title = title
@@ -37,6 +38,7 @@ public struct PanelRow<Accessory: View>: View {
                         .fixedSize(horizontal: false, vertical: true)
                 }
             }
+            .opacity(isEnabled ? 1 : 0.5)
             Spacer(minLength: 8)
             accessory
         }
@@ -130,34 +132,48 @@ private struct PanelSwitchBody: View {
 struct CapsuleButtonLabel: View {
     let title: String
     let hovered: Bool
+    var isProminent = false
 
     var body: some View {
         Text(title)
-            .font(PanelFont.title)
-            .foregroundStyle(Color(nsColor: Palette.ink))
+            .font(isProminent ? PanelFont.title.weight(.semibold) : PanelFont.title)
+            .foregroundStyle(Color(nsColor: isProminent ? Palette.accentInk : Palette.ink))
             .lineLimit(1)
             .padding(.horizontal, 11)
             .frame(height: 24)
-            .background(Capsule().fill(Color(nsColor: hovered ? Palette.hover : Palette.chip)))
+            .background(Capsule().fill(Color(nsColor: fill)))
             .contentShape(Capsule())
+    }
+
+    private var fill: NSColor {
+        if isProminent { return Palette.selection }
+        return hovered ? Palette.hover : Palette.chip
     }
 }
 
 /// A small text button that sits at the end of a `PanelRow`, such as Clear….
 public struct PanelButton: View {
+    public enum Style {
+        case regular
+        /// In the accent color, for the one thing a card asks the person to do, such as installing an update.
+        case prominent
+    }
+
     private let title: String
+    private let style: Style
     private let action: @MainActor () -> Void
     @State private var hovered = false
     @Environment(\.isEnabled) private var isEnabled
 
-    public init(_ title: String, action: @escaping @MainActor () -> Void) {
+    public init(_ title: String, style: Style = .regular, action: @escaping @MainActor () -> Void) {
         self.title = title
+        self.style = style
         self.action = action
     }
 
     public var body: some View {
         Button(action: action) {
-            CapsuleButtonLabel(title: title, hovered: hovered && isEnabled)
+            CapsuleButtonLabel(title: title, hovered: hovered && isEnabled, isProminent: style == .prominent)
         }
         .buttonStyle(PanelPressStyle())
         .fixedSize()
@@ -172,6 +188,7 @@ public struct PanelPopUp<Value: Hashable>: View {
     private let options: [Value]
     private let title: (Value) -> String
     @State private var hovered = false
+    @Environment(\.isEnabled) private var isEnabled
 
     public init(selection: Binding<Value>, options: [Value], title: @escaping (Value) -> String) {
         self.selection = selection
@@ -201,13 +218,14 @@ public struct PanelPopUp<Value: Hashable>: View {
             .padding(.leading, 11)
             .padding(.trailing, 7)
             .frame(height: 24)
-            .background(Capsule().fill(Color(nsColor: hovered ? Palette.hover : Palette.chip)))
+            .background(Capsule().fill(Color(nsColor: hovered && isEnabled ? Palette.hover : Palette.chip)))
             .contentShape(Capsule())
         }
         .menuStyle(.button)
         .buttonStyle(.plain)
         .menuIndicator(.hidden)
         .fixedSize()
+        .opacity(isEnabled ? 1 : 0.4)
         .onHover { hovered = $0 }
         .accessibilityValue(title(selection.wrappedValue))
     }

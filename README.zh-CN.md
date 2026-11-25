@@ -114,7 +114,7 @@ Prism 没有自己的常驻图标。工具的「显示在菜单栏」开关打�
 
 点面板外任何地方都会把面板关掉。面板不抢焦点，点它不会打断你正在打的字。
 
-Prism 窗口就是完整的工具箱。左边列出全部工具，每个工具写着它现在的状态，最下面是「通用」。工具页面最上面是它的开关，这是开启或关闭工具的唯一位置。关闭的工具会停止所有工作，设置会保留。开关下面依次是这个工具的控件（Lumos 和 Vitals 有）、它的设置，最后是「菜单栏」卡片，里面有「显示在菜单栏」和这个工具自己的菜单栏设置，比如 Vitals 要在菜单栏放哪些读数。「通用」里有「外观」（跟随系统、浅色或深色）、「登录时打开」、版本号和「退出 Prism」。⌘W 关闭窗口。
+Prism 窗口就是完整的工具箱。左边列出全部工具，每个工具写着它现在的状态，最下面是「通用」。工具页面最上面是它的开关，这是开启或关闭工具的唯一位置。关闭的工具会停止所有工作，设置会保留。开关下面依次是这个工具的控件（Lumos 和 Vitals 有）、它的设置，最后是「菜单栏」卡片，里面有「显示在菜单栏」和这个工具自己的菜单栏设置，比如 Vitals 要在菜单栏放哪些读数。「通用」里有「外观」（跟随系统、浅色或深色）、「登录时打开」和「退出 Prism」，下面是「关于」：版本号和更新，以及 GitHub 和更新日志的链接。⌘W 关闭窗口。
 
 ## 安装
 
@@ -124,7 +124,9 @@ Prism 窗口就是完整的工具箱。左边列出全部工具，每个工具�
 
 也可以跳过第 2、3 步，改为运行一次 `xattr -dr com.apple.quarantine /Applications/Prism.app`。
 
-更新时，退出 Prism，用新的 `Prism.app` 替换旧的。如果 macOS 拦下新版本，再做一遍第 2、3 步。
+Prism 会自己更新。它默认每天向 GitHub 查一次新版本，下载后在 Prism 空闲时安装，然后重新打开。在 Prism 窗口的「通用 → 关于」里可以改检查的频率，或者关掉自动安装。从这个功能上线之前的版本升级，仍然要手动替换一次：退出 Prism，用新的 `Prism.app` 替换旧的。如果 macOS 拦下新版本，再做一遍第 2、3 步。
+
+这是 Prism 唯一的联网行为：只请求 `api.github.com` 和 GitHub 的下载地址，不带任何个人信息。
 
 Prism 需要 macOS 14 或更高版本，Apple 芯片和 Intel 芯片的 Mac 都能用。
 
@@ -181,7 +183,13 @@ debug 版本认几个环境变量，`docs/images` 就是这么生成的：
 | --- | --- |
 | `PRISM_CAPTURE=<目录>` | 把每个工具的面板（`popover-<工具>.png`）、Prism 窗口的每个页面（`window-<工具>.png`、`window-general.png`）、带电量提示和一条错误的 Lumos 面板和页面（`popover-lumos-note.png`、`window-lumos-note.png`）、Pensieve 窗口（`pensieve-window.png`）、连同背后屏幕一起截的筛选菜单（`pensieve-filter-menu.png`）、在这个菜单里选了「图片」之后的窗口（`pensieve-window-images.png`）和图片预览（`pensieve-preview.png`）截图到这个目录，然后退出。面板不占用 ⌘,，它仍然交给最前面的 app。Portkey 显示示例 app，不用你自己的列表，快捷键也不生效。Pensieve 显示示例内容，不用你的历史：不读取剪贴板，不读写历史，也不注册快捷键。 |
 | `PRISM_STATUS_CAPTURE=<文件>` | 把所有菜单栏图标画在浅色、深色、蓝色三种菜单栏上，然后退出。Pensieve 不读取剪贴板，Portkey 的快捷键也不生效。 |
-| `PRISM_START_LUMOS=1` | 启动时开始一个 30 分钟的 Lumos 会话。 |
+| `PRISM_CAPTURE_GENERAL=<文件>` | 截一张 Prism 窗口停在「通用」页的图，然后退出。和 `PRISM_CAPTURE` 一样，Lumos、Pensieve、Portkey 不动你的会话、历史和快捷键。 |
+| `PRISM_SHOW_WHATS_NEW=1` | 配合 `PRISM_CAPTURE_GENERAL`，打开「更新内容」，改截窗口周围的屏幕。 |
+| `PRISM_START_LUMOS=1` 或 `lid` | 启动时开始一个 30 分钟的 Lumos 会话。`lid` 还会打开合盖保持运行，前提是这个版本带的小助手已经装好；它从不要密码。 |
+| `PRISM_UPDATE=1` | 让 debug 版本也能自己更新：启动时检查一次，之后按设定的频率检查。 |
+| `PRISM_UPDATE_FEED=<url>` | 从这个地址读最新版本，不找 GitHub，比如本机一个字段和 GitHub 一样的 `latest.json`。 |
+| `PRISM_UPDATE_INSTALL_NOW=<秒>` | 下载好的更新最早在启动后这么多秒安装，和点「安装并重新打开」一样，Lumos 保持唤醒时也装。 |
+| `PRISM_UPDATE_PHASE=<名字>` | 在「通用」页显示一个假的更新状态，不检查、不下载、不保存任何东西：`idle`、`never`、`unchecked`、`checking`、`available`、`downloading`、`ready`、`readyBlocked`、`readyManual`、`installing`、`updated`、`checkFailed`、`downloadFailed`、`verifyFailed`、`installFailed`、`cannotInstall` 或 `unavailable`。 |
 | `PRISM_APPEARANCE=light` 或 `dark` | 强制外观，优先于「通用」里选的外观。 |
 | `PRISM_DUMP=1` | 打印每个工具的摘要，然后退出。 |
 | `PRISM_PORTKEY_SWITCH=<bundle id>` | 启动 3 秒后切到这个 app，和按 Portkey 快捷键的效果一样。 |

@@ -26,6 +26,11 @@ final class LidControl {
 
     var isSystemSleepDisabled: Bool { status == .enabled }
 
+    /// Where this instance keeps its flag: the helper's in the app, a scratch file in tests.
+    let flagPath: String
+    /// Whether this process holds the flag open, which is what keeps the lid setting on.
+    var holdsFlag: Bool { flag != nil }
+
     @ObservationIgnored private let runner: CommandRunning
     @ObservationIgnored private let defaults: UserDefaults
     @ObservationIgnored private let fileManager: FileManager
@@ -38,12 +43,20 @@ final class LidControl {
     static let flagDirectory = "/var/tmp/\(helperLabel)"
     static let flagPath = flagDirectory + "/session"
 
-    init(runner: CommandRunning = CommandRunner(), defaults: UserDefaults = .standard, fileManager: FileManager = .default) {
+    init(
+        runner: CommandRunning = CommandRunner(),
+        defaults: UserDefaults = .standard,
+        fileManager: FileManager = .default,
+        flagPath: String = LidControl.flagPath
+    ) {
         self.runner = runner
         self.defaults = defaults
         self.fileManager = fileManager
+        self.flagPath = flagPath
         enabledByApp = defaults.bool(forKey: Self.enabledByAppKey)
     }
+
+    private var flagDirectory: String { (flagPath as NSString).deletingLastPathComponent }
 
     func refresh() async {
         guard !isBusy else { return }
@@ -62,7 +75,7 @@ final class LidControl {
         if enabled {
             // The app runs as the person, so it makes the folder; one made by the root installer would not let it
             // create the flag.
-            guard (try? fileManager.createDirectory(atPath: Self.flagDirectory, withIntermediateDirectories: true)) != nil else {
+            guard (try? fileManager.createDirectory(atPath: flagDirectory, withIntermediateDirectories: true)) != nil else {
                 errorMessage = LumosStrings.lidHelperUnavailable
                 return false
             }
@@ -93,7 +106,7 @@ final class LidControl {
     /// normal sleep setting back. Doing it synchronously keeps the work from being cancelled by termination.
     @discardableResult
     func repairSynchronously() -> Bool {
-        guard fileManager.fileExists(atPath: Self.flagPath) else { return true }
+        guard fileManager.fileExists(atPath: flagPath) else { return true }
         let removed = removeFlag()
         enabledByApp = false
         defaults.set(false, forKey: Self.enabledByAppKey)
@@ -102,11 +115,22 @@ final class LidControl {
 
     /// Called on quit: the flag goes away so the daemon puts the normal sleep setting back.
     func repairIfNeeded() async {
-        guard fileManager.fileExists(atPath: Self.flagPath) else { return }
+        guard fileManager.fileExists(atPath: flagPath) else { return }
         _ = removeFlag()
         _ = await waitForStatus(.disabled)
         enabledByApp = false
         defaults.set(false, forKey: Self.enabledByAppKey)
+    }
+
+    /// After a relaunch for an update: holds the flag the old process left open for this one, so the lid setting
+    /// carries on. False when there is no flag to hold.
+    func resumeHoldingFlag() -> Bool {
+        guard fileManager.fileExists(atPath: flagPath) else { return false }
+        flag = Self.holdFile(at: flagPath)
+        guard flag != nil else { return false }
+        enabledByApp = true
+        defaults.set(true, forKey: Self.enabledByAppKey)
+        return true
     }
 
     /// The setting lives outside the app, so the panel follows pmset rather than its own memory.
@@ -130,15 +154,15 @@ final class LidControl {
     static var installerScript: String { installScript(helperScript: helperScript, daemon: daemonPlist) }
 
     private func createFlag() -> Bool {
-        flag = Self.holdFile(at: Self.flagPath)
+        flag = Self.holdFile(at: flagPath)
         return flag != nil
     }
 
     private func removeFlag() -> Bool {
         flag = nil
-        guard fileManager.fileExists(atPath: Self.flagPath) else { return true }
+        guard fileManager.fileExists(atPath: flagPath) else { return true }
         do {
-            try fileManager.removeItem(atPath: Self.flagPath)
+            try fileManager.removeItem(atPath: flagPath)
             return true
         } catch {
             return false

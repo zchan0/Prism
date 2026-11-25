@@ -146,6 +146,31 @@ public struct PanelNote: View {
     }
 }
 
+/// A thin bar filled up to `fraction`, such as a Vitals reading or a download.
+public struct LevelBar: View {
+    private let fraction: Double
+    private let color: NSColor
+
+    public init(fraction: Double, color: NSColor) {
+        self.fraction = fraction
+        self.color = color
+    }
+
+    public var body: some View {
+        GeometryReader { proxy in
+            ZStack(alignment: .leading) {
+                Capsule()
+                    .fill(Color(nsColor: Palette.well))
+                Capsule()
+                    .fill(Color(nsColor: color))
+                    .frame(width: max(4, proxy.size.width * fraction))
+            }
+        }
+        .frame(height: 4)
+        .accessibilityHidden(true)
+    }
+}
+
 /// A tool's symbol on a rounded square of its color.
 public struct ToolTile: View {
     public enum Size {
@@ -225,15 +250,24 @@ public struct PanelIconButton: View {
     private let symbol: String
     private let title: String
     private let isRevealed: Bool
+    private let badge: String?
     private let action: @MainActor () -> Void
     @State private var hovered = false
 
     /// `isRevealed` false hides the symbol but keeps the button, so a row does not shift when it appears on hover and
-    /// VoiceOver still finds it; a transparent button would drop out of the accessibility tree.
-    public init(symbol: String, title: String, isRevealed: Bool = true, action: @escaping @MainActor () -> Void) {
+    /// VoiceOver still finds it; a transparent button would drop out of the accessibility tree. A `badge` puts a dot
+    /// on the button and is what VoiceOver reads for the dot.
+    public init(
+        symbol: String,
+        title: String,
+        isRevealed: Bool = true,
+        badge: String? = nil,
+        action: @escaping @MainActor () -> Void
+    ) {
         self.symbol = symbol
         self.title = title
         self.isRevealed = isRevealed
+        self.badge = badge
         self.action = action
     }
 
@@ -244,13 +278,41 @@ public struct PanelIconButton: View {
                 .foregroundStyle(Color(nsColor: hovered ? Palette.ink : Palette.ink2))
                 .frame(width: 28, height: 28)
                 .background(Circle().fill(hovered ? Color(nsColor: Palette.hover) : .clear))
+                .overlay(alignment: .topTrailing) {
+                    if badge != nil {
+                        BadgeDot()
+                    }
+                }
                 .opacity(isRevealed || hovered ? 1 : 0)
                 .contentShape(Circle())
         }
         .buttonStyle(PanelPressStyle())
         .help(title)
         .accessibilityLabel(title)
+        .accessibilityValue(badge ?? "")
         .onHover { hovered = $0 }
+    }
+}
+
+/// The dot that says something waits behind a button or a row, such as a downloaded update.
+public struct BadgeDot: View {
+    private let ring: NSColor?
+
+    /// `ring` draws a thin outline in the color behind the dot, so the dot stands off what it overlaps.
+    public init(ring: NSColor? = nil) {
+        self.ring = ring
+    }
+
+    public var body: some View {
+        Circle()
+            .fill(Color(nsColor: Palette.accent))
+            .frame(width: 9, height: 9)
+            .background {
+                if let ring {
+                    Circle().fill(Color(nsColor: ring)).frame(width: 13, height: 13)
+                }
+            }
+            .accessibilityHidden(true)
     }
 }
 

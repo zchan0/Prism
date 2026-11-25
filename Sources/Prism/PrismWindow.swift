@@ -61,7 +61,7 @@ final class PrismWindowController {
     private let loginItem = LoginItem()
     private var hasBeenShown = false
 
-    init(shell: ShellSettings, registrations: [ToolRegistration]) {
+    init(shell: ShellSettings, registrations: [ToolRegistration], updater: Updater) {
         let model = PrismWindowModel(toolIDs: registrations.map(\.id))
         self.model = model
         window = PrismWindow(
@@ -81,6 +81,7 @@ final class PrismWindowController {
             shell: shell,
             registrations: registrations,
             loginItem: loginItem,
+            updater: updater,
             actions: actions
         ))
         // Without this, SwiftUI keeps the content clear of the title bar.
@@ -155,6 +156,7 @@ struct PrismWindowView: View {
     let shell: ShellSettings
     let registrations: [ToolRegistration]
     let loginItem: LoginItem
+    let updater: Updater
     let actions: PrismWindowActions
 
     var body: some View {
@@ -199,10 +201,13 @@ struct PrismWindowView: View {
                     }
                 }
                 Spacer(minLength: 12)
+                let badge = updater.attentionBadge
                 SidebarRow(
                     tile: ToolTile(symbol: "gearshape", tint: Palette.neutral, size: .small),
                     title: Strings.general,
-                    status: nil,
+                    status: badge,
+                    statusColor: Palette.accentInk,
+                    hasBadge: badge != nil,
                     isSelected: model.page == .general
                 ) {
                     go(.general)
@@ -222,7 +227,7 @@ struct PrismWindowView: View {
                 ToolPage(registration: registration, shell: shell, actions: actions)
             }
         case .general:
-            GeneralPage(shell: shell, loginItem: loginItem, actions: actions)
+            GeneralPage(shell: shell, loginItem: loginItem, updater: updater, revision: model.revision, actions: actions)
         }
     }
 
@@ -237,6 +242,9 @@ private struct SidebarRow: View {
     let tile: ToolTile
     let title: String
     let status: String?
+    var statusColor = Palette.ink3
+    /// A dot on the tile, for something that waits for the person.
+    var hasBadge = false
     let isSelected: Bool
     let select: @MainActor () -> Void
     @State private var hovered = false
@@ -245,6 +253,12 @@ private struct SidebarRow: View {
         Button(action: select) {
             HStack(spacing: 9) {
                 tile
+                    .overlay(alignment: .topTrailing) {
+                        if hasBadge {
+                            BadgeDot(ring: Palette.window)
+                                .offset(x: 3, y: -3)
+                        }
+                    }
                 VStack(alignment: .leading, spacing: 1) {
                     Text(title)
                         .font(PanelFont.title)
@@ -253,7 +267,7 @@ private struct SidebarRow: View {
                         Text(status)
                             .font(PanelFont.note)
                             .monospacedDigit()
-                            .foregroundStyle(Color(nsColor: Palette.ink3))
+                            .foregroundStyle(Color(nsColor: statusColor))
                     }
                 }
                 .lineLimit(1)
@@ -357,6 +371,8 @@ private struct ToolPage: View {
 private struct GeneralPage: View {
     let shell: ShellSettings
     let loginItem: LoginItem
+    let updater: Updater
+    let revision: Int
     let actions: PrismWindowActions
 
     var body: some View {
@@ -364,7 +380,7 @@ private struct GeneralPage: View {
             PageHeader(
                 tile: ToolTile(symbol: "triangle", tint: Palette.neutral, size: .large),
                 title: Strings.appName,
-                subtitle: Strings.version(Self.version)
+                subtitle: Strings.tagline
             ) {
                 EmptyView()
             }
@@ -396,6 +412,8 @@ private struct GeneralPage: View {
                     PanelButton(Strings.quitButton, action: actions.quit)
                 }
             }
+            AboutSection(updater: updater, revision: revision)
+            AboutFooter()
         }
         .onAppear { loginItem.refresh() }
     }
@@ -403,9 +421,5 @@ private struct GeneralPage: View {
     private var loginNote: String? {
         if let error = loginItem.error { return error }
         return loginItem.status == .requiresApproval ? Strings.loginItemNeedsApproval : nil
-    }
-
-    private static var version: String {
-        Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "dev"
     }
 }
