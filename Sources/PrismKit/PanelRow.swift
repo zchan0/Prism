@@ -23,18 +23,18 @@ public struct PanelRow<Accessory: View>: View {
             if let symbol {
                 Image(systemName: symbol)
                     .font(.system(size: 12))
-                    .foregroundStyle(Color(nsColor: Palette.ink3))
+                    .panelInk(.tertiary)
                     .frame(width: 16)
             }
             VStack(alignment: .leading, spacing: 1) {
                 Text(title)
                     .font(PanelFont.title)
-                    .foregroundStyle(Color(nsColor: Palette.ink))
+                    .panelInk(.primary)
                     .fixedSize(horizontal: false, vertical: true)
                 if let note {
                     Text(note)
                         .font(PanelFont.note)
-                        .foregroundStyle(Color(nsColor: Palette.ink3))
+                        .panelInk(.tertiary)
                         .fixedSize(horizontal: false, vertical: true)
                 }
             }
@@ -137,7 +137,7 @@ struct CapsuleButtonLabel: View {
     var body: some View {
         Text(title)
             .font(isProminent ? PanelFont.title.weight(.semibold) : PanelFont.title)
-            .foregroundStyle(Color(nsColor: isProminent ? Palette.accentInk : Palette.ink))
+            .panelInk(isProminent ? .fixed(Palette.accentInk) : .primary)
             .lineLimit(1)
             .padding(.horizontal, 11)
             .frame(height: 24)
@@ -212,9 +212,9 @@ public struct PanelPopUp<Value: Hashable>: View {
                     .lineLimit(1)
                 Image(systemName: "chevron.up.chevron.down")
                     .font(.system(size: 9, weight: .semibold))
-                    .foregroundStyle(Color(nsColor: Palette.ink2))
+                    .panelInk(.secondary)
             }
-            .foregroundStyle(Color(nsColor: Palette.ink))
+            .panelInk(.primary)
             .padding(.leading, 11)
             .padding(.trailing, 7)
             .frame(height: 24)
@@ -261,9 +261,9 @@ public struct PanelMenuButton<Value: Hashable>: View {
                     .lineLimit(1)
                 Image(systemName: "chevron.down")
                     .font(.system(size: 9, weight: .semibold))
-                    .foregroundStyle(Color(nsColor: Palette.ink2))
+                    .panelInk(.secondary)
             }
-            .foregroundStyle(Color(nsColor: Palette.ink))
+            .panelInk(.primary)
             .padding(.leading, 11)
             .padding(.trailing, 9)
             .frame(height: 24)

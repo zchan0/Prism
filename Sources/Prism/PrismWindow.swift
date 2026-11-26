@@ -76,27 +76,57 @@ final class PrismWindowController {
             setAppearance: { [weak self] appearance in self?.onSetAppearance?(appearance) },
             quit: { NSApp.terminate(nil) }
         )
-        let hosting = NSHostingView(rootView: PrismWindowView(
-            model: model,
-            shell: shell,
-            registrations: registrations,
-            loginItem: loginItem,
-            updater: updater,
-            actions: actions
-        ))
-        // Without this, SwiftUI keeps the content clear of the title bar.
-        hosting.safeAreaRegions = []
         window.title = Strings.appName
         window.titleVisibility = .hidden
         window.titlebarAppearsTransparent = true
-        // An empty toolbar only makes the title bar taller, which moves the close and minimize buttons in from the
-        // list's corner.
-        let toolbar = NSToolbar(identifier: "prism.window")
-        toolbar.allowsUserCustomization = false
-        window.toolbar = toolbar
-        window.toolbarStyle = .unified
-        window.backgroundColor = Palette.window
-        window.contentView = hosting
+        switch LookSettings.shared.sidebar {
+        case .custom:
+            let hosting = NSHostingView(rootView: PrismWindowView(
+                model: model,
+                shell: shell,
+                registrations: registrations,
+                loginItem: loginItem,
+                updater: updater,
+                actions: actions
+            ))
+            // Without this, SwiftUI keeps the content clear of the title bar.
+            hosting.safeAreaRegions = []
+            // An empty toolbar only makes the title bar taller, which moves the close and minimize buttons in from
+            // the list's corner.
+            let toolbar = NSToolbar(identifier: "prism.window")
+            toolbar.allowsUserCustomization = false
+            window.toolbar = toolbar
+            window.toolbarStyle = .unified
+            window.backgroundColor = Palette.window
+            window.contentView = hosting
+        case .system:
+            let sidebar = NSHostingController(rootView: PrismSplitSidebarView(
+                model: model,
+                shell: shell,
+                registrations: registrations,
+                updater: updater
+            ))
+            let page = NSHostingController(rootView: PrismSplitPageView(
+                model: model,
+                shell: shell,
+                registrations: registrations,
+                loginItem: loginItem,
+                updater: updater,
+                actions: actions
+            ))
+            // The window keeps its own size rather than the content's.
+            sidebar.sizingOptions = []
+            page.sizingOptions = []
+            let sidebarItem = NSSplitViewItem(sidebarWithViewController: sidebar)
+            sidebarItem.minimumThickness = Metrics.sidebarWidth
+            sidebarItem.maximumThickness = Metrics.sidebarWidth
+            sidebarItem.canCollapse = false
+            let split = NSSplitViewController()
+            split.addSplitViewItem(sidebarItem)
+            split.addSplitViewItem(NSSplitViewItem(viewController: page))
+            window.contentViewController = split
+            window.setContentSize(Self.contentSize)
+        }
         window.isReleasedWhenClosed = false
         window.collectionBehavior = [.moveToActiveSpace]
         window.standardWindowButton(.zoomButton)?.isEnabled = false
@@ -162,61 +192,152 @@ struct PrismWindowView: View {
     var body: some View {
         let _ = model.revision
         HStack(alignment: .top, spacing: 0) {
-            sidebar
-                .frame(width: Metrics.sidebarWidth)
-                .padding(Metrics.sidebarMargin)
-            ZStack(alignment: .topLeading) {
-                ScrollView {
-                    page
-                        .padding(.top, 22)
-                        .padding(.leading, 14)
-                        .padding(.trailing, 24)
-                        .padding(.bottom, 22)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                }
-                .id(model.page)
-                .transition(.opacity)
+            PanelCard {
+                SidebarList(
+                    model: model,
+                    shell: shell,
+                    registrations: registrations,
+                    updater: updater,
+                    revision: model.revision,
+                    topClearance: Metrics.titleBarClearance
+                )
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .frame(maxHeight: .infinity)
+            .frame(width: Metrics.sidebarWidth)
+            .padding(Metrics.sidebarMargin)
+            PageScroll(
+                model: model,
+                shell: shell,
+                registrations: registrations,
+                loginItem: loginItem,
+                updater: updater,
+                revision: model.revision,
+                actions: actions
+            )
         }
         .frame(width: PrismWindowController.contentSize.width, height: PrismWindowController.contentSize.height)
         .background(Color(nsColor: Palette.window))
     }
+}
 
-    private var sidebar: some View {
-        PanelCard {
-            VStack(alignment: .leading, spacing: 2) {
-                Color.clear.frame(height: Metrics.titleBarClearance)
-                PanelSectionTitle(Strings.tools)
-                    .padding(.bottom, 4)
-                ForEach(registrations, id: \.id) { registration in
-                    let isOn = shell.isEnabled(registration.id)
-                    SidebarRow(
-                        tile: ToolTile(registration.tool, isOn: isOn, size: .small),
-                        title: registration.tool.title,
-                        status: isOn ? registration.tool.summary : Strings.off,
-                        isSelected: model.page == .tool(registration.id)
-                    ) {
-                        go(.tool(registration.id))
-                    }
-                }
-                Spacer(minLength: 12)
-                let badge = updater.attentionBadge
+/// The list on the left, as the system's sidebar holds it.
+struct PrismSplitSidebarView: View {
+    let model: PrismWindowModel
+    let shell: ShellSettings
+    let registrations: [ToolRegistration]
+    let updater: Updater
+
+    var body: some View {
+        SidebarList(
+            model: model,
+            shell: shell,
+            registrations: registrations,
+            updater: updater,
+            revision: model.revision,
+            topClearance: 0
+        )
+    }
+}
+
+/// The page on the right, next to the system's sidebar.
+struct PrismSplitPageView: View {
+    let model: PrismWindowModel
+    let shell: ShellSettings
+    let registrations: [ToolRegistration]
+    let loginItem: LoginItem
+    let updater: Updater
+    let actions: PrismWindowActions
+
+    var body: some View {
+        PageScroll(
+            model: model,
+            shell: shell,
+            registrations: registrations,
+            loginItem: loginItem,
+            updater: updater,
+            revision: model.revision,
+            actions: actions
+        )
+    }
+}
+
+/// Every tool, each with what it is doing now, then General at the bottom.
+private struct SidebarList: View {
+    let model: PrismWindowModel
+    let shell: ShellSettings
+    let registrations: [ToolRegistration]
+    let updater: Updater
+    /// Changes once a second, so what the tools are doing keeps up.
+    let revision: Int
+    /// Room for the window's close and minimize buttons, where the list is drawn under them.
+    let topClearance: CGFloat
+
+    var body: some View {
+        let _ = revision
+        VStack(alignment: .leading, spacing: 2) {
+            Color.clear.frame(height: topClearance)
+            PanelSectionTitle(Strings.tools)
+                .padding(.bottom, 4)
+            ForEach(registrations, id: \.id) { registration in
+                let isOn = shell.isEnabled(registration.id)
                 SidebarRow(
-                    tile: ToolTile(symbol: "gearshape", tint: Palette.neutral, size: .small),
-                    title: Strings.general,
-                    status: badge,
-                    statusColor: Palette.accentInk,
-                    hasBadge: badge != nil,
-                    isSelected: model.page == .general
+                    tile: ToolTile(registration.tool, isOn: isOn, size: .small),
+                    title: registration.tool.title,
+                    status: isOn ? registration.tool.summary : Strings.off,
+                    isSelected: model.page == .tool(registration.id)
                 ) {
-                    go(.general)
+                    go(.tool(registration.id))
                 }
             }
-            .padding(8)
-            .frame(maxHeight: .infinity, alignment: .top)
+            Spacer(minLength: 12)
+            let badge = updater.attentionBadge
+            SidebarRow(
+                tile: ToolTile(symbol: "gearshape", tint: Palette.neutral, size: .small),
+                title: Strings.general,
+                status: badge,
+                statusColor: Palette.accentInk,
+                hasBadge: badge != nil,
+                isSelected: model.page == .general
+            ) {
+                go(.general)
+            }
         }
-        .frame(maxHeight: .infinity)
+        .padding(8)
+        .frame(maxHeight: .infinity, alignment: .top)
+    }
+
+    private func go(_ page: WindowPage) {
+        withAnimation(.easeInOut(duration: 0.15)) {
+            model.go(to: page)
+        }
+    }
+}
+
+/// The chosen page, scrolling.
+private struct PageScroll: View {
+    let model: PrismWindowModel
+    let shell: ShellSettings
+    let registrations: [ToolRegistration]
+    let loginItem: LoginItem
+    let updater: Updater
+    let revision: Int
+    let actions: PrismWindowActions
+
+    var body: some View {
+        let _ = revision
+        ZStack(alignment: .topLeading) {
+            ScrollView {
+                page
+                    .padding(.top, 22)
+                    .padding(.leading, 14)
+                    .padding(.trailing, 24)
+                    .padding(.bottom, 22)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
+            .id(model.page)
+            .transition(.opacity)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
     @ViewBuilder
@@ -227,13 +348,7 @@ struct PrismWindowView: View {
                 ToolPage(registration: registration, shell: shell, actions: actions)
             }
         case .general:
-            GeneralPage(shell: shell, loginItem: loginItem, updater: updater, revision: model.revision, actions: actions)
-        }
-    }
-
-    private func go(_ page: WindowPage) {
-        withAnimation(.easeInOut(duration: 0.15)) {
-            model.go(to: page)
+            GeneralPage(shell: shell, loginItem: loginItem, updater: updater, revision: revision, actions: actions)
         }
     }
 }
@@ -414,6 +529,7 @@ private struct GeneralPage: View {
             }
             AboutSection(updater: updater, revision: revision)
             AboutFooter()
+            ExperimentsSection(look: LookSettings.shared)
         }
         .onAppear { loginItem.refresh() }
     }

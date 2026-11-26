@@ -79,6 +79,7 @@ public struct ShortcutKeys: View {
 
 public struct Keycap: View {
     private let key: String
+    @Environment(\.panelLook) private var look
 
     public init(key: String) {
         self.key = key
@@ -88,10 +89,10 @@ public struct Keycap: View {
         let shape = RoundedRectangle(cornerRadius: 6, style: .continuous)
         Text(verbatim: key)
             .font(PanelFont.note)
-            .foregroundStyle(Color(nsColor: Palette.ink))
+            .panelInk(.primary)
             .padding(.horizontal, 4)
             .frame(minWidth: 20, minHeight: 20, maxHeight: 20)
-            .background(shape.fill(Color(nsColor: Palette.key)))
+            .background(shape.fill(Color(nsColor: look.isTranslucent ? Palette.keyOnGlass : Palette.key)))
             .overlay(shape.strokeBorder(Color(nsColor: Palette.keyBorder), lineWidth: 1))
     }
 }

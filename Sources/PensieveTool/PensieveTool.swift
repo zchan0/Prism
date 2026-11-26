@@ -444,7 +444,7 @@ public final class PensieveTool: Tool {
             let panel = previewPanel ?? SidePanelController()
             previewPanel = panel
             panel.show(
-                AnyView(ImagePreview(image: image, size: size, pixelWidth: width, pixelHeight: height)),
+                AnyView(ImagePreview(image: image, size: size, pixelWidth: width, pixelHeight: height).followsPanelLook()),
                 beside: window,
                 preferring: side
             )

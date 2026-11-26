@@ -351,6 +351,16 @@
         }
       }
     },
+    "Bare" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "无底"
+          }
+        }
+      }
+    },
     "Battery" : {
       "localizations" : {
         "zh-Hans" : {
@@ -427,6 +437,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "取消"
+          }
+        }
+      }
+    },
+    "Cards" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "卡片"
           }
         }
       }
@@ -631,6 +651,16 @@
         }
       }
     },
+    "Custom" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "自绘"
+          }
+        }
+      }
+    },
     "Daily" : {
       "localizations" : {
         "zh-Hans" : {
@@ -761,12 +791,32 @@
         }
       }
     },
+    "Experiments" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "实验"
+          }
+        }
+      }
+    },
     "Files" : {
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "文件"
+          }
+        }
+      }
+    },
+    "For trying looks. This section goes away before release." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "用来试外观，正式版里会去掉。"
           }
         }
       }
@@ -797,6 +847,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "连不上 GitHub。上次检查：%@"
+          }
+        }
+      }
+    },
+    "Glass" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "玻璃"
           }
         }
       }
@@ -1011,6 +1071,16 @@
         }
       }
     },
+    "Material" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "材质"
+          }
+        }
+      }
+    },
     "Maximum capacity %lld%%" : {
       "localizations" : {
         "zh-Hans" : {
@@ -1201,6 +1271,46 @@
         }
       }
     },
+    "Palette" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "调色板"
+          }
+        }
+      }
+    },
+    "Panel background" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "面板底"
+          }
+        }
+      }
+    },
+    "Panel groups" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "面板分组"
+          }
+        }
+      }
+    },
+    "Panel text" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "面板文字"
+          }
+        }
+      }
+    },
     "Pause recording" : {
       "localizations" : {
         "zh-Hans" : {
@@ -1217,6 +1327,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "已暂停"
+          }
+        }
+      }
+    },
+    "Plates" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "薄底"
           }
         }
       }
@@ -1551,6 +1671,16 @@
         }
       }
     },
+    "Takes effect after Prism restarts." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "重新打开 Prism 后生效。"
+          }
+        }
+      }
+    },
     "Tell me when a session ends" : {
       "localizations" : {
         "zh-Hans" : {
@@ -1781,6 +1911,16 @@
         }
       }
     },
+    "Window sidebar" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "设置窗口侧栏"
+          }
+        }
+      }
+    },
     "You have %@" : {
       "localizations" : {
         "zh-Hans" : {
@@ -1847,6 +1987,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "不到一分钟"
+          }
+        }
+      }
+    },
+    "look.system" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "System"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "系统"
           }
         }
       }

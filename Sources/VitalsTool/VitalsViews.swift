@@ -12,7 +12,7 @@ struct VitalsPanelView: View {
                 if tool.readings.isEmpty {
                     Text(VitalsStrings.unavailable)
                         .font(PanelFont.note)
-                        .foregroundStyle(Color(nsColor: Palette.ink3))
+                        .panelInk(.tertiary)
                 }
                 ForEach(tool.readings) { reading in
                     ReadingView(reading: reading)
@@ -32,21 +32,21 @@ private struct ReadingView: View {
             HStack(spacing: 6) {
                 Image(systemName: reading.symbolName)
                     .font(.system(size: 11))
-                    .foregroundStyle(Color(nsColor: reading.isTight ? Palette.warning : Palette.ink3))
+                    .panelInk(reading.isTight ? .fixed(Palette.warning) : .tertiary)
                     .frame(width: 16)
                 HStack(alignment: .firstTextBaseline, spacing: 6) {
                     Text(reading.kind.name)
                         .font(PanelFont.title)
-                        .foregroundStyle(Color(nsColor: Palette.ink2))
+                        .panelInk(.secondary)
                     Spacer(minLength: 6)
                     Text(reading.value)
                         .font(PanelFont.name)
                         .monospacedDigit()
-                        .foregroundStyle(Color(nsColor: Palette.ink))
+                        .panelInk(.primary)
                     Text(reading.detail)
                         .font(PanelFont.note)
                         .monospacedDigit()
-                        .foregroundStyle(Color(nsColor: Palette.ink3))
+                        .panelInk(.tertiary)
                 }
                 .lineLimit(1)
             }
@@ -55,7 +55,7 @@ private struct ReadingView: View {
                 Text(note)
                     .font(PanelFont.note)
                     .monospacedDigit()
-                    .foregroundStyle(Color(nsColor: Palette.ink3))
+                    .panelInk(.tertiary)
             }
         }
     }

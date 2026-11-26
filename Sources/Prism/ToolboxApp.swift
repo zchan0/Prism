@@ -242,6 +242,55 @@ final class ToolboxApp {
         quick.hide()
     }
 
+    /// Each tool's panel, the history window `historyWindow` returns, and the Prism window on Lumos's page and on
+    /// General, each over the same colorful backdrop and captured from the screen, so the glass shows what it shows
+    /// in use. General is scrolled to its end.
+    func captureLooks(to directory: String, historyWindow: () -> NSWindow?) async -> Bool {
+        guard let screen = NSScreen.main else { return false }
+        let backdrop = DebugBackdrop()
+        var ok = true
+        let visible = screen.visibleFrame
+        // Well below the menu bar, which no window can cover, so it stays out of the screenshots.
+        let anchor = NSRect(x: visible.midX - QuickPanelController.width / 2, y: visible.midY + 260, width: 1, height: 1)
+        quick.opensSettingsWithCommandComma = false
+        for registration in registrations {
+            quick.show(registration, anchoredAt: anchor, on: screen)
+            try? await Task.sleep(for: .seconds(0.8))
+            let frame = quick.window.frame
+            backdrop.cover(frame)
+            try? await Task.sleep(for: .seconds(1))
+            ok = DebugCapture.screen(around: frame, to: "\(directory)/panel-\(registration.id.rawValue).png") && ok
+        }
+        quick.hide()
+        if let history = historyWindow() {
+            history.center()
+            history.orderFrontRegardless()
+            try? await Task.sleep(for: .seconds(0.5))
+            backdrop.cover(history.frame)
+            try? await Task.sleep(for: .seconds(1))
+            ok = DebugCapture.screen(around: history.frame, to: "\(directory)/history.png") && ok
+            history.orderOut(nil)
+        }
+        var pages: [(WindowPage, String)] = [(.general, "window-general")]
+        if let lumos = registrations.first(where: { $0.id.rawValue == "lumos" }) {
+            pages.insert((.tool(lumos.id), "window-lumos"), at: 0)
+        }
+        for (page, name) in pages {
+            prismWindow.prepareForCapture(page)
+            backdrop.cover(prismWindow.window.frame)
+            prismWindow.window.orderFrontRegardless()
+            try? await Task.sleep(for: .seconds(1))
+            if page == .general {
+                DebugCapture.scrollToEnd(in: prismWindow.window)
+                try? await Task.sleep(for: .seconds(0.5))
+            }
+            ok = DebugCapture.screen(around: prismWindow.window.frame, to: "\(directory)/\(name).png") && ok
+        }
+        prismWindow.window.orderOut(nil)
+        backdrop.hide()
+        return ok
+    }
+
     func captureGeneralPage(to path: String) async -> Bool {
         prismWindow.prepareForCapture(.general)
         if ProcessInfo.processInfo.environment["PRISM_SHOW_WHATS_NEW"] == "1" {

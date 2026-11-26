@@ -176,7 +176,7 @@ final class HistoryWindowController {
             choose: { [weak self] id in self?.choose(id) },
             selectionChanged: { [weak self] item in self?.selectionChanged(item) },
             searchFieldCreated: { [weak self] field in self?.searchField = field }
-        ))
+        ).followsPanelLook())
         hosting.sizingOptions = [.minSize, .maxSize]
         hosting.safeAreaRegions = []
         window.contentView = Self.background(for: hosting)
@@ -200,21 +200,29 @@ final class HistoryWindowController {
 
     var isShown: Bool { window.isVisible }
 
-    /// Glass on macOS 26, the window's own background before. The content is pinned to the glass on every edge, so
-    /// the window still takes the content's size.
+    /// Glass on macOS 26, the window's own background before, the popover material when that look is picked. The
+    /// content is pinned to the background on every edge, so the window still takes the content's size.
     private static func background(for content: NSView) -> NSView {
         guard #available(macOS 26, *) else { return content }
-        let glass = NSGlassEffectView()
-        glass.cornerRadius = 20
-        glass.contentView = content
+        let background: NSView
+        if LookSettings.shared.background == .material {
+            let material = FloatingPanelController.materialBackground(cornerRadius: 20)
+            material.addSubview(content)
+            background = material
+        } else {
+            let glass = NSGlassEffectView()
+            glass.cornerRadius = 20
+            glass.contentView = content
+            background = glass
+        }
         content.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            content.leadingAnchor.constraint(equalTo: glass.leadingAnchor),
-            content.trailingAnchor.constraint(equalTo: glass.trailingAnchor),
-            content.topAnchor.constraint(equalTo: glass.topAnchor),
-            content.bottomAnchor.constraint(equalTo: glass.bottomAnchor),
+            content.leadingAnchor.constraint(equalTo: background.leadingAnchor),
+            content.trailingAnchor.constraint(equalTo: background.trailingAnchor),
+            content.topAnchor.constraint(equalTo: background.topAnchor),
+            content.bottomAnchor.constraint(equalTo: background.bottomAnchor),
         ])
-        return glass
+        return background
     }
 
     /// In the middle of the screen with the pointer, with the search field ready for typing.

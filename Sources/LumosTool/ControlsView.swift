@@ -126,12 +126,12 @@ struct ControlsView: View {
                         Text(content.title)
                             .font(PanelFont.hero)
                             .monospacedDigit()
-                            .foregroundStyle(Color(nsColor: Palette.ink))
+                            .panelInk(.primary)
                             .contentTransition(reduceMotion ? .opacity : .numericText())
                             .animation(.default, value: content.title)
                         Text(content.subtitle)
                             .font(PanelFont.note)
-                            .foregroundStyle(Color(nsColor: Palette.ink2))
+                            .panelInk(.secondary)
                     }
                     .lineLimit(1)
                     Spacer(minLength: 8)
@@ -181,11 +181,11 @@ struct ControlsView: View {
         HStack(alignment: .firstTextBaseline, spacing: 10) {
             Image(systemName: symbol)
                 .font(.system(size: 11))
-                .foregroundStyle(Color(nsColor: Palette.ink3))
+                .panelInk(.tertiary)
                 .frame(width: 16)
             Text(text)
                 .font(PanelFont.note)
-                .foregroundStyle(Color(nsColor: Palette.ink2))
+                .panelInk(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
         }
         .frame(maxWidth: .infinity, minHeight: PanelRowMetrics.minHeight - 16, alignment: .leading)

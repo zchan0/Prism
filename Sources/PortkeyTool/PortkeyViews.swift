@@ -24,7 +24,7 @@ struct PortkeyPanelView: View {
                 }
             }
         } else {
-            PanelCard {
+            PanelCard(role: .list) {
                 let rows = VStack(spacing: 0) {
                     ForEach(Array(apps.enumerated()), id: \.element.id) { index, app in
                         PortkeyPanelRow(tool: tool, app: app, isFirst: index == 0) {
@@ -58,7 +58,7 @@ private struct PortkeyPanelRow: View {
                 AppIconView(image: tool.icon(of: app), size: 24)
                 Text(name)
                     .font(PanelFont.title)
-                    .foregroundStyle(Color(nsColor: Palette.ink))
+                    .panelInk(.primary)
                     .lineLimit(1)
                     .truncationMode(.tail)
                 Spacer(minLength: 8)
@@ -67,7 +67,7 @@ private struct PortkeyPanelRow: View {
                 } else {
                     Text(PortkeyStrings.noShortcut)
                         .font(PanelFont.note)
-                        .foregroundStyle(Color(nsColor: Palette.ink3))
+                        .panelInk(.tertiary)
                 }
             }
             .padding(.horizontal, 12)

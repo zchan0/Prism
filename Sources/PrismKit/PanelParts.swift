@@ -27,12 +27,23 @@ public enum PanelMotion {
 }
 
 /// A rounded group of rows. Put `PanelDivider.inCard` between the rows.
+///
+/// On a floating panel it follows the grouping being tried: a card, a plate, or for a list nothing at all.
 public struct PanelCard<Content: View>: View {
+    public enum Role: Sendable {
+        case group
+        /// Rows of the same kind, such as Portkey's apps, which can stand on the glass without a card.
+        case list
+    }
+
+    private let role: Role
     private let tint: CardTint?
     private let isTinted: Bool
     private let content: Content
+    @Environment(\.panelLook) private var look
 
-    public init(@ViewBuilder content: () -> Content) {
+    public init(role: Role = .group, @ViewBuilder content: () -> Content) {
+        self.role = role
         tint = nil
         isTinted = false
         self.content = content()
@@ -40,12 +51,50 @@ public struct PanelCard<Content: View>: View {
 
     /// A card that takes `tint`'s colors while `isTinted`, fading between the two.
     public init(tint: CardTint, isTinted: Bool, @ViewBuilder content: () -> Content) {
+        role = .group
         self.tint = tint
         self.isTinted = isTinted
         self.content = content()
     }
 
     public var body: some View {
+        switch look.grouping {
+        case .cards:
+            card
+        case .plates:
+            plate(fill: Palette.plate)
+        case .bare:
+            plate(fill: role == .list ? nil : Palette.plate)
+        }
+    }
+
+    /// The tint stays whatever the grouping: Lumos's card turns amber while it keeps the Mac awake.
+    private func plate(fill: NSColor?) -> some View {
+        let shape = RoundedRectangle(cornerRadius: 14, style: .continuous)
+        return VStack(alignment: .leading, spacing: 0) {
+            content
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background {
+            ZStack {
+                if let fill {
+                    shape.fill(Color(nsColor: fill)).opacity(isTinted ? 0 : 1)
+                }
+                if let tint {
+                    shape.fill(Color(nsColor: tint.fill)).opacity(isTinted ? 1 : 0)
+                }
+            }
+        }
+        .overlay {
+            if let tint {
+                shape.strokeBorder(Color(nsColor: tint.border), lineWidth: 1).opacity(isTinted ? 1 : 0)
+            }
+        }
+        .clipShape(shape)
+        .animation(.easeInOut(duration: 0.25), value: isTinted)
+    }
+
+    @ViewBuilder private var card: some View {
         let shape = RoundedRectangle(cornerRadius: 14, style: .continuous)
         VStack(alignment: .leading, spacing: 0) {
             content
@@ -96,7 +145,7 @@ public struct PanelSectionTitle: View {
     public var body: some View {
         Text(text)
             .font(PanelFont.section)
-            .foregroundStyle(Color(nsColor: Palette.ink3))
+            .panelInk(.tertiary)
             .lineLimit(1)
             .padding(.leading, 8)
             .accessibilityAddTraits(.isHeader)
@@ -139,7 +188,7 @@ public struct PanelNote: View {
     public var body: some View {
         Text(text)
             .font(PanelFont.note)
-            .foregroundStyle(Color(nsColor: Palette.ink3))
+            .panelInk(.tertiary)
             .fixedSize(horizontal: false, vertical: true)
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.horizontal, 8)
@@ -275,7 +324,7 @@ public struct PanelIconButton: View {
         Button(action: action) {
             Image(systemName: symbol)
                 .font(.system(size: 14))
-                .foregroundStyle(Color(nsColor: hovered ? Palette.ink : Palette.ink2))
+                .panelInk(hovered ? .primary : .secondary)
                 .frame(width: 28, height: 28)
                 .background(Circle().fill(hovered ? Color(nsColor: Palette.hover) : .clear))
                 .overlay(alignment: .topTrailing) {
@@ -340,7 +389,7 @@ public struct PanelWideButton: View {
                     .font(PanelFont.title)
                     .lineLimit(1)
             }
-            .foregroundStyle(Color(nsColor: hovered ? Palette.ink : Palette.ink2))
+            .panelInk(hovered ? .primary : .secondary)
             .frame(maxWidth: .infinity)
             .frame(height: 30)
             .background(Capsule().fill(Color(nsColor: hovered ? Palette.hover : Palette.chip)))
@@ -375,17 +424,17 @@ public struct PanelOption: View {
             HStack(spacing: 10) {
                 Image(systemName: symbol)
                     .font(.system(size: 12, weight: .medium))
-                    .foregroundStyle(isOn ? Color.white : Color(nsColor: Palette.ink2))
+                    .panelInk(isOn ? .fixed(.white) : .secondary)
                     .frame(width: 28, height: 28)
                     .background(Circle().fill(Color(nsColor: isOn ? Palette.accent : Palette.chip)))
                     .animation(.easeInOut(duration: 0.2), value: isOn)
                 VStack(alignment: .leading, spacing: 1) {
                     Text(title)
                         .font(PanelFont.title)
-                        .foregroundStyle(Color(nsColor: Palette.ink))
+                        .panelInk(.primary)
                     Text(note)
                         .font(PanelFont.note)
-                        .foregroundStyle(Color(nsColor: Palette.ink3))
+                        .panelInk(.tertiary)
                 }
                 .lineLimit(1)
                 Spacer(minLength: 0)
@@ -454,7 +503,7 @@ public struct PanelSegmented<Value: Hashable>: View {
         } label: {
             Text(item.title)
                 .font(PanelFont.title)
-                .foregroundStyle(Color(nsColor: isSelected ? Palette.ink : Palette.ink2))
+                .panelInk(isSelected ? .primary : .secondary)
                 .lineLimit(1)
                 .frame(maxWidth: .infinity)
                 .frame(height: 24)

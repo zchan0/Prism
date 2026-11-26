@@ -44,7 +44,7 @@ final class QuickPanelController {
             openSettings: { [weak self] id in self?.onOpenSettings?(id) },
             openGeneral: { [weak self] in self?.onOpenGeneral?() },
             onHeight: { [weak self] height in self?.panel.setContentHeight(height) }
-        )))
+        ).followsPanelLook()))
         // Every way the panel closes goes through the controller's `hide()`, which reports it here.
         panel.onVisibilityChange = { [weak self] isShown in self?.visibilityChanged(isShown) }
     }
@@ -128,7 +128,7 @@ struct QuickPanelView: View {
                 HStack(spacing: 8) {
                     Text(tool.title)
                         .font(PanelFont.section)
-                        .foregroundStyle(Color(nsColor: Palette.ink3))
+                        .panelInk(.tertiary)
                     Spacer(minLength: 8)
                     let badge = model.updater?.attentionBadge
                     PanelIconButton(symbol: "gearshape", title: Strings.toolSettings(tool.title), badge: badge) {

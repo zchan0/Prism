@@ -87,6 +87,23 @@ public enum Strings {
     )
     public static let developmentBuild = String(localized: "Development builds don't check for updates")
 
+    public static let experiments = String(localized: "Experiments")
+    public static let experimentsNote = String(localized: "For trying looks. This section goes away before release.")
+    public static let lookGrouping = String(localized: "Panel groups")
+    public static let lookInk = String(localized: "Panel text")
+    public static let lookBackground = String(localized: "Panel background")
+    public static let lookSidebar = String(localized: "Window sidebar")
+    public static let lookSidebarNote = String(localized: "Takes effect after Prism restarts.")
+    public static let lookCards = String(localized: "Cards")
+    public static let lookPlates = String(localized: "Plates")
+    public static let lookBare = String(localized: "Bare")
+    public static let lookPalette = String(localized: "Palette")
+    // Its own key: the appearance's "System" reads differently in Chinese.
+    public static let lookSystem = String(localized: "look.system", defaultValue: "System")
+    public static let lookGlass = String(localized: "Glass")
+    public static let lookMaterial = String(localized: "Material")
+    public static let lookCustom = String(localized: "Custom")
+
     public static let addApp = String(localized: "Add App…")
     public static let openApps = String(localized: "Open")
     public static let dockApps = String(localized: "Dock")

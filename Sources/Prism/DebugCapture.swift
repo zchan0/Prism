@@ -22,6 +22,23 @@ enum DebugCapture {
         return capture.terminationStatus == 0
     }
 
+    /// Scrolls every scroll view in `window` to its end, such as a page longer than the window.
+    static func scrollToEnd(in window: NSWindow) {
+        guard let root = window.contentView else { return }
+        for scrollView in scrollViews(in: root) {
+            guard let document = scrollView.documentView else { continue }
+            let clip = scrollView.contentView
+            let end = document.isFlipped ? max(0, document.bounds.height - clip.bounds.height) : 0
+            clip.scroll(to: NSPoint(x: clip.bounds.minX, y: end))
+            scrollView.reflectScrolledClipView(clip)
+        }
+    }
+
+    private static func scrollViews(in view: NSView) -> [NSScrollView] {
+        let own = (view as? NSScrollView).map { [$0] } ?? []
+        return own + view.subviews.flatMap { scrollViews(in: $0) }
+    }
+
     /// Screenshots what is on screen around `frame`, at once, such as a window with a menu open on it.
     static func screen(around frame: NSRect, to path: String) -> Bool {
         guard let mainHeight = NSScreen.screens.first?.frame.height else { return false }

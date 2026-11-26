@@ -28,7 +28,7 @@ struct PensievePanelView: View {
 
     var body: some View {
         let items = frozenItems ?? tool.panelItems
-        PanelCard {
+        PanelCard(role: .list) {
             if tool.isPaused {
                 PanelRow(PensieveStrings.recordingPaused) {
                     PanelButton(PensieveStrings.resume) {
@@ -45,7 +45,7 @@ struct PensievePanelView: View {
                 PanelDivider.inCard
                 Text(PensieveStrings.nothingCopied)
                     .font(PanelFont.note)
-                    .foregroundStyle(Color(nsColor: Palette.ink3))
+                    .panelInk(.tertiary)
                     .padding(.horizontal, 12)
                     .frame(maxWidth: .infinity, minHeight: Metrics.panelRowHeight, alignment: .leading)
             } else {
@@ -90,11 +90,11 @@ private struct SearchRow: View {
             HStack(spacing: 10) {
                 Image(systemName: "magnifyingglass")
                     .font(.system(size: 12, weight: .medium))
-                    .foregroundStyle(Color(nsColor: Palette.ink3))
+                    .panelInk(.tertiary)
                     .frame(width: Metrics.leadingSlot, height: Metrics.leadingSlot)
                 Text(PensieveStrings.search)
                     .font(PanelFont.title)
-                    .foregroundStyle(Color(nsColor: Palette.ink3))
+                    .panelInk(.tertiary)
                 Spacer(minLength: 8)
                 if let shortcut {
                     ShortcutKeys(shortcut)
@@ -199,7 +199,7 @@ struct ImagePreview: View {
             Text(verbatim: PensieveStrings.pixelSize(width: pixelWidth, height: pixelHeight))
                 .font(PanelFont.note)
                 .monospacedDigit()
-                .foregroundStyle(Color(nsColor: Palette.ink3))
+                .panelInk(.tertiary)
         }
         .padding(12)
         .fixedSize()
@@ -278,7 +278,7 @@ struct PensieveSettingsView: View {
                     Text(PensieveStrings.itemCount(tool.items.count))
                         .font(PanelFont.note)
                         .monospacedDigit()
-                        .foregroundStyle(Color(nsColor: Palette.ink3))
+                        .panelInk(.tertiary)
                     PanelButton(confirmsClear ? PensieveStrings.confirmClear(tool.items.count) : PensieveStrings.clear) {
                         if confirmsClear {
                             confirmsClear = false
@@ -350,7 +350,7 @@ struct HistoryView: View {
             HStack(spacing: 10) {
                 Image(systemName: "magnifyingglass")
                     .font(.system(size: 15, weight: .medium))
-                    .foregroundStyle(Color(nsColor: Palette.ink3))
+                    .panelInk(.tertiary)
                 SearchField(text: $browser.query, prompt: PensieveStrings.search, created: searchFieldCreated)
                     .accessibilityLabel(PensieveStrings.searchHistory)
                 PanelMenuButton(
@@ -367,7 +367,7 @@ struct HistoryView: View {
             if results.isEmpty {
                 Text(browser.hasHistory ? PensieveStrings.noMatches : PensieveStrings.nothingCopied)
                     .font(PanelFont.title)
-                    .foregroundStyle(Color(nsColor: Palette.ink2))
+                    .panelInk(.secondary)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 40)
             } else {
@@ -421,7 +421,7 @@ struct HistoryView: View {
                 Text(verbatim: tool.title)
                     .font(PanelFont.section)
             }
-            .foregroundStyle(Color(nsColor: Palette.ink3))
+            .panelInk(.tertiary)
             Spacer(minLength: 0)
             KeyHint(keys: ["↩"], label: PensieveStrings.copy)
             KeyHint(keys: ["⌘", "⌫"], label: PensieveStrings.remove)
@@ -440,7 +440,7 @@ private struct KeyHint: View {
             ShortcutKeys(keys: keys)
             Text(label)
                 .font(PanelFont.note)
-                .foregroundStyle(Color(nsColor: Palette.ink3))
+                .panelInk(.tertiary)
         }
     }
 }
@@ -490,15 +490,12 @@ struct ClipRow<Trailing: View>: View {
         }
     }
 
-    private var ink: Color { Color(nsColor: Palette.ink) }
-    private var ink3: Color { Color(nsColor: Palette.ink3) }
-
     @ViewBuilder private var leading: some View {
         switch item.kind {
         case .text:
             Image(systemName: item.isLink ? "link" : "text.alignleft")
                 .font(.system(size: 13))
-                .foregroundStyle(ink3)
+                .panelInk(.tertiary)
         case .image:
             if let image = thumbnail ?? tool.cachedThumbnail(of: item.id) {
                 Image(nsImage: image)
@@ -510,7 +507,7 @@ struct ClipRow<Trailing: View>: View {
             } else {
                 Image(systemName: "photo")
                     .font(.system(size: 13))
-                    .foregroundStyle(ink3)
+                    .panelInk(.tertiary)
             }
         case .file:
             if let path = item.filePaths?.first {
@@ -541,12 +538,12 @@ struct ClipRow<Trailing: View>: View {
             let names = item.fileNames
             HStack(spacing: 4) {
                 Text(verbatim: names.first ?? "")
-                    .foregroundStyle(ink)
+                    .panelInk(.primary)
                     .lineLimit(1)
                     .truncationMode(.middle)
                 if names.count > 1 {
                     Text(PensieveStrings.andMore(names.count - 1))
-                        .foregroundStyle(ink3)
+                        .panelInk(.tertiary)
                         .lineLimit(1)
                         .fixedSize()
                 }
@@ -560,7 +557,7 @@ struct ClipRow<Trailing: View>: View {
     private func line(_ text: String, font: Font = PanelFont.title) -> some View {
         Text(verbatim: text)
             .font(font)
-            .foregroundStyle(ink)
+            .panelInk(.primary)
             .lineLimit(1)
             .truncationMode(.tail)
     }

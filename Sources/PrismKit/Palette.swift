@@ -16,6 +16,10 @@ public enum Palette {
     public static let switchOff = dynamic(light: black(0.15), dark: white(0.20))
     public static let key = dynamic(light: rgb(0xFFFFFF), dark: white(0.10))
     public static let keyBorder = dynamic(light: black(0.14), dark: white(0.16))
+    /// A group of rows on a panel's glass, in place of a card: thin enough for the glass to show through.
+    public static let plate = dynamic(light: white(0.14), dark: white(0.06))
+    /// A keycap on a panel's glass.
+    public static let keyOnGlass = dynamic(light: white(0.45), dark: white(0.08))
     /// The ground of the Prism window, behind its cards.
     public static let window = dynamic(light: rgb(0xF3F4F7), dark: rgb(0x222328))
     /// Close to running out, such as a nearly full disk.

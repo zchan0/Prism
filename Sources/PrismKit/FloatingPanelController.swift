@@ -32,6 +32,8 @@ public final class FloatingPanelController {
     private var shownAt: TimeInterval = 0
     private var outsideClickMonitor: Any?
     private let hosting: NSHostingView<AnyView>
+    /// The background the panel has, so a different one picked meanwhile takes over at the next opening.
+    private var backgroundLook: PanelBackground
 
     public init(width: CGFloat, cornerRadius: CGFloat = 16, content: AnyView) {
         self.width = width
@@ -39,6 +41,7 @@ public final class FloatingPanelController {
         hosting = NSHostingView(rootView: content)
         // The panel's height follows `setContentHeight`, not the hosting view's own idea of its size.
         hosting.sizingOptions = []
+        backgroundLook = LookSettings.shared.background
         panel = Self.makePanel(width: width, cornerRadius: cornerRadius, host: hosting)
         Self.instances.add(self)
     }
@@ -67,6 +70,10 @@ public final class FloatingPanelController {
     }
 
     public func show(anchoredAt rect: NSRect, placement: Placement, on screen: NSScreen) {
+        if !panel.isVisible, backgroundLook != LookSettings.shared.background {
+            Self.setBackground(of: panel, cornerRadius: cornerRadius, host: hosting)
+            backgroundLook = LookSettings.shared.background
+        }
         anchor = rect
         self.placement = placement
         visibleFrame = screen.visibleFrame
@@ -169,24 +176,30 @@ public final class FloatingPanelController {
         return panel
     }
 
-    /// Glass on macOS 26, the popover material before, with `host` on it.
+    /// Glass on macOS 26, the popover material before or when that look is picked, with `host` on it.
     static func setBackground(of panel: NSPanel, cornerRadius: CGFloat, host: NSView) {
         host.autoresizingMask = [.width, .height]
-        if #available(macOS 26, *) {
+        if #available(macOS 26, *), LookSettings.shared.background == .glass {
             let glass = NSGlassEffectView()
             glass.cornerRadius = cornerRadius
             glass.contentView = host
             panel.contentView = glass
         } else {
-            let background = NSVisualEffectView()
-            background.material = .popover
-            background.blendingMode = .behindWindow
-            background.state = .active
-            background.maskImage = roundedMask(radius: cornerRadius)
+            let background = materialBackground(cornerRadius: cornerRadius)
             background.addSubview(host)
             panel.contentView = background
             host.frame = background.bounds
         }
+    }
+
+    /// The popover material, rounded, and active even though the panel never becomes key.
+    public static func materialBackground(cornerRadius: CGFloat) -> NSVisualEffectView {
+        let background = NSVisualEffectView()
+        background.material = .popover
+        background.blendingMode = .behindWindow
+        background.state = .active
+        background.maskImage = roundedMask(radius: cornerRadius)
+        return background
     }
 
     private static func roundedMask(radius: CGFloat) -> NSImage {

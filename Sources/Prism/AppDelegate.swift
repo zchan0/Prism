@@ -31,7 +31,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         let portkey = registrations.first(where: { $0.id == PortkeyTool.id })?.tool as? PortkeyTool
         // Before launch, which starts the tools: Pensieve would otherwise watch the clipboard and read its history,
         // and Portkey would set up the person's shortcuts. A packaged debug build reads the installed Prism's settings.
-        let captures = ["PRISM_CAPTURE", "PRISM_CAPTURE_GENERAL", "PRISM_STATUS_CAPTURE"]
+        let captures = ["PRISM_CAPTURE", "PRISM_CAPTURE_GENERAL", "PRISM_CAPTURE_LOOK", "PRISM_STATUS_CAPTURE"]
         if captures.contains(where: { environment[$0] != nil }) {
             lumos?.leaveLidAloneForDebug()
             if let pensieve {
@@ -79,6 +79,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                         print("preview: not shown")
                         ok = false
                     }
+                }
+                exit(ok ? 0 : 1)
+            }
+        }
+        if let directory = environment["PRISM_CAPTURE_LOOK"] {
+            Task {
+                try? await Task.sleep(for: .seconds(1.5))
+                let ok = await toolbox.captureLooks(to: directory) {
+                    pensieve.map { PensieveDebug.historyWindow($0) }
                 }
                 exit(ok ? 0 : 1)
             }
