@@ -2,6 +2,24 @@
 
 All notable changes to Prism are listed here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow [Semantic Versioning](https://semver.org/).
 
+## [0.4.0] - 2026-11-26
+
+- Prism updates itself. Once a day it asks GitHub for a newer version, downloads it, checks it, and installs it when
+  Prism is idle: no window or panel open, and Lumos not keeping the Mac awake. Then it opens again. This is the only
+  thing Prism does on the network, and it sends nothing about you.
+- *General* has an *About* section. It shows the version, a newer version when there is one, the download's progress,
+  and *What's new* with the changes. *Check Now* looks at once.
+- *Check for updates* on *About* sets how often Prism looks: daily, weekly, monthly or never. With *Install updates
+  automatically* off, Prism only tells you about a newer version, and *Update* downloads and installs it.
+- A blue dot on *General* in the Prism window's list, and on the gear at the bottom of a tool's panel, says that an
+  update waits for you. The gear then opens *General*.
+- *Install and Relaunch* installs a downloaded update at once. A Lumos session carries on after the relaunch with the
+  same time left, and *Lid closed* stays on.
+- When Prism cannot replace itself, such as when it was opened from the Downloads folder, *About* says so, and
+  *Download* opens the release on GitHub.
+- An update from 0.3.0 or earlier is still by hand, once: quit Prism and replace `Prism.app` with the new one.
+- The top of *General* says what Prism is. The version moved to *About*.
+
 ## [0.3.0] - 2026-11-25
 
 - Pensieve, a new tool: a history of the last 200 things you copied, whether text, pictures, files or colors. ⇧⌘V
@@ -73,6 +91,7 @@ First version. It runs on macOS 14 or later, on Apple silicon and Intel.
 - English and Chinese.
 
 [Unreleased]: https://github.com/zchan0/Prism/compare/v0.2.0...HEAD
+[0.4.0]: https://github.com/zchan0/Prism/releases/tag/v0.4.0
 [0.3.0]: https://github.com/zchan0/Prism/releases/tag/v0.3.0
 [0.2.0]: https://github.com/zchan0/Prism/releases/tag/v0.2.0
 [0.1.0]: https://github.com/zchan0/Prism/releases/tag/v0.1.0
